@@ -99,7 +99,7 @@ public class CampanhaService {
                 .mestreId(mestreId)
                 .gameSystemId(asus.getId())
                 .nome(req.nome())
-                .descricao(req.descricao())
+                .descricao(com.asus.platform.util.Sanitizador.limpar(req.descricao()))
                 .config(req.config() == null ? null : req.config().paraEntidade())
                 .arquivada(false)
                 .build();
@@ -127,7 +127,7 @@ public class CampanhaService {
             campanha.setNome(req.nome());
         }
         if (req.descricao() != null) {
-            campanha.setDescricao(req.descricao());
+            campanha.setDescricao(com.asus.platform.util.Sanitizador.limpar(req.descricao()));
         }
         if (req.capaAssetId() != null) {
             campanha.setCapaAssetId(req.capaAssetId());

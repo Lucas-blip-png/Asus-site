@@ -1,3 +1,9 @@
 package com.asus.platform.web.dto;
 
-public record PericiaCalculadaDto(String codigo, String nome, String atributoBase, int valor) {}
+public record PericiaCalculadaDto(
+        String codigo,
+        String nome,
+        String atributoBase,
+        String sigla,
+        int treino,
+        int cap) {}

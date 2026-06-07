@@ -40,14 +40,15 @@ class PersonagemFlowIntegrationTest {
         long orgId = readId(orgResult);
 
         // 2) Criar personagem ASUS + 3) calculo automatico
+        // Humano (PV/PM/PE 5/5/5) + Cavaleiro (+2 For, +2 Con, +1 Car)
         String personagemJson = """
             {
               "nome":"Thorin",
               "jogador":"Ana",
               "racaCodigo":"HUMANO",
-              "classeCodigo":"GUERREIRO",
+              "classeCodigo":"CAVALEIRO",
               "nivel":1,
-              "atributosBase":{"forca":5,"agilidade":3,"vigor":4,"intelecto":2,"presenca":2}
+              "atributosBase":{"forca":3,"constituicao":4,"destreza":2,"agilidade":3,"inteligencia":1,"sabedoria":1,"carisma":2}
             }
             """;
         MvcResult pResult = mockMvc.perform(
@@ -56,14 +57,15 @@ class PersonagemFlowIntegrationTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.nome").value("Thorin"))
                 .andExpect(jsonPath("$.rulesetVersion").value("ASUS_V1"))
-                // PV = 12 + 6*1 + vigor(4)*2 = 26
-                .andExpect(jsonPath("$.status.pvMax").value(26))
-                // PM = 6 + 1*1 + intelectoFinal(3)*2 = 13  (humano da +1 intelecto)
-                .andExpect(jsonPath("$.status.pmMax").value(13))
-                // PE = 4 + 3*1 + agilidade(3) = 10
-                .andExpect(jsonPath("$.status.peMax").value(10))
-                // Defesa = 10 + agilidade(3) = 13
+                // Con final 6, Cavaleiro PV/PM/PE 6/3/6 -> PV = 5 + 6 + 6*2 = 23
+                .andExpect(jsonPath("$.status.pvMax").value(23))
+                // PM = 5 + 3 + Int(1)*2 = 10
+                .andExpect(jsonPath("$.status.pmMax").value(10))
+                // PE = 5 + 6 + Con(6)*2 = 23
+                .andExpect(jsonPath("$.status.peMax").value(23))
+                // Defesa = 10 + Agi(3) = 13
                 .andExpect(jsonPath("$.status.defesa").value(13))
+                .andExpect(jsonPath("$.deslocamento").value(4))
                 .andExpect(jsonPath("$.pericias").isArray())
                 .andReturn();
         long personagemId = readId(pResult);
@@ -76,7 +78,7 @@ class PersonagemFlowIntegrationTest {
         // 5) Ver ficha completa
         mockMvc.perform(get("/api/personagens/" + personagemId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.atributosFinais.intelecto").value(3));
+                .andExpect(jsonPath("$.atributosFinais.constituicao").value(6));
 
         // 6) Exportar em JSON
         mockMvc.perform(get("/api/personagens/" + personagemId + "/export"))
@@ -102,7 +104,7 @@ class PersonagemFlowIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON).content(patchJson))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status.pvAtual").value(10))
-                .andExpect(jsonPath("$.status.pvMax").value(26));
+                .andExpect(jsonPath("$.status.pvMax").value(23));
     }
 
     private long readId(MvcResult result) throws Exception {

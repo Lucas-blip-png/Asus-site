@@ -49,7 +49,7 @@ public class MarketplaceService {
         MarketplaceItem item = itemRepository.save(MarketplaceItem.builder()
                 .autorUsuarioId(req.autorUsuarioId())
                 .titulo(req.titulo())
-                .descricao(req.descricao())
+                .descricao(com.asus.platform.util.Sanitizador.limpar(req.descricao()))
                 .tipo(req.tipo())
                 .preco(gratuito ? null : req.preco())
                 .moeda(req.moeda())

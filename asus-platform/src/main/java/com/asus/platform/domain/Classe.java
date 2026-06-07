@@ -39,5 +39,12 @@ public class Classe {
     @Column(columnDefinition = "TEXT")
     private String jsonPassiva;
 
+    /** Bonus inicial: {"atributos":{"forca":2,...},"pericias":{"vigor":2,...},"slots":1}. */
+    @Column(columnDefinition = "TEXT")
+    private String jsonBonus;
+
+    /** Se preenchido, esta "classe" e uma trilha da classe-pai (codigo). */
+    private String classePaiCodigo;
+
     private boolean oficial;
 }
