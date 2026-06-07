@@ -1,0 +1,21 @@
+# Ative com:  mvn spring-boot:run -Dspring-boot.run.profiles=postgres
+# ou:         java -jar target/asus-platform-0.1.0-SNAPSHOT.jar --spring.profiles.active=postgres
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/asus}
+    username: ${DB_USER:asus}
+    password: ${DB_PASSWORD:asus}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+  h2:
+    console:
+      enabled: false

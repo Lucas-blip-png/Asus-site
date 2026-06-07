@@ -1,0 +1,51 @@
+spring:
+  application:
+    name: asus-platform
+
+  # Banco padrao: H2 em memoria (zero setup). Para PostgreSQL use o profile 'postgres'.
+  datasource:
+    url: jdbc:h2:mem:asus;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  # Fase 11: limites de upload de assets
+  servlet:
+    multipart:
+      max-file-size: 30MB
+      max-request-size: 32MB
+
+server:
+  port: 8080
+
+logging:
+  level:
+    com.asus.platform: INFO
+
+# Configuracoes da plataforma ASUS
+asus:
+  # Fase 11: diretorio de uploads (storage local no MVP; trocar por S3/R2/GCS em producao)
+  uploads-dir: uploads
+  # Fase 7: seguranca / JWT (defina ASUS_JWT_SECRET em producao com >= 32 bytes)
+  jwt:
+    secret: ${ASUS_JWT_SECRET:troque-este-segredo-em-producao-asus-rpg-platform-0123456789}
+    access-ttl-min: 15
+    refresh-ttl-days: 7
+  cors:
+    allowed-origins: ${ASUS_CORS_ORIGINS:*}
+  security:
+    # false (dev): API aberta, so /api/auth/me exige token. true (prod): exige token em /api/**
+    enforce: ${ASUS_SECURITY_ENFORCE:false}

@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell($zip = \"C:\\\\Users\\\\irine\\\\Downloads\\\\files.zip\"; Add-Type -AssemblyName System.IO.Compression.FileSystem; $archive = [System.IO.Compression.ZipFile]::OpenRead\\($zip\\); $archive.Entries | Select-Object FullName, Length | Format-Table -AutoSize; $archive.Dispose\\(\\))",
+      "PowerShell($dest = \"C:\\\\Users\\\\irine\\\\Downloads\\\\Asus rpg site\"; Expand-Archive -Path \"$dest\\\\asus-platform.zip\" -DestinationPath $dest -Force; Get-ChildItem -Path \"$dest\\\\asus-platform\" -Force | Select-Object Name)",
+      "Bash(java -version)",
+      "Bash(mvn -version)"
+    ]
+  }
+}
