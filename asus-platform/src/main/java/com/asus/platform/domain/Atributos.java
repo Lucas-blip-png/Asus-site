@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/** Valor dos cinco atributos ASUS. Usado como base e como final (apos bonus). */
+/** Valor dos sete atributos ASUS. Usado como base e como final (apos bonus). */
 @Embeddable
 @Getter
 @Setter
@@ -17,38 +17,46 @@ import lombok.Setter;
 public class Atributos {
 
     private int forca;
+    private int constituicao;
+    private int destreza;
     private int agilidade;
-    private int vigor;
-    private int intelecto;
-    private int presenca;
+    private int inteligencia;
+    private int sabedoria;
+    private int carisma;
 
     /** Acessa o valor de um atributo pelo enum. */
     public int get(Atributo atributo) {
         return switch (atributo) {
             case FORCA -> forca;
+            case CONSTITUICAO -> constituicao;
+            case DESTREZA -> destreza;
             case AGILIDADE -> agilidade;
-            case VIGOR -> vigor;
-            case INTELECTO -> intelecto;
-            case PRESENCA -> presenca;
+            case INTELIGENCIA -> inteligencia;
+            case SABEDORIA -> sabedoria;
+            case CARISMA -> carisma;
         };
     }
 
     /** Retorna uma copia com o valor de um atributo somado a um delta. */
     public Atributos comBonus(Atributo atributo, int delta) {
-        Atributos novo = Atributos.builder()
-                .forca(forca)
-                .agilidade(agilidade)
-                .vigor(vigor)
-                .intelecto(intelecto)
-                .presenca(presenca)
-                .build();
+        Atributos novo = copia();
         switch (atributo) {
             case FORCA -> novo.forca += delta;
+            case CONSTITUICAO -> novo.constituicao += delta;
+            case DESTREZA -> novo.destreza += delta;
             case AGILIDADE -> novo.agilidade += delta;
-            case VIGOR -> novo.vigor += delta;
-            case INTELECTO -> novo.intelecto += delta;
-            case PRESENCA -> novo.presenca += delta;
+            case INTELIGENCIA -> novo.inteligencia += delta;
+            case SABEDORIA -> novo.sabedoria += delta;
+            case CARISMA -> novo.carisma += delta;
         }
         return novo;
+    }
+
+    public Atributos copia() {
+        return Atributos.builder()
+                .forca(forca).constituicao(constituicao).destreza(destreza)
+                .agilidade(agilidade).inteligencia(inteligencia)
+                .sabedoria(sabedoria).carisma(carisma)
+                .build();
     }
 }

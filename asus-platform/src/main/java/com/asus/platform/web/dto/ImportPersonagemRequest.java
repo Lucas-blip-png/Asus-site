@@ -26,6 +26,8 @@ public record ImportPersonagemRequest(
             String jogador,
             @NotBlank String racaCodigo,
             @NotBlank String classeCodigo,
+            String trilhaCodigo,
+            String divindade,
             Integer nivel,
             Integer xpAtual,
             @NotNull @Valid AtributosDto atributosBase) {

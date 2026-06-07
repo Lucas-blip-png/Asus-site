@@ -35,8 +35,8 @@ class ImportPersonagemIntegrationTest {
                 .andReturn());
 
         String personagemJson = """
-            {"nome":"Original","jogador":"Cau","racaCodigo":"ANAO","classeCodigo":"GUERREIRO",
-             "nivel":2,"atributosBase":{"forca":4,"agilidade":2,"vigor":3,"intelecto":1,"presenca":1}}
+            {"nome":"Original","jogador":"Cau","racaCodigo":"ANAO","classeCodigo":"CAVALEIRO",
+             "nivel":2,"atributosBase":{"forca":4,"constituicao":3,"destreza":2,"agilidade":2,"inteligencia":1,"sabedoria":1,"carisma":1}}
             """;
         MvcResult criado = mockMvc.perform(post("/api/organizacoes/" + orgId + "/personagens")
                         .contentType(MediaType.APPLICATION_JSON).content(personagemJson))

@@ -41,9 +41,9 @@ class EscudoIntegrationTest {
 
         long pId = readId(mockMvc.perform(post("/api/organizacoes/" + orgId + "/personagens")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"nome\":\"Varg\",\"racaCodigo\":\"ANAO\",\"classeCodigo\":\"GUERREIRO\","
-                                + "\"nivel\":1,\"atributosBase\":{\"forca\":4,\"agilidade\":2,\"vigor\":4,"
-                                + "\"intelecto\":1,\"presenca\":1}}"))
+                        .content("{\"nome\":\"Varg\",\"racaCodigo\":\"ANAO\",\"classeCodigo\":\"CAVALEIRO\","
+                                + "\"nivel\":1,\"atributosBase\":{\"forca\":4,\"constituicao\":4,\"destreza\":2,"
+                                + "\"agilidade\":2,\"inteligencia\":1,\"sabedoria\":1,\"carisma\":1}}"))
                 .andExpect(status().isCreated()).andReturn());
 
         mockMvc.perform(post("/api/campanhas/" + campId + "/personagens")

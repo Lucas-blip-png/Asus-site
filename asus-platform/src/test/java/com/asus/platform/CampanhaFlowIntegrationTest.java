@@ -52,7 +52,7 @@ class CampanhaFlowIntegrationTest {
         // Personagem na mesma organizacao
         String personagemJson = """
             {"nome":"Lyra","jogador":"Bia","racaCodigo":"ELFO","classeCodigo":"MAGO",
-             "nivel":1,"atributosBase":{"forca":1,"agilidade":3,"vigor":2,"intelecto":5,"presenca":2}}
+             "nivel":1,"atributosBase":{"forca":1,"constituicao":2,"destreza":2,"agilidade":3,"inteligencia":5,"sabedoria":2,"carisma":2}}
             """;
         long personagemId = readId(mockMvc.perform(
                         post("/api/organizacoes/" + orgId + "/personagens")

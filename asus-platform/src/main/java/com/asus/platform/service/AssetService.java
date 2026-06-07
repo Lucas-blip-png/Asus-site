@@ -62,6 +62,13 @@ public class AssetService {
             throw new IllegalArgumentException("Arquivo vazio");
         }
 
+        // Validacao de tipo (plano, Seção 20.1): imagens, PDF, texto ou JSON.
+        String mime = arquivo.getContentType();
+        if (mime != null && !(mime.startsWith("image/") || mime.equals("application/pdf")
+                || mime.startsWith("text/") || mime.equals("application/json"))) {
+            throw new IllegalArgumentException("Tipo de arquivo nao permitido: " + mime);
+        }
+
         long tamanho = arquivo.getSize();
         LimitesPlano limites = planoService.limitesDa(organizacaoId);
         long usado = assetRepository.somaBytesPorOrganizacao(organizacaoId);
