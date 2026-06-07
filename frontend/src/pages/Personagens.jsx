@@ -11,6 +11,7 @@ export default function Personagens() {
   const [classes, setClasses] = useState([])
   const [busca, setBusca] = useState('')
   const [erro, setErro] = useState(null)
+  const [nivel1Cap, setNivel1Cap] = useState(99)
   const [form, setForm] = useState({
     nome: '', racaCodigo: '', classeCodigo: '', trilhaCodigo: '',
     atributos: Object.fromEntries(ATRS.map((a) => [a, 0])),
@@ -27,6 +28,9 @@ export default function Personagens() {
       const cs = await api('/api/sistemas/asus/classes')
       setRacas(rs)
       setClasses(cs)
+      const prog = await api('/api/sistemas/asus/progressao').catch(() => [])
+      const n1 = (prog || []).find((x) => x.nivel === 1)
+      if (n1 && n1.limiteAtributo > 0) setNivel1Cap(n1.limiteAtributo)
       setForm((f) => ({
         ...f,
         racaCodigo: rs[0]?.codigo || '',
@@ -42,7 +46,7 @@ export default function Personagens() {
   const setAtr = (a, delta) =>
     setForm((f) => {
       const atual = Number(f.atributos[a]) || 0
-      const novo = Math.max(0, atual + delta)
+      const novo = Math.max(0, Math.min(nivel1Cap, atual + delta))
       const soma = pontos - atual + novo
       if (delta > 0 && soma > 5) return f
       return { ...f, atributos: { ...f.atributos, [a]: novo } }
@@ -133,7 +137,7 @@ export default function Personagens() {
             </div>
           </div>
           <label style={{ marginTop: 10 }}>
-            Atributos — {pontos}/5 pontos distribuíveis (os fixos da classe entram automaticamente)
+            Atributos — {pontos}/5 pontos distribuíveis · teto {nivel1Cap}/atributo (os fixos da classe entram automaticamente)
           </label>
           <div className="row" style={{ gap: 12, flexWrap: 'wrap' }}>
             {ATRS.map((a) => (

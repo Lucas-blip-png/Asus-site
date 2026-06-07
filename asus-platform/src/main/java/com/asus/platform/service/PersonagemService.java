@@ -94,8 +94,8 @@ public class PersonagemService {
         organizacaoService.buscar(organizacaoId);
         planoService.validarNovoPersonagem(organizacaoId);
 
-        // Personagem nasce no nivel 0 (regra ASUS): so os fixos de classe + 5 distribuiveis.
-        int nivelInicial = req.nivel() == null ? 0 : Math.max(0, req.nivel());
+        // Personagem nasce no nivel 1 (regra ASUS): fixos da classe + 5 pontos distribuiveis.
+        int nivelInicial = req.nivel() == null ? 1 : Math.max(1, req.nivel());
         Personagem p = montarSalvar(organizacaoId, req.nome(), req.jogador(),
                 req.racaCodigo(), req.classeCodigo(), req.trilhaCodigo(), req.divindade(),
                 nivelInicial, 0, req.atributosBase(), req.pericias());
@@ -140,7 +140,7 @@ public class PersonagemService {
         if (req.xpAtual() != null) {
             p.setXpAtual(req.xpAtual());
         }
-        if (req.nivel() != null && req.nivel() >= 0) {
+        if (req.nivel() != null && req.nivel() >= 1) {
             p.setNivel(req.nivel());
         }
         if (req.avatarAssetId() != null) {
@@ -295,10 +295,7 @@ public class PersonagemService {
 
     /** Maior nivel cuja exigencia de XP foi atingida (0 quando XP <= 0). */
     private int nivelPorXp(int xp) {
-        if (xp <= 0) {
-            return 0;
-        }
-        int nivel = 0;
+        int nivel = 1;
         for (ProgressaoNivel pn : progressaoNivelRepository.findByGameSystemIdOrderByNivel(asus().getId())) {
             if (xp >= pn.getXpNecessario()) {
                 nivel = pn.getNivel();
@@ -406,6 +403,18 @@ public class PersonagemService {
         ResultadoCalculo r = calculoService.calcular(p);
         List<PericiaCalculadaDto> pericias = r.pericias().stream().map(this::toPericiaDto).toList();
 
+        // Teto de atributo do nivel atual e XP para o proximo nivel (ex.: "0/100 para o nivel 2").
+        int limiteAtributo = 0;
+        Integer xpProximoNivel = null;
+        for (ProgressaoNivel pn : progressaoNivelRepository.findByGameSystemIdOrderByNivel(p.getGameSystemId())) {
+            if (pn.getNivel() == p.getNivel()) {
+                limiteAtributo = pn.getLimiteAtributo();
+            }
+            if (pn.getNivel() == p.getNivel() + 1) {
+                xpProximoNivel = pn.getXpNecessario();
+            }
+        }
+
         return new PersonagemResponse(
                 p.getId(),
                 p.getOrganizacaoId(),
@@ -431,6 +440,8 @@ public class PersonagemService {
                 r.limiteHabilidades(),
                 r.limiteFeiticos(),
                 r.limiteBencaos(),
+                limiteAtributo,
+                xpProximoNivel,
                 pericias,
                 p.isArquivado(),
                 p.getCriadoEm(),

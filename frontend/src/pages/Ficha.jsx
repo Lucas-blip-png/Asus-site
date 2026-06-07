@@ -9,7 +9,6 @@ const ATRIBS = [
   ['forca', 'For'], ['constituicao', 'Con'], ['destreza', 'Des'], ['agilidade', 'Agi'],
   ['inteligencia', 'Int'], ['sabedoria', 'Sab'], ['carisma', 'Car'],
 ]
-const PONTOS_ATRIBUTO = 5 // regra ASUS: 5 pontos distribuíveis sobre os fixos da classe
 const CAMPOS_DESC = [
   ['anotacoes', 'Anotações'], ['aparencia', 'Aparência'], ['personalidade', 'Personalidade'],
   ['historico', 'Histórico'], ['objetivo', 'Objetivo'],
@@ -84,14 +83,12 @@ export default function Ficha() {
     } catch (e) { setErro(e.message) }
   }
 
-  // ----- atributos (5 pontos distribuíveis) -----
-  const totalBase = Object.values(base).reduce((a, b) => a + (Number(b) || 0), 0)
+  // ----- atributos: após criar, livres até o teto por nível (limiteAtributo) -----
+  const tetoAtributo = (p && p.limiteAtributo > 0) ? p.limiteAtributo : 99
   function setAtr(attr, delta) {
     setBase((b) => {
       const atual = Number(b[attr]) || 0
-      const novo = Math.max(0, atual + delta)
-      const soma = totalBase - atual + novo
-      if (delta > 0 && soma > PONTOS_ATRIBUTO) return b
+      const novo = Math.max(0, Math.min(tetoAtributo, atual + delta))
       return { ...b, [attr]: novo }
     })
   }
@@ -212,7 +209,7 @@ export default function Ficha() {
             <div className="row">
               <b>Atributos</b>
               <div className="spacer" />
-              <span className={`tag ${totalBase > PONTOS_ATRIBUTO ? 'over' : ''}`}>{totalBase}/{PONTOS_ATRIBUTO} pts</span>
+              <span className="tag" title="teto por atributo no nível atual">teto {tetoAtributo}</span>
               <button className="mini" onClick={salvarAtributos}>Salvar</button>
             </div>
             <div className="atr-grid">
@@ -234,12 +231,17 @@ export default function Ficha() {
           <div className="atr-edit">
             <div className="row" style={{ gap: 8 }}>
               <label style={{ flex: 1 }}>Nível
-                <input type="number" min="0" value={nivelInput} onChange={(e) => setNivelInput(e.target.value)} />
+                <input type="number" min="1" value={nivelInput} onChange={(e) => setNivelInput(e.target.value)} />
               </label>
               <label style={{ flex: 2 }}>XP
                 <input type="number" min="0" value={xpInput} onChange={(e) => setXpInput(e.target.value)} />
               </label>
               <button className="mini" style={{ alignSelf: 'flex-end' }} onClick={salvarProgresso}>Salvar</button>
+            </div>
+            <div className="muted" style={{ marginTop: 4 }}>
+              {p.xpProximoNivel != null
+                ? `XP ${p.xpAtual}/${p.xpProximoNivel} para o nível ${p.nivel + 1}`
+                : `Nível máximo · XP ${p.xpAtual}`}
             </div>
           </div>
 

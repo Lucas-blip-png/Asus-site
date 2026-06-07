@@ -108,8 +108,8 @@ public class Personagem {
             criadoEm = agora;
         }
         atualizadoEm = agora;
-        if (nivel < 0) {
-            nivel = 0;
+        if (nivel < 1) {
+            nivel = 1;
         }
     }
 

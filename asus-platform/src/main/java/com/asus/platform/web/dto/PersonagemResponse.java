@@ -29,6 +29,8 @@ public record PersonagemResponse(
         int limiteHabilidades,
         int limiteFeiticos,
         int limiteBencaos,
+        int limiteAtributo,
+        Integer xpProximoNivel,
         List<PericiaCalculadaDto> pericias,
         boolean arquivado,
         LocalDateTime criadoEm,
