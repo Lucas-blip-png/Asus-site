@@ -45,20 +45,24 @@ public class Personagem {
     @Embedded
     @AttributeOverrides({
         @AttributeOverride(name = "forca", column = @Column(name = "base_forca")),
+        @AttributeOverride(name = "constituicao", column = @Column(name = "base_constituicao")),
+        @AttributeOverride(name = "destreza", column = @Column(name = "base_destreza")),
         @AttributeOverride(name = "agilidade", column = @Column(name = "base_agilidade")),
-        @AttributeOverride(name = "vigor", column = @Column(name = "base_vigor")),
-        @AttributeOverride(name = "intelecto", column = @Column(name = "base_intelecto")),
-        @AttributeOverride(name = "presenca", column = @Column(name = "base_presenca"))
+        @AttributeOverride(name = "inteligencia", column = @Column(name = "base_inteligencia")),
+        @AttributeOverride(name = "sabedoria", column = @Column(name = "base_sabedoria")),
+        @AttributeOverride(name = "carisma", column = @Column(name = "base_carisma"))
     })
     private Atributos atributosBase;
 
     @Embedded
     @AttributeOverrides({
         @AttributeOverride(name = "forca", column = @Column(name = "final_forca")),
+        @AttributeOverride(name = "constituicao", column = @Column(name = "final_constituicao")),
+        @AttributeOverride(name = "destreza", column = @Column(name = "final_destreza")),
         @AttributeOverride(name = "agilidade", column = @Column(name = "final_agilidade")),
-        @AttributeOverride(name = "vigor", column = @Column(name = "final_vigor")),
-        @AttributeOverride(name = "intelecto", column = @Column(name = "final_intelecto")),
-        @AttributeOverride(name = "presenca", column = @Column(name = "final_presenca"))
+        @AttributeOverride(name = "inteligencia", column = @Column(name = "final_inteligencia")),
+        @AttributeOverride(name = "sabedoria", column = @Column(name = "final_sabedoria")),
+        @AttributeOverride(name = "carisma", column = @Column(name = "final_carisma"))
     })
     private Atributos atributosFinais;
 
@@ -79,6 +83,13 @@ public class Personagem {
 
     @Column(columnDefinition = "TEXT")
     private String objetivo;
+
+    /** Divindade escolhida (passo 4 da criacao). */
+    private String divindade;
+
+    /** Pontos de treino de pericias: {"VIGOR":2,"COMBATE":3,...}. */
+    @Column(columnDefinition = "TEXT")
+    private String jsonPericias;
 
     private boolean arquivado;
 

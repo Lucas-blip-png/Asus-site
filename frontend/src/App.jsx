@@ -2,11 +2,14 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import { useAuth } from './auth.jsx'
 import Layout from './components/Layout.jsx'
 import Login from './pages/Login.jsx'
-import Dashboard from './pages/Dashboard.jsx'
-import Organizacao from './pages/Organizacao.jsx'
-import Personagem from './pages/Personagem.jsx'
+import Home from './pages/Home.jsx'
+import Personagens from './pages/Personagens.jsx'
+import Ficha from './pages/Ficha.jsx'
+import Campanhas from './pages/Campanhas.jsx'
 import Campanha from './pages/Campanha.jsx'
 import Escudo from './pages/Escudo.jsx'
+import Bestiario from './pages/Bestiario.jsx'
+import Livros from './pages/Livros.jsx'
 import Overlay from './pages/Overlay.jsx'
 
 function Protected({ children }) {
@@ -19,7 +22,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
-      {/* Overlay OBS e publico (consome WebSocket) — Fase 9 */}
+      {/* Overlay OBS e publico (consome WebSocket) */}
       <Route path="/overlay/:campanhaId" element={<Overlay />} />
       <Route
         element={
@@ -28,11 +31,14 @@ export default function App() {
           </Protected>
         }
       >
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/orgs/:orgId" element={<Organizacao />} />
-        <Route path="/personagens/:id" element={<Personagem />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/personagens" element={<Personagens />} />
+        <Route path="/personagens/:id" element={<Ficha />} />
+        <Route path="/campanhas" element={<Campanhas />} />
         <Route path="/campanhas/:id" element={<Campanha />} />
         <Route path="/campanhas/:id/escudo" element={<Escudo />} />
+        <Route path="/bestiario" element={<Bestiario />} />
+        <Route path="/livros" element={<Livros />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

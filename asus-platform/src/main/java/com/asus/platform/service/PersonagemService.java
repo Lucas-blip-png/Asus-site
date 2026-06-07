@@ -25,7 +25,9 @@ import com.asus.platform.web.dto.PericiaCalculadaDto;
 import com.asus.platform.web.dto.PersonagemResponse;
 import com.asus.platform.web.dto.SnapshotResponse;
 import com.asus.platform.web.dto.StatusDto;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
+import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,6 +44,7 @@ public class PersonagemService {
     private final OrganizacaoService organizacaoService;
     private final RealtimeNotifier realtimeNotifier;
     private final PlanoService planoService;
+    private final ObjectMapper objectMapper;
 
     public PersonagemService(PersonagemRepository personagemRepository,
                              GameSystemRepository gameSystemRepository,
@@ -52,7 +55,8 @@ public class PersonagemService {
                              AuditoriaService auditoriaService,
                              OrganizacaoService organizacaoService,
                              RealtimeNotifier realtimeNotifier,
-                             PlanoService planoService) {
+                             PlanoService planoService,
+                             ObjectMapper objectMapper) {
         this.personagemRepository = personagemRepository;
         this.gameSystemRepository = gameSystemRepository;
         this.racaRepository = racaRepository;
@@ -63,6 +67,7 @@ public class PersonagemService {
         this.organizacaoService = organizacaoService;
         this.realtimeNotifier = realtimeNotifier;
         this.planoService = planoService;
+        this.objectMapper = objectMapper;
     }
 
     public List<PersonagemResponse> listar(Long organizacaoId) {
@@ -77,16 +82,14 @@ public class PersonagemService {
 
     @Transactional
     public PersonagemResponse criar(Long organizacaoId, CriarPersonagemRequest req) {
-        organizacaoService.buscar(organizacaoId); // valida existencia
-        planoService.validarNovoPersonagem(organizacaoId); // Fase 10: limite do plano
+        organizacaoService.buscar(organizacaoId);
+        planoService.validarNovoPersonagem(organizacaoId);
 
         Personagem p = montarSalvar(organizacaoId, req.nome(), req.jogador(),
-                req.racaCodigo(), req.classeCodigo(), req.nivelOuPadrao(), 0, req.atributosBase());
+                req.racaCodigo(), req.classeCodigo(), req.trilhaCodigo(), req.divindade(),
+                req.nivelOuPadrao(), 0, req.atributosBase(), req.pericias());
 
-        // Snapshot na criacao (criterio 8)
         snapshotService.criar(p, "CRIACAO");
-
-        // Auditoria (criterio 7)
         auditoriaService.registrar(organizacaoId, p.getUsuarioId(), "PERSONAGEM_CRIADO",
                 "Personagem", p.getId(), null, null, p.getNome());
 
@@ -97,12 +100,12 @@ public class PersonagemService {
     @Transactional
     public PersonagemResponse importar(ImportPersonagemRequest req) {
         ImportPersonagemRequest.PersonagemImport dados = req.personagem();
-        organizacaoService.buscar(dados.organizacaoId()); // valida existencia
-        planoService.validarNovoPersonagem(dados.organizacaoId()); // Fase 10: limite do plano
+        organizacaoService.buscar(dados.organizacaoId());
+        planoService.validarNovoPersonagem(dados.organizacaoId());
 
         Personagem p = montarSalvar(dados.organizacaoId(), dados.nome(), dados.jogador(),
-                dados.racaCodigo(), dados.classeCodigo(),
-                dados.nivelOuPadrao(), dados.xpOuZero(), dados.atributosBase());
+                dados.racaCodigo(), dados.classeCodigo(), dados.trilhaCodigo(), dados.divindade(),
+                dados.nivelOuPadrao(), dados.xpOuZero(), dados.atributosBase(), null);
 
         snapshotService.criar(p, "IMPORTACAO");
         auditoriaService.registrar(dados.organizacaoId(), p.getUsuarioId(), "PERSONAGEM_IMPORTADO",
@@ -111,7 +114,7 @@ public class PersonagemService {
         return toResponse(p);
     }
 
-    /** Atualiza a ficha (plano, secao 21.3 — PUT): recalcula, preserva dano e snapshota. */
+    /** Atualiza a ficha (PUT): recalcula, preserva dano e snapshota. */
     @Transactional
     public PersonagemResponse atualizar(Long id, AtualizarPersonagemRequest req) {
         Personagem p = carregar(id);
@@ -148,20 +151,30 @@ public class PersonagemService {
             p.setObjetivo(req.objetivo());
         }
 
-        GameSystem asus = gameSystemRepository.findByCodigo(AsusV1Engine.SYSTEM_ID)
-                .orElseThrow(() -> new NotFoundException("Sistema ASUS nao encontrado"));
+        GameSystem asus = asus();
         if (req.racaCodigo() != null) {
-            Raca raca = racaRepository.findByGameSystemIdAndCodigo(asus.getId(), req.racaCodigo())
-                    .orElseThrow(() -> new NotFoundException("Raca '" + req.racaCodigo() + "' nao encontrada"));
-            p.setRacaId(raca.getId());
+            p.setRacaId(racaRepository.findByGameSystemIdAndCodigo(asus.getId(), req.racaCodigo())
+                    .map(Raca::getId)
+                    .orElseThrow(() -> new NotFoundException("Raca '" + req.racaCodigo() + "' nao encontrada")));
         }
         if (req.classeCodigo() != null) {
-            Classe classe = classeRepository.findByGameSystemIdAndCodigo(asus.getId(), req.classeCodigo())
-                    .orElseThrow(() -> new NotFoundException("Classe '" + req.classeCodigo() + "' nao encontrada"));
-            p.setClasseId(classe.getId());
+            p.setClasseId(classeRepository.findByGameSystemIdAndCodigo(asus.getId(), req.classeCodigo())
+                    .map(Classe::getId)
+                    .orElseThrow(() -> new NotFoundException("Classe '" + req.classeCodigo() + "' nao encontrada")));
+        }
+        if (req.trilhaCodigo() != null) {
+            p.setTrilhaId(req.trilhaCodigo().isBlank() ? null
+                    : classeRepository.findByGameSystemIdAndCodigo(asus.getId(), req.trilhaCodigo())
+                            .map(Classe::getId)
+                            .orElseThrow(() -> new NotFoundException("Trilha '" + req.trilhaCodigo() + "' nao encontrada")));
+        }
+        if (req.divindade() != null) {
+            p.setDivindade(req.divindade());
+        }
+        if (req.pericias() != null) {
+            p.setJsonPericias(serializar(req.pericias()));
         }
 
-        // Recalcula a ficha preservando o "dano" atual (atual <= novo maximo).
         ResultadoCalculo r = calculoService.calcular(p);
         Status novo = r.status();
         Status antigo = p.getStatus();
@@ -187,44 +200,9 @@ public class PersonagemService {
     }
 
     public List<AuditoriaResponse> historicoAuditoria(Long id) {
-        carregar(id); // valida existencia
+        carregar(id);
         return auditoriaService.historico("Personagem", id).stream()
                 .map(AuditoriaResponse::de).toList();
-    }
-
-    /** Resolve ASUS/raca/classe, monta a ficha, calcula status e persiste. */
-    private Personagem montarSalvar(Long organizacaoId, String nome, String jogador,
-                                    String racaCodigo, String classeCodigo,
-                                    int nivel, int xpAtual, AtributosDto atributosBase) {
-        GameSystem asus = gameSystemRepository.findByCodigo(AsusV1Engine.SYSTEM_ID)
-                .orElseThrow(() -> new NotFoundException("Sistema ASUS nao encontrado"));
-
-        Raca raca = racaRepository.findByGameSystemIdAndCodigo(asus.getId(), racaCodigo)
-                .orElseThrow(() -> new NotFoundException("Raca '" + racaCodigo + "' nao encontrada"));
-
-        Classe classe = classeRepository.findByGameSystemIdAndCodigo(asus.getId(), classeCodigo)
-                .orElseThrow(() -> new NotFoundException("Classe '" + classeCodigo + "' nao encontrada"));
-
-        Personagem p = Personagem.builder()
-                .organizacaoId(organizacaoId)
-                .gameSystemId(asus.getId())
-                .rulesetVersion(AsusV1Engine.VERSION)
-                .nome(nome)
-                .jogador(jogador)
-                .racaId(raca.getId())
-                .classeId(classe.getId())
-                .nivel(nivel)
-                .xpAtual(xpAtual)
-                .atributosBase(atributosBase.paraEntidade())
-                .arquivado(false)
-                .build();
-
-        // Calculo automatico da ficha (criterio 3)
-        ResultadoCalculo r = calculoService.calcular(p);
-        p.setAtributosFinais(r.atributosFinais());
-        p.setStatus(r.status());
-
-        return personagemRepository.save(p);
     }
 
     @Transactional
@@ -264,28 +242,89 @@ public class PersonagemService {
                 AtributosDto.de(p.getAtributosBase()),
                 AtributosDto.de(r.atributosFinais()),
                 StatusDto.de(r.status()),
+                r.deslocamento(), r.cargaMaxima(),
+                r.limiteHabilidades(), r.limiteFeiticos(), r.limiteBencaos(),
                 r.pericias().stream().map(this::toPericiaDto).toList(),
                 r.passos());
     }
 
     public List<SnapshotResponse> snapshots(Long id) {
-        carregar(id); // valida existencia
+        carregar(id);
         return snapshotService.listar(id).stream().map(SnapshotResponse::de).toList();
     }
 
     // ----- helpers -----
+
+    private GameSystem asus() {
+        return gameSystemRepository.findByCodigo(AsusV1Engine.SYSTEM_ID)
+                .orElseThrow(() -> new NotFoundException("Sistema ASUS nao encontrado"));
+    }
 
     private Personagem carregar(Long id) {
         return personagemRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Personagem " + id + " nao encontrado"));
     }
 
+    private Personagem montarSalvar(Long organizacaoId, String nome, String jogador,
+                                    String racaCodigo, String classeCodigo, String trilhaCodigo,
+                                    String divindade, int nivel, int xpAtual,
+                                    AtributosDto atributosBase, Map<String, Integer> pericias) {
+        GameSystem asus = asus();
+
+        Raca raca = racaRepository.findByGameSystemIdAndCodigo(asus.getId(), racaCodigo)
+                .orElseThrow(() -> new NotFoundException("Raca '" + racaCodigo + "' nao encontrada"));
+
+        Classe classe = classeRepository.findByGameSystemIdAndCodigo(asus.getId(), classeCodigo)
+                .orElseThrow(() -> new NotFoundException("Classe '" + classeCodigo + "' nao encontrada"));
+
+        Long trilhaId = null;
+        if (trilhaCodigo != null && !trilhaCodigo.isBlank()) {
+            trilhaId = classeRepository.findByGameSystemIdAndCodigo(asus.getId(), trilhaCodigo)
+                    .map(Classe::getId)
+                    .orElseThrow(() -> new NotFoundException("Trilha '" + trilhaCodigo + "' nao encontrada"));
+        }
+
+        Personagem p = Personagem.builder()
+                .organizacaoId(organizacaoId)
+                .gameSystemId(asus.getId())
+                .rulesetVersion(AsusV1Engine.VERSION)
+                .nome(nome)
+                .jogador(jogador)
+                .racaId(raca.getId())
+                .classeId(classe.getId())
+                .trilhaId(trilhaId)
+                .divindade(divindade)
+                .jsonPericias(serializar(pericias))
+                .nivel(nivel)
+                .xpAtual(xpAtual)
+                .atributosBase(atributosBase.paraEntidade())
+                .arquivado(false)
+                .build();
+
+        ResultadoCalculo r = calculoService.calcular(p);
+        p.setAtributosFinais(r.atributosFinais());
+        p.setStatus(r.status());
+
+        return personagemRepository.save(p);
+    }
+
+    private String serializar(Map<String, Integer> pericias) {
+        if (pericias == null || pericias.isEmpty()) {
+            return null;
+        }
+        try {
+            return objectMapper.writeValueAsString(pericias);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     private PersonagemResponse toResponse(Personagem p) {
         GameSystem sistema = gameSystemRepository.findById(p.getGameSystemId()).orElse(null);
         Raca raca = p.getRacaId() == null ? null : racaRepository.findById(p.getRacaId()).orElse(null);
         Classe classe = p.getClasseId() == null ? null : classeRepository.findById(p.getClasseId()).orElse(null);
+        Classe trilha = p.getTrilhaId() == null ? null : classeRepository.findById(p.getTrilhaId()).orElse(null);
 
-        // pericias sao recalculadas (nao tem estado "atual" para persistir)
         ResultadoCalculo r = calculoService.calcular(p);
         List<PericiaCalculadaDto> pericias = r.pericias().stream().map(this::toPericiaDto).toList();
 
@@ -300,11 +339,19 @@ public class PersonagemService {
                 raca == null ? null : raca.getNome(),
                 classe == null ? null : classe.getCodigo(),
                 classe == null ? null : classe.getNome(),
+                trilha == null ? null : trilha.getCodigo(),
+                trilha == null ? null : trilha.getNome(),
+                p.getDivindade(),
                 p.getNivel(),
                 p.getXpAtual(),
                 AtributosDto.de(p.getAtributosBase()),
                 AtributosDto.de(p.getAtributosFinais()),
                 StatusDto.de(p.getStatus()),
+                r.deslocamento(),
+                r.cargaMaxima(),
+                r.limiteHabilidades(),
+                r.limiteFeiticos(),
+                r.limiteBencaos(),
                 pericias,
                 p.isArquivado(),
                 p.getCriadoEm(),
@@ -312,6 +359,7 @@ public class PersonagemService {
     }
 
     private PericiaCalculadaDto toPericiaDto(PericiaCalculada pc) {
-        return new PericiaCalculadaDto(pc.codigo(), pc.nome(), pc.atributoBase(), pc.valor());
+        return new PericiaCalculadaDto(pc.codigo(), pc.nome(), pc.atributoBase(),
+                pc.sigla(), pc.treino(), pc.cap());
     }
 }

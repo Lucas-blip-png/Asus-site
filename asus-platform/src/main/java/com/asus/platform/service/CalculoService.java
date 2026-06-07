@@ -14,14 +14,19 @@ import com.asus.platform.repository.GameSystemRepository;
 import com.asus.platform.repository.PericiaRepository;
 import com.asus.platform.repository.RacaRepository;
 import com.asus.platform.web.NotFoundException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import org.springframework.stereotype.Service;
 
 /**
- * Calcula a ficha de um personagem (criterio de aceite 3).
- *
- * <p>O backend e a fonte unica das regras (plano, secao 2.4): resolve raca,
- * classe e pericias do sistema e delega o calculo ao engine correto.</p>
+ * Calcula a ficha de um personagem. O backend e a fonte unica das regras:
+ * resolve raca, classe, trilha e pericias e delega ao engine correto.
  */
 @Service
 public class CalculoService {
@@ -31,17 +36,20 @@ public class CalculoService {
     private final ClasseRepository classeRepository;
     private final PericiaRepository periciaRepository;
     private final GameSystemRegistry registry;
+    private final ObjectMapper objectMapper;
 
     public CalculoService(GameSystemRepository gameSystemRepository,
                           RacaRepository racaRepository,
                           ClasseRepository classeRepository,
                           PericiaRepository periciaRepository,
-                          GameSystemRegistry registry) {
+                          GameSystemRegistry registry,
+                          ObjectMapper objectMapper) {
         this.gameSystemRepository = gameSystemRepository;
         this.racaRepository = racaRepository;
         this.classeRepository = classeRepository;
         this.periciaRepository = periciaRepository;
         this.registry = registry;
+        this.objectMapper = objectMapper;
     }
 
     public ResultadoCalculo calcular(Personagem personagem) {
@@ -54,13 +62,40 @@ public class CalculoService {
         Classe classe = classeRepository.findById(personagem.getClasseId())
                 .orElseThrow(() -> new NotFoundException("Classe nao encontrada"));
 
+        List<Classe> fontes = new ArrayList<>();
+        fontes.add(classe);
+        if (personagem.getTrilhaId() != null) {
+            classeRepository.findById(personagem.getTrilhaId()).ifPresent(fontes::add);
+        }
+
         List<Pericia> pericias = periciaRepository.findByGameSystemId(sistema.getId());
+        Map<String, Integer> treino = parseTreino(personagem.getJsonPericias());
 
         GameSystemEngine engine = registry.getEngine(sistema.getCodigo(), personagem.getRulesetVersion());
 
         ContextoCalculo contexto = new ContextoCalculo(
-                raca, classe, personagem.getAtributosBase(), personagem.getNivel(), pericias);
+                raca, fontes, personagem.getAtributosBase(), personagem.getNivel(), pericias, treino);
 
         return engine.calcular(contexto);
+    }
+
+    private Map<String, Integer> parseTreino(String json) {
+        Map<String, Integer> treino = new HashMap<>();
+        if (json == null || json.isBlank()) {
+            return treino;
+        }
+        try {
+            JsonNode raiz = objectMapper.readTree(json);
+            if (raiz.isObject()) {
+                Iterator<Map.Entry<String, JsonNode>> it = raiz.fields();
+                while (it.hasNext()) {
+                    Map.Entry<String, JsonNode> e = it.next();
+                    treino.put(e.getKey().toUpperCase(Locale.ROOT), e.getValue().asInt());
+                }
+            }
+        } catch (Exception ignored) {
+            // json invalido: trata como sem treino
+        }
+        return treino;
     }
 }

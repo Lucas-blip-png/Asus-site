@@ -59,7 +59,7 @@ public class TemplateService {
                 .autorUsuarioId(req.autorUsuarioId())
                 .tipo(TipoTemplate.deOuOutro(req.tipo()).name())
                 .nome(req.nome())
-                .descricao(req.descricao())
+                .descricao(com.asus.platform.util.Sanitizador.limpar(req.descricao()))
                 .jsonConteudo(req.jsonConteudo())
                 .oficial(false)
                 .publico(req.publico() != null && req.publico())
