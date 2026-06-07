@@ -56,5 +56,18 @@ npm run dev                   # http://localhost:5173
 
 Login dev: **dev@asus.local / dev12345**.
 
+## Deploy (Railway)
+
+O projeto sobe como **um serviço só**: o `Dockerfile` builda o React, embute no
+Spring Boot e roda o `.jar` (API + WebSocket + SPA na mesma origem). Passo a passo
+completo, variáveis e banco PostgreSQL em **[`DEPLOY.md`](DEPLOY.md)**. Resumo:
+
+1. Railway → *Deploy from GitHub repo* → `Asus-site` (usa o `Dockerfile` da raiz).
+2. *New → Database → PostgreSQL*.
+3. Variáveis do app (modelo em [`.env.example`](.env.example)):
+   `SPRING_PROFILES_ACTIVE=postgres`, `DB_URL/DB_USER/DB_PASSWORD`,
+   `ASUS_SECURITY_ENFORCE=true`, `ASUS_JWT_SECRET`, `ASUS_CORS_ORIGINS`.
+4. *Generate Domain* → abra a URL. (Opcional: Volume em `/app/uploads`.)
+
 Detalhes e walkthrough de cada parte: veja os READMEs em
 [`asus-platform/`](asus-platform/README.md) e [`frontend/`](frontend/README.md).
