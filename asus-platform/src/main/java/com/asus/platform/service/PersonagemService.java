@@ -3,6 +3,7 @@ package com.asus.platform.service;
 import com.asus.platform.domain.Classe;
 import com.asus.platform.domain.GameSystem;
 import com.asus.platform.domain.Personagem;
+import com.asus.platform.domain.ProgressaoNivel;
 import com.asus.platform.domain.Raca;
 import com.asus.platform.domain.Status;
 import com.asus.platform.engine.AsusV1Engine;
@@ -12,6 +13,7 @@ import com.asus.platform.realtime.RealtimeNotifier;
 import com.asus.platform.repository.ClasseRepository;
 import com.asus.platform.repository.GameSystemRepository;
 import com.asus.platform.repository.PersonagemRepository;
+import com.asus.platform.repository.ProgressaoNivelRepository;
 import com.asus.platform.repository.RacaRepository;
 import com.asus.platform.web.NotFoundException;
 import com.asus.platform.web.dto.AtributosDto;
@@ -21,11 +23,15 @@ import com.asus.platform.web.dto.CalculoDebugResponse;
 import com.asus.platform.web.dto.CriarPersonagemRequest;
 import com.asus.platform.web.dto.ExportPersonagemResponse;
 import com.asus.platform.web.dto.ImportPersonagemRequest;
+import com.asus.platform.web.dto.NivelGanho;
 import com.asus.platform.web.dto.PericiaCalculadaDto;
 import com.asus.platform.web.dto.PersonagemResponse;
+import com.asus.platform.web.dto.ProgressoResponse;
 import com.asus.platform.web.dto.SnapshotResponse;
 import com.asus.platform.web.dto.StatusDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.stereotype.Service;
@@ -44,6 +50,7 @@ public class PersonagemService {
     private final OrganizacaoService organizacaoService;
     private final RealtimeNotifier realtimeNotifier;
     private final PlanoService planoService;
+    private final ProgressaoNivelRepository progressaoNivelRepository;
     private final ObjectMapper objectMapper;
 
     public PersonagemService(PersonagemRepository personagemRepository,
@@ -56,6 +63,7 @@ public class PersonagemService {
                              OrganizacaoService organizacaoService,
                              RealtimeNotifier realtimeNotifier,
                              PlanoService planoService,
+                             ProgressaoNivelRepository progressaoNivelRepository,
                              ObjectMapper objectMapper) {
         this.personagemRepository = personagemRepository;
         this.gameSystemRepository = gameSystemRepository;
@@ -67,6 +75,7 @@ public class PersonagemService {
         this.organizacaoService = organizacaoService;
         this.realtimeNotifier = realtimeNotifier;
         this.planoService = planoService;
+        this.progressaoNivelRepository = progressaoNivelRepository;
         this.objectMapper = objectMapper;
     }
 
@@ -85,9 +94,11 @@ public class PersonagemService {
         organizacaoService.buscar(organizacaoId);
         planoService.validarNovoPersonagem(organizacaoId);
 
+        // Personagem nasce no nivel 0 (regra ASUS): so os fixos de classe + 5 distribuiveis.
+        int nivelInicial = req.nivel() == null ? 0 : Math.max(0, req.nivel());
         Personagem p = montarSalvar(organizacaoId, req.nome(), req.jogador(),
                 req.racaCodigo(), req.classeCodigo(), req.trilhaCodigo(), req.divindade(),
-                req.nivelOuPadrao(), 0, req.atributosBase(), req.pericias());
+                nivelInicial, 0, req.atributosBase(), req.pericias());
 
         snapshotService.criar(p, "CRIACAO");
         auditoriaService.registrar(organizacaoId, p.getUsuarioId(), "PERSONAGEM_CRIADO",
@@ -129,8 +140,11 @@ public class PersonagemService {
         if (req.xpAtual() != null) {
             p.setXpAtual(req.xpAtual());
         }
-        if (req.nivel() != null && req.nivel() >= 1) {
+        if (req.nivel() != null && req.nivel() >= 0) {
             p.setNivel(req.nivel());
+        }
+        if (req.avatarAssetId() != null) {
+            p.setAvatarAssetId(req.avatarAssetId() < 0 ? null : req.avatarAssetId());
         }
         if (req.atributosBase() != null) {
             p.setAtributosBase(req.atributosBase().paraEntidade());
@@ -229,6 +243,70 @@ public class PersonagemService {
         p = personagemRepository.save(p);
         realtimeNotifier.statusPersonagem(p.getId(), StatusDto.de(p.getStatus()));
         return toResponse(p);
+    }
+
+    /** Define XP e/ou nivel, sobe de nivel automaticamente pelo XP e devolve os ganhos (popup). */
+    @Transactional
+    public ProgressoResponse atualizarProgresso(Long id, Integer xpAtual, Integer nivelAlvoReq) {
+        Personagem p = carregar(id);
+        int nivelAntes = p.getNivel();
+
+        if (xpAtual != null) {
+            p.setXpAtual(Math.max(0, xpAtual));
+        }
+        int nivelAlvo = (nivelAlvoReq != null) ? Math.max(0, nivelAlvoReq) : p.getNivel();
+        nivelAlvo = Math.max(nivelAlvo, nivelPorXp(p.getXpAtual()));
+
+        List<NivelGanho> ganhos = new ArrayList<>();
+        if (nivelAlvo > nivelAntes) {
+            Map<Integer, ProgressaoNivel> tabela = new HashMap<>();
+            for (ProgressaoNivel pn : progressaoNivelRepository.findByGameSystemIdOrderByNivel(p.getGameSystemId())) {
+                tabela.put(pn.getNivel(), pn);
+            }
+            for (int n = nivelAntes + 1; n <= nivelAlvo; n++) {
+                ProgressaoNivel pn = tabela.get(n);
+                ganhos.add(new NivelGanho(n,
+                        pn != null ? pn.getRecompensa() : "Novo nivel",
+                        pn != null ? pn.getLimiteAtributo() : 0));
+            }
+        }
+        p.setNivel(nivelAlvo);
+
+        ResultadoCalculo r = calculoService.calcular(p);
+        Status novo = r.status();
+        Status antigo = p.getStatus();
+        if (antigo != null) {
+            novo.setPvAtual(Math.min(antigo.getPvAtual(), novo.getPvMax()));
+            novo.setPmAtual(Math.min(antigo.getPmAtual(), novo.getPmMax()));
+            novo.setPeAtual(Math.min(antigo.getPeAtual(), novo.getPeMax()));
+        }
+        p.setAtributosFinais(r.atributosFinais());
+        p.setStatus(novo);
+        p = personagemRepository.save(p);
+
+        if (nivelAlvo != nivelAntes) {
+            snapshotService.criar(p, "LEVEL_UP");
+            auditoriaService.registrar(p.getOrganizacaoId(), p.getUsuarioId(), "PERSONAGEM_ATUALIZADO",
+                    "Personagem", p.getId(), "nivel", String.valueOf(nivelAntes), String.valueOf(nivelAlvo));
+        }
+        realtimeNotifier.statusPersonagem(p.getId(), StatusDto.de(p.getStatus()));
+        return new ProgressoResponse(toResponse(p), ganhos);
+    }
+
+    /** Maior nivel cuja exigencia de XP foi atingida (0 quando XP <= 0). */
+    private int nivelPorXp(int xp) {
+        if (xp <= 0) {
+            return 0;
+        }
+        int nivel = 0;
+        for (ProgressaoNivel pn : progressaoNivelRepository.findByGameSystemIdOrderByNivel(asus().getId())) {
+            if (xp >= pn.getXpNecessario()) {
+                nivel = pn.getNivel();
+            } else {
+                break;
+            }
+        }
+        return nivel;
     }
 
     public ExportPersonagemResponse exportar(Long id) {
@@ -342,6 +420,7 @@ public class PersonagemService {
                 trilha == null ? null : trilha.getCodigo(),
                 trilha == null ? null : trilha.getNome(),
                 p.getDivindade(),
+                p.getAvatarAssetId(),
                 p.getNivel(),
                 p.getXpAtual(),
                 AtributosDto.de(p.getAtributosBase()),

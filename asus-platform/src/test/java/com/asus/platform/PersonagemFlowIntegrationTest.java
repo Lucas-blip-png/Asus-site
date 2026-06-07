@@ -63,8 +63,6 @@ class PersonagemFlowIntegrationTest {
                 .andExpect(jsonPath("$.status.pmMax").value(10))
                 // PE = 5 + 6 + Con(6)*2 = 23
                 .andExpect(jsonPath("$.status.peMax").value(23))
-                // Defesa = 10 + Agi(3) = 13
-                .andExpect(jsonPath("$.status.defesa").value(13))
                 .andExpect(jsonPath("$.deslocamento").value(4))
                 .andExpect(jsonPath("$.pericias").isArray())
                 .andReturn();

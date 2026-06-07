@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/** Status derivado da ficha (PV/PM/PE + defesa). */
+/** Status derivado da ficha (PV/PM/PE). */
 @Embeddable
 @Getter
 @Setter
@@ -24,6 +24,4 @@ public class Status {
 
     private int peMax;
     private int peAtual;
-
-    private int defesa;
 }

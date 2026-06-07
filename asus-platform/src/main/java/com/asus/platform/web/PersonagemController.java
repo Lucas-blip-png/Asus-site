@@ -9,6 +9,8 @@ import com.asus.platform.web.dto.CriarPersonagemRequest;
 import com.asus.platform.web.dto.ExportPersonagemResponse;
 import com.asus.platform.web.dto.ImportPersonagemRequest;
 import com.asus.platform.web.dto.PersonagemResponse;
+import com.asus.platform.web.dto.ProgressoRequest;
+import com.asus.platform.web.dto.ProgressoResponse;
 import com.asus.platform.web.dto.SnapshotResponse;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -59,6 +61,13 @@ public class PersonagemController {
     public PersonagemResponse atualizarStatus(@PathVariable Long id,
                                               @RequestBody AtualizarStatusRequest req) {
         return service.atualizarStatus(id, req.pvAtual(), req.pmAtual(), req.peAtual());
+    }
+
+    /** Atualiza XP/nivel; sobe de nivel automaticamente pelo XP e devolve os ganhos (popup). */
+    @PatchMapping("/personagens/{id}/progresso")
+    public ProgressoResponse atualizarProgresso(@PathVariable Long id,
+                                                @RequestBody ProgressoRequest req) {
+        return service.atualizarProgresso(id, req.xpAtual(), req.nivel());
     }
 
     @GetMapping("/personagens/{id}/export")

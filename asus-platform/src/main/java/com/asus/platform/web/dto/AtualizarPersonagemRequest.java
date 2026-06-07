@@ -16,6 +16,7 @@ public record AtualizarPersonagemRequest(
         String divindade,
         Integer nivel,
         Integer xpAtual,
+        Long avatarAssetId,
         @Valid AtributosDto atributosBase,
         Map<String, Integer> pericias,
         String anotacoes,
