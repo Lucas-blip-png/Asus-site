@@ -31,3 +31,21 @@ export async function api(path, { method = 'GET', body, auth = true, headers = {
   }
   return data
 }
+
+// O backend e multi-tenant (organizacoes); o frontend usa a 1a org do usuario
+// (criando uma se nao houver). Mantido em cache na sessao.
+let cachedOrgId = null
+export async function obterOrgId() {
+  if (cachedOrgId) return cachedOrgId
+  const orgs = await api('/api/organizacoes')
+  if (orgs && orgs.length > 0) {
+    cachedOrgId = orgs[0].id
+  } else {
+    const nova = await api('/api/organizacoes', {
+      method: 'POST',
+      body: { nome: 'Minha Mesa', slug: 'mesa-' + Math.random().toString(36).slice(2, 8) },
+    })
+    cachedOrgId = nova.id
+  }
+  return cachedOrgId
+}
