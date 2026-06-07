@@ -27,7 +27,6 @@ import org.springframework.stereotype.Component;
  *   <li>PV  = raca.pvBase + Constituicao * 2  (Con da +2 de vida por ponto)</li>
  *   <li>PM  = raca.pmBase + Inteligencia * 2  (Int conduz a feiticaria)</li>
  *   <li>PE  = raca.peBase + Constituicao * 2  (Con da +2 de energia por ponto)</li>
- *   <li>Defesa = 10 + Agilidade</li>
  *   <li>Deslocamento = 4 + Agilidade / 5</li>
  *   <li>Carga maxima = Forca * 2</li>
  *   <li>Limites: Habilidades = Des/2 · Feiticos = Int/2 · Bencaos = Sab/2</li>
@@ -117,20 +116,17 @@ public class AsusV1Engine implements GameSystemEngine {
         int pv = raca.getPvBase() + classePv + finais.getConstituicao() * 2;
         int pm = raca.getPmBase() + classePm + finais.getInteligencia() * 2;
         int pe = raca.getPeBase() + classePe + finais.getConstituicao() * 2;
-        int defesa = 10 + finais.getAgilidade();
         passos.add(String.format("PV = racaPV(%d) + classePV(%d) + Con(%d)x2 = %d",
                 raca.getPvBase(), classePv, finais.getConstituicao(), pv));
         passos.add(String.format("PM = racaPM(%d) + classePM(%d) + Int(%d)x2 = %d",
                 raca.getPmBase(), classePm, finais.getInteligencia(), pm));
         passos.add(String.format("PE = racaPE(%d) + classePE(%d) + Con(%d)x2 = %d",
                 raca.getPeBase(), classePe, finais.getConstituicao(), pe));
-        passos.add(String.format("Defesa = 10 + Agi(%d) = %d", finais.getAgilidade(), defesa));
 
         Status status = Status.builder()
                 .pvMax(pv).pvAtual(pv)
                 .pmMax(pm).pmAtual(pm)
                 .peMax(pe).peAtual(pe)
-                .defesa(defesa)
                 .build();
 
         int deslocamento = 4 + finais.getAgilidade() / 5;

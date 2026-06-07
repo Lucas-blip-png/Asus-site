@@ -39,6 +39,9 @@ public class Personagem {
     private Long classeId;
     private Long trilhaId;
 
+    /** Asset (Fase 11) usado como foto/retrato da ficha. */
+    private Long avatarAssetId;
+
     private int nivel;
     private int xpAtual;
 
@@ -105,8 +108,8 @@ public class Personagem {
             criadoEm = agora;
         }
         atualizadoEm = agora;
-        if (nivel <= 0) {
-            nivel = 1;
+        if (nivel < 0) {
+            nivel = 0;
         }
     }
 

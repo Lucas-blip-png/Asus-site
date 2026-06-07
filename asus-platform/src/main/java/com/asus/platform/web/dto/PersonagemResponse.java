@@ -18,6 +18,7 @@ public record PersonagemResponse(
         String trilhaCodigo,
         String trilhaNome,
         String divindade,
+        Long avatarAssetId,
         int nivel,
         int xpAtual,
         AtributosDto atributosBase,

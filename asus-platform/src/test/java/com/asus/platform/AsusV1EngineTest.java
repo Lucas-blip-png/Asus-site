@@ -57,8 +57,6 @@ class AsusV1EngineTest {
         assertThat(r.status().getPvAtual()).isEqualTo(23);
         assertThat(r.status().getPmMax()).isEqualTo(10);
         assertThat(r.status().getPeMax()).isEqualTo(23);
-        // Defesa = 10 + Agi(3) = 13
-        assertThat(r.status().getDefesa()).isEqualTo(13);
         // Deslocamento = 4 + Agi(3)/5 = 4 ; Carga = For(5)*2 = 10
         assertThat(r.deslocamento()).isEqualTo(4);
         assertThat(r.cargaMaxima()).isEqualTo(10);
