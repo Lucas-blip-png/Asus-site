@@ -1,0 +1,12 @@
+# Não enviar para o build do Docker (acelera e evita lixo na imagem)
+**/node_modules
+**/target
+frontend/dist
+**/.git
+.git
+.gitignore
+**/*.md
+uploads
+*.log
+.idea
+.vscode
