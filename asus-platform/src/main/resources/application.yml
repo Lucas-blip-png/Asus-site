@@ -29,7 +29,8 @@ spring:
       max-request-size: 32MB
 
 server:
-  port: 8080
+  # Railway/Render injetam a porta via $PORT; cai para 8080 em local.
+  port: ${PORT:8080}
 
 logging:
   level:
@@ -37,8 +38,9 @@ logging:
 
 # Configuracoes da plataforma ASUS
 asus:
-  # Fase 11: diretorio de uploads (storage local no MVP; trocar por S3/R2/GCS em producao)
-  uploads-dir: uploads
+  # Fase 11: diretorio de uploads (storage local no MVP; trocar por S3/R2/GCS em producao).
+  # Em producao aponte ASUS_UPLOADS_DIR para um volume persistente (ex.: /app/uploads).
+  uploads-dir: ${ASUS_UPLOADS_DIR:uploads}
   # Fase 7: seguranca / JWT (defina ASUS_JWT_SECRET em producao com >= 32 bytes)
   jwt:
     secret: ${ASUS_JWT_SECRET:troque-este-segredo-em-producao-asus-rpg-platform-0123456789}
