@@ -26,6 +26,7 @@ public record PersonagemResponse(
         StatusDto status,
         int deslocamento,
         int cargaMaxima,
+        int cargaAtual,
         int limiteHabilidades,
         int limiteFeiticos,
         int limiteBencaos,

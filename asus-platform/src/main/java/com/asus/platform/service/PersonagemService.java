@@ -2,6 +2,7 @@ package com.asus.platform.service;
 
 import com.asus.platform.domain.Classe;
 import com.asus.platform.domain.GameSystem;
+import com.asus.platform.domain.ItemPersonagem;
 import com.asus.platform.domain.Personagem;
 import com.asus.platform.domain.ProgressaoNivel;
 import com.asus.platform.domain.Raca;
@@ -12,6 +13,7 @@ import com.asus.platform.engine.ResultadoCalculo;
 import com.asus.platform.realtime.RealtimeNotifier;
 import com.asus.platform.repository.ClasseRepository;
 import com.asus.platform.repository.GameSystemRepository;
+import com.asus.platform.repository.ItemPersonagemRepository;
 import com.asus.platform.repository.PersonagemRepository;
 import com.asus.platform.repository.ProgressaoNivelRepository;
 import com.asus.platform.repository.RacaRepository;
@@ -51,6 +53,7 @@ public class PersonagemService {
     private final RealtimeNotifier realtimeNotifier;
     private final PlanoService planoService;
     private final ProgressaoNivelRepository progressaoNivelRepository;
+    private final ItemPersonagemRepository itemPersonagemRepository;
     private final ObjectMapper objectMapper;
 
     public PersonagemService(PersonagemRepository personagemRepository,
@@ -64,6 +67,7 @@ public class PersonagemService {
                              RealtimeNotifier realtimeNotifier,
                              PlanoService planoService,
                              ProgressaoNivelRepository progressaoNivelRepository,
+                             ItemPersonagemRepository itemPersonagemRepository,
                              ObjectMapper objectMapper) {
         this.personagemRepository = personagemRepository;
         this.gameSystemRepository = gameSystemRepository;
@@ -76,6 +80,7 @@ public class PersonagemService {
         this.realtimeNotifier = realtimeNotifier;
         this.planoService = planoService;
         this.progressaoNivelRepository = progressaoNivelRepository;
+        this.itemPersonagemRepository = itemPersonagemRepository;
         this.objectMapper = objectMapper;
     }
 
@@ -415,6 +420,14 @@ public class PersonagemService {
             }
         }
 
+        // Carga atual = soma de espacos x quantidade do inventario (max = Forca x 2).
+        int cargaAtual = 0;
+        for (ItemPersonagem it : itemPersonagemRepository.findByPersonagemId(p.getId())) {
+            int esp = it.getEspacos() == null ? 0 : it.getEspacos();
+            int qtd = it.getQuantidade() == null ? 1 : it.getQuantidade();
+            cargaAtual += esp * qtd;
+        }
+
         return new PersonagemResponse(
                 p.getId(),
                 p.getOrganizacaoId(),
@@ -437,6 +450,7 @@ public class PersonagemService {
                 StatusDto.de(p.getStatus()),
                 r.deslocamento(),
                 r.cargaMaxima(),
+                cargaAtual,
                 r.limiteHabilidades(),
                 r.limiteFeiticos(),
                 r.limiteBencaos(),
