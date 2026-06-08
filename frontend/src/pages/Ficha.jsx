@@ -38,10 +38,13 @@ export default function Ficha() {
   const [inventario, setInventario] = useState([])
   const [itemCat, setItemCat] = useState('')
   const [novoItem, setNovoItem] = useState({ nome: '', categoria: 'GERAL', espacos: 1, quantidade: 1 })
+  const [outros, setOutros] = useState([])
+  const [novaPericia, setNovaPericia] = useState({ nome: '', atributo: 'FORCA' })
 
   function aplicar(d) {
     setP(d)
-    setTreino(Object.fromEntries((d.pericias || []).map((pe) => [pe.codigo, pe.treino])))
+    setTreino(Object.fromEntries((d.pericias || []).filter((pe) => !pe.custom).map((pe) => [pe.codigo, pe.treino])))
+    setOutros((d.pericias || []).filter((pe) => pe.custom).map((pe) => ({ nome: pe.nome, atributo: pe.atributoBase, treino: pe.treino })))
     setDesc({
       anotacoes: d.anotacoes || '', aparencia: d.aparencia || '', personalidade: d.personalidade || '',
       historico: d.historico || '', objetivo: d.objetivo || '',
@@ -131,6 +134,15 @@ export default function Ficha() {
 
   const setTr = (cod, delta, cap) =>
     setTreino((t) => ({ ...t, [cod]: Math.max(0, Math.min(cap, (t[cod] || 0) + delta)) }))
+  const setTrCustom = (idx, delta, cap) =>
+    setOutros((arr) => arr.map((o, i) => (i === idx ? { ...o, treino: Math.max(0, Math.min(cap, o.treino + delta)) } : o)))
+  const addOutro = () => {
+    if (!novaPericia.nome.trim()) return
+    setOutros((arr) => [...arr, { nome: novaPericia.nome.trim(), atributo: novaPericia.atributo, treino: 0 }])
+    setNovaPericia({ nome: '', atributo: 'FORCA' })
+  }
+  const delOutro = (idx) => setOutros((arr) => arr.filter((_, i) => i !== idx))
+  const siglaDe = (atributo) => (ATRIBS.find(([k]) => k === atributo.toLowerCase()) || [])[1] || atributo
 
   async function salvar(body) {
     try {
@@ -330,12 +342,12 @@ export default function Ficha() {
           <div className="row">
             <h2>Perícias</h2>
             <div className="spacer" />
-            <button className="mini" onClick={() => salvar({ pericias: treino })}>Salvar</button>
+            <button className="mini" onClick={() => salvar({ pericias: treino, periciasCustom: outros })}>Salvar</button>
           </div>
           <table className="pericias">
             <thead><tr><th>Perícia</th><th>Atr</th><th>Treino</th><th>Teto</th></tr></thead>
             <tbody>
-              {p.pericias.map((pe) => (
+              {p.pericias.filter((pe) => !pe.custom).map((pe) => (
                 <tr key={pe.codigo}>
                   <td>{pe.nome}</td>
                   <td className="muted">{pe.sigla}</td>
@@ -349,8 +361,33 @@ export default function Ficha() {
                   <td className="muted stat">{pe.cap}</td>
                 </tr>
               ))}
+              {outros.map((o, idx) => {
+                const cap = 2 * ((p.atributosFinais[o.atributo.toLowerCase()]) || 0)
+                return (
+                  <tr key={'outro-' + idx}>
+                    <td>{o.nome} <span className="tag">Outros</span></td>
+                    <td className="muted">{siglaDe(o.atributo)}</td>
+                    <td>
+                      <span className="step">
+                        <button className="ghost mini" onClick={() => setTrCustom(idx, -1, cap)}>−</button>
+                        <b className="stat">{o.treino}</b>
+                        <button className="ghost mini" onClick={() => setTrCustom(idx, +1, cap)}>+</button>
+                      </span>
+                    </td>
+                    <td className="muted stat">{cap} <button className="ghost mini" onClick={() => delOutro(idx)}>✕</button></td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
+          <div className="add-form">
+            <input placeholder="Perícia de item" value={novaPericia.nome}
+              onChange={(e) => setNovaPericia((s) => ({ ...s, nome: e.target.value }))} />
+            <select value={novaPericia.atributo} onChange={(e) => setNovaPericia((s) => ({ ...s, atributo: e.target.value }))}>
+              {ATRIBS.map(([k, sig]) => <option key={k} value={k.toUpperCase()}>{sig}</option>)}
+            </select>
+            <button className="mini" onClick={addOutro}>+ Outros</button>
+          </div>
         </div>
 
         {/* Direita: abas */}

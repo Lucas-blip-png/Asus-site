@@ -1,6 +1,7 @@
 package com.asus.platform.service;
 
 import com.asus.platform.domain.Classe;
+import com.asus.platform.domain.Atributo;
 import com.asus.platform.domain.GameSystem;
 import com.asus.platform.domain.ItemPersonagem;
 import com.asus.platform.domain.Personagem;
@@ -27,6 +28,7 @@ import com.asus.platform.web.dto.ExportPersonagemResponse;
 import com.asus.platform.web.dto.ImportPersonagemRequest;
 import com.asus.platform.web.dto.NivelGanho;
 import com.asus.platform.web.dto.PericiaCalculadaDto;
+import com.asus.platform.web.dto.PericiaCustomDto;
 import com.asus.platform.web.dto.PersonagemResponse;
 import com.asus.platform.web.dto.ProgressoResponse;
 import com.asus.platform.web.dto.SnapshotResponse;
@@ -35,6 +37,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -101,6 +104,7 @@ public class PersonagemService {
 
         // Personagem nasce no nivel 1 (regra ASUS): fixos da classe + 5 pontos distribuiveis.
         int nivelInicial = req.nivel() == null ? 1 : Math.max(1, req.nivel());
+        validarDistribuicaoCriacao(req.atributosBase(), req.pericias(), nivelInicial);
         Personagem p = montarSalvar(organizacaoId, req.nome(), req.jogador(),
                 req.racaCodigo(), req.classeCodigo(), req.trilhaCodigo(), req.divindade(),
                 nivelInicial, 0, req.atributosBase(), req.pericias());
@@ -152,6 +156,11 @@ public class PersonagemService {
             p.setAvatarAssetId(req.avatarAssetId() < 0 ? null : req.avatarAssetId());
         }
         if (req.atributosBase() != null) {
+            int teto = tetoNivel(p.getNivel());
+            if (maxAtributo(req.atributosBase()) > teto) {
+                throw new IllegalArgumentException(
+                        "Atributo acima do teto do nivel " + p.getNivel() + " (max " + teto + ").");
+            }
             p.setAtributosBase(req.atributosBase().paraEntidade());
         }
         if (req.anotacoes() != null) {
@@ -192,6 +201,9 @@ public class PersonagemService {
         }
         if (req.pericias() != null) {
             p.setJsonPericias(serializar(req.pericias()));
+        }
+        if (req.periciasCustom() != null) {
+            p.setJsonPericiasCustom(serializarCustom(req.periciasCustom()));
         }
 
         ResultadoCalculo r = calculoService.calcular(p);
@@ -399,6 +411,62 @@ public class PersonagemService {
         }
     }
 
+    private String serializarCustom(List<PericiaCustomDto> lista) {
+        if (lista == null || lista.isEmpty()) {
+            return null;
+        }
+        try {
+            return objectMapper.writeValueAsString(lista);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /** Regra ASUS: na criacao (nivel 1) distribui-se 5 pontos de atributo e 5 de pericia,
+     *  cada atributo limitado ao teto do nivel. */
+    private void validarDistribuicaoCriacao(AtributosDto a, Map<String, Integer> pericias, int nivel) {
+        if (a != null) {
+            int soma = somaAtributos(a);
+            if (soma > 5) {
+                throw new IllegalArgumentException(
+                        "Na criacao voce distribui no maximo 5 pontos de atributo (usou " + soma + ").");
+            }
+            int teto = tetoNivel(nivel);
+            if (maxAtributo(a) > teto) {
+                throw new IllegalArgumentException(
+                        "Atributo acima do teto do nivel " + nivel + " (max " + teto + ").");
+            }
+        }
+        if (pericias != null) {
+            int sp = pericias.values().stream().mapToInt(v -> v == null ? 0 : v).sum();
+            if (sp > 5) {
+                throw new IllegalArgumentException(
+                        "Na criacao voce distribui no maximo 5 pontos de pericia (usou " + sp + ").");
+            }
+        }
+    }
+
+    private int somaAtributos(AtributosDto a) {
+        return a.forca() + a.constituicao() + a.destreza() + a.agilidade()
+                + a.inteligencia() + a.sabedoria() + a.carisma();
+    }
+
+    private int maxAtributo(AtributosDto a) {
+        return Math.max(Math.max(Math.max(a.forca(), a.constituicao()), Math.max(a.destreza(), a.agilidade())),
+                Math.max(Math.max(a.inteligencia(), a.sabedoria()), a.carisma()));
+    }
+
+    private int tetoNivel(int nivel) {
+        int teto = 99;
+        for (ProgressaoNivel pn : progressaoNivelRepository.findByGameSystemIdOrderByNivel(asus().getId())) {
+            if (pn.getNivel() == nivel) {
+                teto = pn.getLimiteAtributo();
+                break;
+            }
+        }
+        return teto;
+    }
+
     private PersonagemResponse toResponse(Personagem p) {
         GameSystem sistema = gameSystemRepository.findById(p.getGameSystemId()).orElse(null);
         Raca raca = p.getRacaId() == null ? null : racaRepository.findById(p.getRacaId()).orElse(null);
@@ -406,7 +474,33 @@ public class PersonagemService {
         Classe trilha = p.getTrilhaId() == null ? null : classeRepository.findById(p.getTrilhaId()).orElse(null);
 
         ResultadoCalculo r = calculoService.calcular(p);
-        List<PericiaCalculadaDto> pericias = r.pericias().stream().map(this::toPericiaDto).toList();
+        List<PericiaCalculadaDto> pericias = new ArrayList<>(r.pericias().stream().map(this::toPericiaDto).toList());
+        // Perícias "Outros" (concedidas por itens), com teto = 2x atributo final.
+        if (p.getJsonPericiasCustom() != null && !p.getJsonPericiasCustom().isBlank()) {
+            try {
+                com.fasterxml.jackson.databind.JsonNode arr = objectMapper.readTree(p.getJsonPericiasCustom());
+                if (arr.isArray()) {
+                    for (com.fasterxml.jackson.databind.JsonNode node : arr) {
+                        String nome = node.path("nome").asText("");
+                        if (nome.isBlank()) {
+                            continue;
+                        }
+                        Atributo at;
+                        try {
+                            at = Atributo.valueOf(node.path("atributo").asText("FORCA").toUpperCase(Locale.ROOT));
+                        } catch (Exception e) {
+                            at = Atributo.FORCA;
+                        }
+                        int finalAttr = p.getAtributosFinais() == null ? 0 : p.getAtributosFinais().get(at);
+                        int cap = Math.max(0, finalAttr * 2);
+                        int treino = Math.max(0, Math.min(node.path("treino").asInt(0), cap));
+                        pericias.add(new PericiaCalculadaDto("OUTROS:" + nome, nome, at.name(), at.getSigla(), treino, cap, true));
+                    }
+                }
+            } catch (Exception ignored) {
+                // json invalido: ignora
+            }
+        }
 
         // Teto de atributo do nivel atual e XP para o proximo nivel (ex.: "0/100 para o nivel 2").
         int limiteAtributo = 0;
@@ -464,6 +558,6 @@ public class PersonagemService {
 
     private PericiaCalculadaDto toPericiaDto(PericiaCalculada pc) {
         return new PericiaCalculadaDto(pc.codigo(), pc.nome(), pc.atributoBase(),
-                pc.sigla(), pc.treino(), pc.cap());
+                pc.sigla(), pc.treino(), pc.cap(), false);
     }
 }

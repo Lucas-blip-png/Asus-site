@@ -94,6 +94,10 @@ public class Personagem {
     @Column(columnDefinition = "TEXT")
     private String jsonPericias;
 
+    /** Pericias "Outros" (concedidas por itens): [{"nome":..,"atributo":..,"treino":..}]. */
+    @Column(columnDefinition = "TEXT")
+    private String jsonPericiasCustom;
+
     private boolean arquivado;
 
     @Column(nullable = false)

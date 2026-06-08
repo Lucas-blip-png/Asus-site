@@ -1,6 +1,7 @@
 package com.asus.platform.web.dto;
 
 import jakarta.validation.Valid;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -19,6 +20,7 @@ public record AtualizarPersonagemRequest(
         Long avatarAssetId,
         @Valid AtributosDto atributosBase,
         Map<String, Integer> pericias,
+        List<PericiaCustomDto> periciasCustom,
         String anotacoes,
         String aparencia,
         String personalidade,
