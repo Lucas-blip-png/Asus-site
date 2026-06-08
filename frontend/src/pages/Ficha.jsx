@@ -33,6 +33,9 @@ export default function Ficha() {
   const [feiticos, setFeiticos] = useState([])
   const [novoAtaque, setNovoAtaque] = useState({ nome: '', dano: '', critico: '', alcance: '' })
   const [novoFeitico, setNovoFeitico] = useState({ nome: '', circulo: 1, custoPm: 0, alcance: '', efeito: '' })
+  const [inventario, setInventario] = useState([])
+  const [itemCat, setItemCat] = useState('')
+  const [novoItem, setNovoItem] = useState({ nome: '', categoria: 'GERAL', espacos: 1, quantidade: 1 })
 
   function aplicar(d) {
     setP(d)
@@ -62,6 +65,7 @@ export default function Ficha() {
         api('/api/sistemas/asus/itens').then(setItens).catch(() => {})
         api(`/api/personagens/${id}/ataques`).then(setAtaques).catch(() => {})
         api(`/api/personagens/${id}/feiticos`).then(setFeiticos).catch(() => {})
+        api(`/api/personagens/${id}/inventario`).then(setInventario).catch(() => {})
       })
       .catch((e) => setErro(e.message))
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -161,6 +165,38 @@ export default function Ficha() {
   }
   async function delFeitico(fid) {
     try { await api(`/api/feiticos/${fid}`, { method: 'DELETE' }); recarregarFeiticos() } catch (e) { setErro(e.message) }
+  }
+
+  // ----- inventário (carga = Força x 2 espaços) -----
+  const recarregarInv = () => { api(`/api/personagens/${id}/inventario`).then(setInventario).catch(() => {}); carregar() }
+  async function addCatalogo() {
+    if (!itemCat) return
+    try { await api(`/api/personagens/${id}/inventario/do-catalogo/${itemCat}`, { method: 'POST' }); setItemCat(''); recarregarInv() }
+    catch (e) { setErro(e.message) }
+  }
+  async function addItemProprio() {
+    if (!novoItem.nome.trim()) return
+    try {
+      await api(`/api/personagens/${id}/inventario`, {
+        method: 'POST',
+        body: { ...novoItem, espacos: Number(novoItem.espacos) || 0, quantidade: Number(novoItem.quantidade) || 1 },
+      })
+      setNovoItem({ nome: '', categoria: 'GERAL', espacos: 1, quantidade: 1 })
+      recarregarInv()
+    } catch (e) { setErro(e.message) }
+  }
+  async function setQtd(it, delta) {
+    const q = Math.max(0, (it.quantidade || 1) + delta)
+    if (q === 0) return delItem(it.id)
+    try { await api(`/api/inventario/${it.id}`, { method: 'PUT', body: { quantidade: q, equipado: it.equipado } }); recarregarInv() }
+    catch (e) { setErro(e.message) }
+  }
+  async function toggleEquip(it) {
+    try { await api(`/api/inventario/${it.id}`, { method: 'PUT', body: { equipado: !it.equipado } }); recarregarInv() }
+    catch (e) { setErro(e.message) }
+  }
+  async function delItem(iid) {
+    try { await api(`/api/inventario/${iid}`, { method: 'DELETE' }); recarregarInv() } catch (e) { setErro(e.message) }
   }
 
   if (erro) return <div><p className="error">{erro}</p></div>
@@ -385,15 +421,53 @@ export default function Ficha() {
 
           {aba === 'Inventário' && (
             <div>
-              <div className="muted" style={{ marginBottom: 8 }}>
-                Catálogo do sistema (itens de Tormenta 20). Inventário editável e itens próprios chegam na próxima etapa.
+              <div className="bar-label">Carga {p.cargaAtual}/{p.cargaMaxima} espaços</div>
+              <div className={`bar ${p.cargaAtual > p.cargaMaxima ? 'energia' : 'vida'}`} style={{ marginBottom: 6 }}>
+                <span style={{ width: Math.min(100, p.cargaMaxima ? Math.round((p.cargaAtual / p.cargaMaxima) * 100) : 0) + '%' }} />
+                <b>{p.cargaAtual}/{p.cargaMaxima}</b>
               </div>
-              {itens.slice(0, 30).map((i) => (
-                <div key={i.id} className="item-card">
-                  <div className="t">{i.nome}</div>
-                  <div className="s">{i.categoria} · {i.moeda} {i.preco}{i.dano ? ` · ${i.dano}` : ''}</div>
+              {p.cargaAtual > p.cargaMaxima && <div className="error" style={{ marginBottom: 8 }}>Sobrecarregado! Acima da carga máxima.</div>}
+
+              {inventario.map((it) => (
+                <div key={it.id} className="item-card">
+                  <div className="t">
+                    {it.equipado ? '🛡️ ' : ''}{it.nome} <span className="tag">{(it.espacos || 0)}×{it.quantidade || 1} esp</span>
+                    <button className="ghost mini" style={{ float: 'right' }} onClick={() => delItem(it.id)}>✕</button>
+                  </div>
+                  <div className="s">
+                    {[it.dano && `Dano ${it.dano}${it.critico ? ` (${it.critico})` : ''}`,
+                      it.bonusDefesa != null && `Defesa +${it.bonusDefesa}`, it.alcance, it.efeito].filter(Boolean).join(' · ')}
+                  </div>
+                  <div className="row" style={{ gap: 8, marginTop: 4 }}>
+                    <span className="step">
+                      <button className="ghost mini" onClick={() => setQtd(it, -1)}>−</button>
+                      <b className="stat">{it.quantidade || 1}</b>
+                      <button className="ghost mini" onClick={() => setQtd(it, +1)}>+</button>
+                    </span>
+                    <label className="muted" style={{ fontSize: '.75rem' }}>
+                      <input type="checkbox" checked={!!it.equipado} onChange={() => toggleEquip(it)} /> equipado
+                    </label>
+                  </div>
                 </div>
               ))}
+              {!inventario.length && <div className="muted">Inventário vazio.</div>}
+
+              <div className="add-form">
+                <select value={itemCat} onChange={(e) => setItemCat(e.target.value)} style={{ flex: '1 1 160px' }}>
+                  <option value="">— item do catálogo (T20) —</option>
+                  {itens.map((i) => (
+                    <option key={i.codigo} value={i.codigo}>{i.nome}{i.dano ? ` (${i.dano})` : ''}</option>
+                  ))}
+                </select>
+                <button className="mini" onClick={addCatalogo}>+ Adicionar</button>
+              </div>
+              <div className="add-form">
+                <input placeholder="Item próprio" value={novoItem.nome}
+                  onChange={(e) => setNovoItem((s) => ({ ...s, nome: e.target.value }))} />
+                <input type="number" min="0" placeholder="Espaços" style={{ maxWidth: 90 }} value={novoItem.espacos}
+                  onChange={(e) => setNovoItem((s) => ({ ...s, espacos: e.target.value }))} />
+                <button className="mini" onClick={addItemProprio}>+ Próprio</button>
+              </div>
             </div>
           )}
 
