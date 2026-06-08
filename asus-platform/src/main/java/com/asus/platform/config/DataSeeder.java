@@ -273,9 +273,34 @@ public class DataSeeder implements CommandLineRunner {
 
     private void hab(String codigo, String nome, String classe, String tipo, int custo,
                      String custoTipo, String requisito, String efeito) {
+        // Deriva nivel/atributo exigidos do texto do requisito (ex.: "Nivel 10", "Destreza 10").
+        int nivelMin = 1;
+        String atrReq = null;
+        int valorAtr = 0;
+        if (requisito != null) {
+            String low = requisito.toLowerCase(java.util.Locale.ROOT);
+            java.util.regex.Matcher mn = java.util.regex.Pattern.compile("n[ií]vel\\s+(\\d+)").matcher(low);
+            if (mn.find()) {
+                nivelMin = Integer.parseInt(mn.group(1));
+            }
+            String[][] attrs = {
+                {"forca", "FORCA"}, {"constituicao", "CONSTITUICAO"}, {"destreza", "DESTREZA"},
+                {"agilidade", "AGILIDADE"}, {"inteligencia", "INTELIGENCIA"},
+                {"sabedoria", "SABEDORIA"}, {"carisma", "CARISMA"}
+            };
+            for (String[] a : attrs) {
+                java.util.regex.Matcher ma = java.util.regex.Pattern.compile(a[0] + "\\s+(\\d+)").matcher(low);
+                if (ma.find()) {
+                    atrReq = a[1];
+                    valorAtr = Integer.parseInt(ma.group(1));
+                    break;
+                }
+            }
+        }
         habilidadeRepository.save(Habilidade.builder()
                 .gameSystemId(sid).codigo(codigo).nome(nome).classeCodigo(classe)
                 .tipo(tipo).custo(custo).custoTipo(custoTipo).requisito(requisito)
+                .nivelMinimo(nivelMin).atributoRequisito(atrReq).valorAtributoRequisito(valorAtr)
                 .efeito(efeito).oficial(true).build());
     }
 

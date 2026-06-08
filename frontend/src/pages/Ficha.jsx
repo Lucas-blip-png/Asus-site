@@ -27,7 +27,9 @@ export default function Ficha() {
   const [xpInput, setXpInput] = useState('0')
   const [statusInput, setStatusInput] = useState({ pvAtual: 0, pmAtual: 0, peAtual: 0 })
   const [levelUp, setLevelUp] = useState(null)
-  const [habilidades, setHabilidades] = useState([])
+  const [habChosen, setHabChosen] = useState([])
+  const [habDisp, setHabDisp] = useState([])
+  const [habSel, setHabSel] = useState('')
   const [itens, setItens] = useState([])
   const [ataques, setAtaques] = useState([])
   const [feiticos, setFeiticos] = useState([])
@@ -59,9 +61,8 @@ export default function Ficha() {
   useEffect(() => {
     carregar()
       .then((d) => {
-        if (d.classeCodigo) {
-          api(`/api/sistemas/asus/habilidades?classe=${d.classeCodigo}`).then(setHabilidades).catch(() => {})
-        }
+        api(`/api/personagens/${id}/habilidades`).then(setHabChosen).catch(() => {})
+        api(`/api/personagens/${id}/habilidades/disponiveis`).then(setHabDisp).catch(() => {})
         api('/api/sistemas/asus/itens').then(setItens).catch(() => {})
         api(`/api/personagens/${id}/ataques`).then(setAtaques).catch(() => {})
         api(`/api/personagens/${id}/feiticos`).then(setFeiticos).catch(() => {})
@@ -197,6 +198,20 @@ export default function Ficha() {
   }
   async function delItem(iid) {
     try { await api(`/api/inventario/${iid}`, { method: 'DELETE' }); recarregarInv() } catch (e) { setErro(e.message) }
+  }
+
+  // ----- habilidades (gated por trilha/nível/atributo; trilha só nível 11) -----
+  const recarregarHab = () => {
+    api(`/api/personagens/${id}/habilidades`).then(setHabChosen).catch(() => {})
+    api(`/api/personagens/${id}/habilidades/disponiveis`).then(setHabDisp).catch(() => {})
+  }
+  async function addHab() {
+    if (!habSel) return
+    try { await api(`/api/personagens/${id}/habilidades`, { method: 'POST', body: { codigo: habSel } }); setHabSel(''); recarregarHab() }
+    catch (e) { setErro(e.message) }
+  }
+  async function delHab(codigo) {
+    try { await api(`/api/personagens/${id}/habilidades/${codigo}`, { method: 'DELETE' }); recarregarHab() } catch (e) { setErro(e.message) }
   }
 
   if (erro) return <div><p className="error">{erro}</p></div>
@@ -377,12 +392,35 @@ export default function Ficha() {
           )}
 
           {aba === 'Habilidades' && (
-            habilidades.length ? habilidades.map((h) => (
-              <div key={h.id} className="item-card">
-                <div className="t">{h.nome} <span className="tag">{h.tipo}</span></div>
-                <div className="s">{h.custo > 0 ? `${h.custo} ${h.custoTipo} · ` : ''}{h.efeito}</div>
+            <div>
+              <div className="muted" style={{ marginBottom: 6 }}>{habChosen.length}/{p.limiteHabilidades} habilidades (limite = Des/2)</div>
+              {habChosen.map((h) => (
+                <div key={h.codigo} className="item-card">
+                  <div className="t">
+                    {h.nome} <span className="tag">{h.tipo}</span>
+                    <button className="ghost mini" style={{ float: 'right' }} onClick={() => delHab(h.codigo)}>✕</button>
+                  </div>
+                  <div className="s">{h.custo > 0 ? `${h.custo} ${h.custoTipo} · ` : ''}{h.efeito}</div>
+                </div>
+              ))}
+              {!habChosen.length && <div className="muted">Nenhuma habilidade escolhida.</div>}
+              <div className="add-form">
+                <select value={habSel} onChange={(e) => setHabSel(e.target.value)} style={{ flex: '1 1 160px' }}>
+                  <option value="">— habilidade disponível —</option>
+                  {habDisp.map((h) => (
+                    <option key={h.codigo} value={h.codigo}>
+                      {h.nome}{h.classeCodigo !== 'GERAL' ? ` (${h.classeCodigo})` : ''}{h.nivelMinimo > 1 ? ` · Nv ${h.nivelMinimo}` : ''}
+                    </option>
+                  ))}
+                </select>
+                <button className="mini" onClick={addHab}>+ Habilidade</button>
               </div>
-            )) : <div className="muted">Sem habilidades de classe listadas para {p.classeNome}.</div>
+              {!habDisp.length && (
+                <div className="muted" style={{ marginTop: 4 }}>
+                  Nada liberado no nível/atributo atuais (a trilha só conta a partir do nível 11).
+                </div>
+              )}
+            </div>
           )}
 
           {aba === 'Magias' && (
