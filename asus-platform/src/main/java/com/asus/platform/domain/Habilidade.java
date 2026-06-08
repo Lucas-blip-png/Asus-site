@@ -40,6 +40,11 @@ public class Habilidade {
 
     private String requisito;
 
+    /** Pre-requisitos derivados para liberar a habilidade (gating). */
+    private int nivelMinimo;
+    private String atributoRequisito;
+    private int valorAtributoRequisito;
+
     @Column(columnDefinition = "TEXT")
     private String efeito;
 
