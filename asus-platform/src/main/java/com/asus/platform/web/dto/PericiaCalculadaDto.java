@@ -6,4 +6,5 @@ public record PericiaCalculadaDto(
         String atributoBase,
         String sigla,
         int treino,
-        int cap) {}
+        int cap,
+        boolean custom) {}
