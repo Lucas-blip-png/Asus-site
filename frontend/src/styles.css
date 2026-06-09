@@ -127,6 +127,23 @@ th, td { text-align: left; padding: 6px 6px; border-bottom: 1px solid var(--bord
 .add-form input { flex: 1 1 120px; min-width: 90px; margin: 0; }
 .add-form button { flex: 0 0 auto; }
 
+/* Editor de atributos / nivel / xp na ficha */
+.atr-edit { background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px;
+  padding: 8px 10px; margin-top: 10px; }
+.atr-edit label { font-size: .72rem; color: var(--muted); display: block; }
+.atr-edit input { margin: 2px 0 0; }
+.atr-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; margin-top: 6px; }
+.atr-cell { display: flex; align-items: center; gap: 6px; justify-content: space-between; }
+.tag.over { background: #5b1d1d; color: #ffb4b4; }
+.mini-num { width: 56px; margin: 0; padding: 2px 4px; text-align: center; }
+
+/* Modal (popup de level-up) */
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: flex;
+  align-items: center; justify-content: center; z-index: 50; padding: 20px; }
+.modal-card { background: var(--panel); border: 1px solid var(--gold); border-radius: 12px;
+  padding: 18px 20px; max-width: 420px; width: 100%; box-shadow: 0 10px 40px rgba(0,0,0,.5); }
+.modal-card h2 { color: var(--gold); margin-top: 0; }
+
 /* Login */
 .login-wrap { max-width: 380px; margin: 8vh auto; }
 

@@ -39,6 +39,9 @@ public class Personagem {
     private Long classeId;
     private Long trilhaId;
 
+    /** Asset (Fase 11) usado como foto/retrato da ficha. */
+    private Long avatarAssetId;
+
     private int nivel;
     private int xpAtual;
 
@@ -91,6 +94,10 @@ public class Personagem {
     @Column(columnDefinition = "TEXT")
     private String jsonPericias;
 
+    /** Pericias "Outros" (concedidas por itens): [{"nome":..,"atributo":..,"treino":..}]. */
+    @Column(columnDefinition = "TEXT")
+    private String jsonPericiasCustom;
+
     private boolean arquivado;
 
     @Column(nullable = false)
@@ -105,7 +112,7 @@ public class Personagem {
             criadoEm = agora;
         }
         atualizadoEm = agora;
-        if (nivel <= 0) {
+        if (nivel < 1) {
             nivel = 1;
         }
     }
