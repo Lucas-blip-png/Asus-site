@@ -129,33 +129,73 @@ public class DataSeeder implements CommandLineRunner {
     // ---------------- Itens (catalogo representativo, moeda T$) ----------------
 
     private void seedItens() {
-        // Armas simples
-        arma("ADAGA", "Adaga", "ARMA_SIMPLES", "5", "1d4", "x2", "Corpo a corpo", "Corte", 1);
-        arma("ESPADA_CURTA", "Espada curta", "ARMA_SIMPLES", "15", "1d6", "x2", "Corpo a corpo", "Corte", 1);
-        arma("CLAVA", "Clava", "ARMA_SIMPLES", "5", "1d6", "x2", "Corpo a corpo", "Impacto", 1);
-        arma("LANCA", "Lanca", "ARMA_SIMPLES", "5", "1d8", "x2", "Corpo a corpo", "Perfuracao", 1);
-        arma("MACA", "Maca", "ARMA_SIMPLES", "15", "1d8", "x2", "Corpo a corpo", "Impacto", 1);
-        arma("ARCO_LONGO", "Arco longo", "ARMA_SIMPLES", "75", "1d8", "x3", "Medio", "Perfuracao", 2);
-        // Armas marciais
-        arma("ESPADA_LONGA", "Espada longa", "ARMA_MARCIAL", "75", "1d8", "x2", "Corpo a corpo", "Corte", 1);
-        arma("MACHADO_BATALHA", "Machado de batalha", "ARMA_MARCIAL", "75", "1d8", "x3", "Corpo a corpo", "Corte", 1);
-        arma("MONTANTE", "Montante", "ARMA_MARCIAL", "1842", "2d6", "x2", "Corpo a corpo", "Corte", 2);
-        arma("KATANA", "Katana", "ARMA_EXOTICA", "100", "1d8", "x3", "Corpo a corpo", "Corte", 1);
-        arma("PISTOLA", "Pistola", "ARMA_FOGO", "5000", "2d6", "20/x3", "Curto", "Perfuracao", 1);
-        // Armaduras / escudos
-        armadura("ARMADURA_COURO", "Armadura de couro", "ARMADURA", "75", 2, 0, 1);
-        armadura("BRUNEA", "Brunea", "ARMADURA", "150", 4, -2, 2);
-        armadura("COTA_MALHA", "Cota de malha", "ARMADURA", "300", 6, -4, 2);
-        armadura("PLACAS", "Armadura de placas", "ARMADURA", "1500", 9, -6, 3);
-        armadura("ESCUDO_LEVE", "Escudo leve", "ESCUDO", "75", 2, 0, 1);
-        armadura("ESCUDO_PESADO", "Escudo pesado", "ESCUDO", "150", 4, -1, 2);
-        // Itens gerais
-        geral("CORDA", "Corda (15m)", "75", "Para escaladas e amarras.");
-        geral("TOCHA", "Tocha", "0.5", "Ilumina o ambiente.");
-        geral("KIT_MEDICO", "Kit de medicina", "75", "Bonus em testes de Medicina.");
-        geral("RACAO", "Racao de viagem (por dia)", "0.5", "Alimento de viagem.");
-        geral("POCAO_CURA", "Pocao de cura", "75", "Recupera PV ao consumir.");
-        geral("BARRACA", "Barraca", "75", "Abrigo para descanso.");
+        // ===== Armas (Tormenta 20, Tabela 3-3) — preco em T$, ultimo numero = espacos =====
+        // Simples
+        arma("ADAGA", "Adaga", "ARMA_SIMPLES", "2", "1d4", "19", "Curto", "Perfuracao", 1);
+        arma("ESPADA_CURTA", "Espada curta", "ARMA_SIMPLES", "10", "1d6", "19", "Corpo a corpo", "Perfuracao", 1);
+        arma("FOICE", "Foice", "ARMA_SIMPLES", "4", "1d6", "x3", "Corpo a corpo", "Corte", 1);
+        arma("CLAVA", "Clava", "ARMA_SIMPLES", "0", "1d6", "x2", "Corpo a corpo", "Impacto", 1);
+        arma("LANCA", "Lanca", "ARMA_SIMPLES", "2", "1d6", "x2", "Curto", "Perfuracao", 1);
+        arma("MACA", "Maca", "ARMA_SIMPLES", "12", "1d8", "x2", "Corpo a corpo", "Impacto", 1);
+        arma("BORDAO", "Bordao", "ARMA_SIMPLES", "0", "1d6/1d6", "x2", "Corpo a corpo", "Impacto", 2);
+        arma("PIQUE", "Pique", "ARMA_SIMPLES", "2", "1d8", "x2", "Corpo a corpo", "Perfuracao", 2);
+        arma("TACAPE", "Tacape", "ARMA_SIMPLES", "0", "1d10", "x2", "Corpo a corpo", "Impacto", 2);
+        arma("AZAGAIA", "Azagaia", "ARMA_SIMPLES", "1", "1d6", "x2", "Medio", "Perfuracao", 1);
+        arma("BESTA_LEVE", "Besta leve", "ARMA_SIMPLES", "35", "1d8", "19", "Medio", "Perfuracao", 1);
+        arma("FUNDA", "Funda", "ARMA_SIMPLES", "0", "1d4", "x2", "Medio", "Impacto", 1);
+        arma("ARCO_CURTO", "Arco curto", "ARMA_SIMPLES", "30", "1d6", "x3", "Medio", "Perfuracao", 2);
+        // Marciais
+        arma("MACHADINHA", "Machadinha", "ARMA_MARCIAL", "6", "1d6", "x3", "Curto", "Corte", 1);
+        arma("CIMITARRA", "Cimitarra", "ARMA_MARCIAL", "15", "1d6", "18", "Corpo a corpo", "Corte", 1);
+        arma("ESPADA_LONGA", "Espada longa", "ARMA_MARCIAL", "15", "1d8", "19", "Corpo a corpo", "Corte", 1);
+        arma("FLORETE", "Florete", "ARMA_MARCIAL", "20", "1d6", "18", "Corpo a corpo", "Perfuracao", 1);
+        arma("ALABARDA", "Alabarda", "ARMA_MARCIAL", "10", "1d10", "x3", "Corpo a corpo", "Corte-perf", 2);
+        arma("ALFANGE", "Alfange", "ARMA_MARCIAL", "75", "2d4", "18", "Corpo a corpo", "Corte", 2);
+        arma("MACHADO_GUERRA", "Machado de guerra", "ARMA_MARCIAL", "20", "1d12", "x3", "Corpo a corpo", "Corte", 2);
+        arma("MARRETA", "Marreta", "ARMA_MARCIAL", "20", "3d4", "x2", "Corpo a corpo", "Impacto", 2);
+        arma("MONTANTE", "Montante", "ARMA_MARCIAL", "50", "2d6", "19", "Corpo a corpo", "Corte", 2);
+        arma("ARCO_LONGO", "Arco longo", "ARMA_MARCIAL", "100", "1d8", "x3", "Medio", "Perfuracao", 2);
+        arma("BESTA_PESADA", "Besta pesada", "ARMA_MARCIAL", "50", "1d12", "19", "Medio", "Perfuracao", 2);
+        // Exoticas
+        arma("ESPADA_BASTARDA", "Espada bastarda", "ARMA_EXOTICA", "35", "1d10/1d12", "19", "Corpo a corpo", "Corte", 1);
+        arma("KATANA", "Katana", "ARMA_EXOTICA", "100", "1d8/1d10", "19", "Corpo a corpo", "Corte", 1);
+        arma("MACHADO_ANAO", "Machado anao", "ARMA_EXOTICA", "30", "1d10", "x3", "Corpo a corpo", "Corte", 1);
+        arma("CHICOTE", "Chicote", "ARMA_EXOTICA", "2", "1d3", "x2", "Corpo a corpo", "Corte", 1);
+        arma("CORRENTE_ESPINHOS", "Corrente de espinhos", "ARMA_EXOTICA", "25", "2d4/2d4", "19", "Corpo a corpo", "Corte", 2);
+        // Fogo
+        arma("PISTOLA", "Pistola", "ARMA_FOGO", "250", "2d6", "19/x3", "Curto", "Perfuracao", 1);
+        arma("MOSQUETE", "Mosquete", "ARMA_FOGO", "500", "2d8", "19/x3", "Medio", "Perfuracao", 2);
+        // Municoes (Tabela 3-4)
+        municao("FLECHAS", "Flechas (20)", "1");
+        municao("VIROTES", "Virotes (20)", "2");
+        municao("BALAS", "Balas (20)", "20");
+        municao("PEDRAS", "Pedras (20)", "0.5");
+
+        // ===== Armaduras e Escudos (Tabela 3-5) — bonus de Defesa, penalidade, espacos =====
+        armadura("ARMADURA_ACOLCHOADA", "Armadura acolchoada", "ARMADURA", "5", 1, 0, 2);
+        armadura("ARMADURA_COURO", "Armadura de couro", "ARMADURA", "20", 2, 0, 2);
+        armadura("COURO_BATIDO", "Couro batido", "ARMADURA", "35", 3, -1, 2);
+        armadura("GIBAO_PELES", "Gibao de peles", "ARMADURA", "25", 4, -3, 2);
+        armadura("COURACA", "Couraca", "ARMADURA", "500", 5, -4, 2);
+        armadura("BRUNEA", "Brunea", "ARMADURA", "50", 5, -2, 5);
+        armadura("COTA_MALHA", "Cota de malha", "ARMADURA", "150", 6, -2, 5);
+        armadura("LORIGA", "Loriga segmentada", "ARMADURA", "250", 7, -3, 5);
+        armadura("MEIA_ARMADURA", "Meia armadura", "ARMADURA", "600", 8, -4, 5);
+        armadura("ARMADURA_COMPLETA", "Armadura completa", "ARMADURA", "3000", 10, -5, 5);
+        armadura("ESCUDO_LEVE", "Escudo leve", "ESCUDO", "5", 1, -1, 1);
+        armadura("ESCUDO_PESADO", "Escudo pesado", "ESCUDO", "15", 2, -2, 2);
+
+        // ===== Equipamento de aventura =====
+        geral("MOCHILA", "Mochila", "2", 1, "Carrega ate 10 espacos de itens.");
+        geral("SACO_DORMIR", "Saco de dormir", "1", 1, "Para descansar ao relento.");
+        geral("CORDA", "Corda de canhamo (15m)", "1", 1, "Para escaladas e amarras.");
+        geral("TOCHA", "Tocha", "0.1", 0, "Ilumina o ambiente por 1 hora.");
+        geral("RACAO", "Racao de viagem (1 dia)", "0.5", 1, "Alimento de viagem.");
+        geral("KIT_MEDICO", "Maleta de medicamentos", "10", 1, "Bonus em testes de Cura/Medicina.");
+        geral("POCAO_CURA", "Pocao de cura menor", "30", 0, "Recupera 2d8+2 PV ao consumir.");
+        geral("BARRACA", "Barraca", "5", 2, "Abrigo para descanso.");
+        geral("PE_CABRA", "Pe de cabra", "2", 1, "Bonus para forcar portas/tampas.");
+        geral("ALGEMAS", "Algemas", "15", 0, "Prendem um alvo capturado.");
     }
 
     private void arma(String codigo, String nome, String cat, String preco, String dano,
@@ -176,11 +216,18 @@ public class DataSeeder implements CommandLineRunner {
                 .oficial(true).build());
     }
 
-    private void geral(String codigo, String nome, String preco, String efeito) {
+    private void geral(String codigo, String nome, String preco, int espacos, String efeito) {
         itemJogoRepository.save(ItemJogo.builder()
                 .gameSystemId(sid).codigo(codigo).nome(nome).categoria("GERAL")
                 .preco(new java.math.BigDecimal(preco)).moeda("T$")
-                .efeito(efeito).oficial(true).build());
+                .espacos(espacos).efeito(efeito).oficial(true).build());
+    }
+
+    private void municao(String codigo, String nome, String preco) {
+        itemJogoRepository.save(ItemJogo.builder()
+                .gameSystemId(sid).codigo(codigo).nome(nome).categoria("MUNICAO")
+                .preco(new java.math.BigDecimal(preco)).moeda("T$")
+                .espacos(1).oficial(true).build());
     }
 
     // ---------------- Habilidades (representativas, gerais + por classe) ----------------
@@ -226,9 +273,34 @@ public class DataSeeder implements CommandLineRunner {
 
     private void hab(String codigo, String nome, String classe, String tipo, int custo,
                      String custoTipo, String requisito, String efeito) {
+        // Deriva nivel/atributo exigidos do texto do requisito (ex.: "Nivel 10", "Destreza 10").
+        int nivelMin = 1;
+        String atrReq = null;
+        int valorAtr = 0;
+        if (requisito != null) {
+            String low = requisito.toLowerCase(java.util.Locale.ROOT);
+            java.util.regex.Matcher mn = java.util.regex.Pattern.compile("n[ií]vel\\s+(\\d+)").matcher(low);
+            if (mn.find()) {
+                nivelMin = Integer.parseInt(mn.group(1));
+            }
+            String[][] attrs = {
+                {"forca", "FORCA"}, {"constituicao", "CONSTITUICAO"}, {"destreza", "DESTREZA"},
+                {"agilidade", "AGILIDADE"}, {"inteligencia", "INTELIGENCIA"},
+                {"sabedoria", "SABEDORIA"}, {"carisma", "CARISMA"}
+            };
+            for (String[] a : attrs) {
+                java.util.regex.Matcher ma = java.util.regex.Pattern.compile(a[0] + "\\s+(\\d+)").matcher(low);
+                if (ma.find()) {
+                    atrReq = a[1];
+                    valorAtr = Integer.parseInt(ma.group(1));
+                    break;
+                }
+            }
+        }
         habilidadeRepository.save(Habilidade.builder()
                 .gameSystemId(sid).codigo(codigo).nome(nome).classeCodigo(classe)
                 .tipo(tipo).custo(custo).custoTipo(custoTipo).requisito(requisito)
+                .nivelMinimo(nivelMin).atributoRequisito(atrReq).valorAtributoRequisito(valorAtr)
                 .efeito(efeito).oficial(true).build());
     }
 

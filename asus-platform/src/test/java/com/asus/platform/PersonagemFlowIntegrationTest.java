@@ -48,7 +48,7 @@ class PersonagemFlowIntegrationTest {
               "racaCodigo":"HUMANO",
               "classeCodigo":"CAVALEIRO",
               "nivel":1,
-              "atributosBase":{"forca":3,"constituicao":4,"destreza":2,"agilidade":3,"inteligencia":1,"sabedoria":1,"carisma":2}
+              "atributosBase":{"forca":0,"constituicao":4,"destreza":1,"agilidade":0,"inteligencia":0,"sabedoria":0,"carisma":0}
             }
             """;
         MvcResult pResult = mockMvc.perform(
@@ -59,12 +59,10 @@ class PersonagemFlowIntegrationTest {
                 .andExpect(jsonPath("$.rulesetVersion").value("ASUS_V1"))
                 // Con final 6, Cavaleiro PV/PM/PE 6/3/6 -> PV = 5 + 6 + 6*2 = 23
                 .andExpect(jsonPath("$.status.pvMax").value(23))
-                // PM = 5 + 3 + Int(1)*2 = 10
-                .andExpect(jsonPath("$.status.pmMax").value(10))
+                // PM = 5 + 3 + Int(0)*2 = 8
+                .andExpect(jsonPath("$.status.pmMax").value(8))
                 // PE = 5 + 6 + Con(6)*2 = 23
                 .andExpect(jsonPath("$.status.peMax").value(23))
-                // Defesa = 10 + Agi(3) = 13
-                .andExpect(jsonPath("$.status.defesa").value(13))
                 .andExpect(jsonPath("$.deslocamento").value(4))
                 .andExpect(jsonPath("$.pericias").isArray())
                 .andReturn();

@@ -11,9 +11,10 @@ export default function Personagens() {
   const [classes, setClasses] = useState([])
   const [busca, setBusca] = useState('')
   const [erro, setErro] = useState(null)
+  const [nivel1Cap, setNivel1Cap] = useState(99)
   const [form, setForm] = useState({
     nome: '', racaCodigo: '', classeCodigo: '', trilhaCodigo: '',
-    atributos: Object.fromEntries(ATRS.map((a) => [a, 2])),
+    atributos: Object.fromEntries(ATRS.map((a) => [a, 0])),
   })
 
   const carregar = (oid) => api(`/api/organizacoes/${oid}/personagens`).then(setLista)
@@ -27,6 +28,9 @@ export default function Personagens() {
       const cs = await api('/api/sistemas/asus/classes')
       setRacas(rs)
       setClasses(cs)
+      const prog = await api('/api/sistemas/asus/progressao').catch(() => [])
+      const n1 = (prog || []).find((x) => x.nivel === 1)
+      if (n1 && n1.limiteAtributo > 0) setNivel1Cap(n1.limiteAtributo)
       setForm((f) => ({
         ...f,
         racaCodigo: rs[0]?.codigo || '',
@@ -39,8 +43,14 @@ export default function Personagens() {
   const trilhas = classes.filter((c) => c.classePaiCodigo === form.classeCodigo)
   const pontos = ATRS.reduce((s, a) => s + (Number(form.atributos[a]) || 0), 0)
 
-  const setAtr = (a, v) =>
-    setForm((f) => ({ ...f, atributos: { ...f.atributos, [a]: Math.max(-1, Number(v) || 0) } }))
+  const setAtr = (a, delta) =>
+    setForm((f) => {
+      const atual = Number(f.atributos[a]) || 0
+      const novo = Math.max(0, Math.min(nivel1Cap, atual + delta))
+      const soma = pontos - atual + novo
+      if (delta > 0 && soma > 5) return f
+      return { ...f, atributos: { ...f.atributos, [a]: novo } }
+    })
 
   async function criar(e) {
     e.preventDefault()
@@ -53,7 +63,7 @@ export default function Personagens() {
           racaCodigo: form.racaCodigo,
           classeCodigo: form.classeCodigo,
           trilhaCodigo: form.trilhaCodigo || null,
-          nivel: 1,
+          nivel: 0,
           atributosBase: form.atributos,
         },
       })
@@ -127,13 +137,17 @@ export default function Personagens() {
             </div>
           </div>
           <label style={{ marginTop: 10 }}>
-            Atributos — {pontos} pontos distribuídos
+            Atributos — {pontos}/5 pontos distribuíveis · teto {nivel1Cap}/atributo (os fixos da classe entram automaticamente)
           </label>
-          <div className="row">
+          <div className="row" style={{ gap: 12, flexWrap: 'wrap' }}>
             {ATRS.map((a) => (
-              <div key={a}>
+              <div key={a} style={{ textAlign: 'center' }}>
                 <label style={{ textTransform: 'capitalize' }}>{a.slice(0, 3)}</label>
-                <input type="number" style={{ width: 72 }} value={form.atributos[a]} onChange={(e) => setAtr(a, e.target.value)} />
+                <span className="step">
+                  <button type="button" className="ghost mini" onClick={() => setAtr(a, -1)}>−</button>
+                  <b className="stat">{form.atributos[a]}</b>
+                  <button type="button" className="ghost mini" onClick={() => setAtr(a, +1)}>+</button>
+                </span>
               </div>
             ))}
           </div>

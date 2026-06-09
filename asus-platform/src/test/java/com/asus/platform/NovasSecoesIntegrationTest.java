@@ -75,8 +75,8 @@ class NovasSecoesIntegrationTest {
         // Conteúdo da ficha: ataques e feitiços
         long pId = readId("/api/organizacoes/" + orgId + "/personagens",
                 "{\"nome\":\"Heitor\",\"racaCodigo\":\"HUMANO\",\"classeCodigo\":\"CAVALEIRO\",\"nivel\":1,"
-                + "\"atributosBase\":{\"forca\":3,\"constituicao\":3,\"destreza\":2,\"agilidade\":2,"
-                + "\"inteligencia\":1,\"sabedoria\":1,\"carisma\":2}}");
+                + "\"atributosBase\":{\"forca\":2,\"constituicao\":3,\"destreza\":0,\"agilidade\":0,"
+                + "\"inteligencia\":0,\"sabedoria\":0,\"carisma\":0}}");
         mockMvc.perform(post("/api/personagens/" + pId + "/ataques")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"nome\":\"Espadada\",\"dano\":\"1d8\",\"critico\":\"x2\"}"))
@@ -89,6 +89,23 @@ class NovasSecoesIntegrationTest {
                 .andExpect(status().isCreated());
         mockMvc.perform(get("/api/personagens/" + pId + "/feiticos"))
                 .andExpect(status().isOk()).andExpect(jsonPath("$[0].nome").value("Bola de Fogo"));
+
+        // Regra dos 5 pontos na criacao -> 400
+        mockMvc.perform(post("/api/organizacoes/" + orgId + "/personagens")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"nome\":\"Excesso\",\"racaCodigo\":\"HUMANO\",\"classeCodigo\":\"CAVALEIRO\","
+                                + "\"atributosBase\":{\"forca\":4,\"constituicao\":4,\"destreza\":0,\"agilidade\":0,"
+                                + "\"inteligencia\":0,\"sabedoria\":0,\"carisma\":0}}"))
+                .andExpect(status().isBadRequest());
+
+        // Perícia "Outros" (concedida por item) aparece na ficha como custom
+        mockMvc.perform(put("/api/personagens/" + pId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"periciasCustom\":[{\"nome\":\"Pilotagem\",\"atributo\":\"DESTREZA\",\"treino\":1}]}"))
+                .andExpect(status().isOk());
+        mockMvc.perform(get("/api/personagens/" + pId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.pericias[?(@.nome == 'Pilotagem')]").isNotEmpty());
 
         // Bestiário
         mockMvc.perform(post("/api/bestiario")
