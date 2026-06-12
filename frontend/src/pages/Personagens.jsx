@@ -43,10 +43,27 @@ export default function Personagens() {
   const trilhas = classes.filter((c) => c.classePaiCodigo === form.classeCodigo)
   const pontos = ATRS.reduce((s, a) => s + (Number(form.atributos[a]) || 0), 0)
 
+  // Bônus fixo de atributo da classe (+ trilha selecionada).
+  function bonusAtributos() {
+    const acc = {}
+    for (const cod of [form.classeCodigo, form.trilhaCodigo]) {
+      const c = classes.find((x) => x.codigo === cod)
+      if (c && c.jsonBonus) {
+        try {
+          const atrs = JSON.parse(c.jsonBonus).atributos || {}
+          for (const [k, v] of Object.entries(atrs)) acc[k] = (acc[k] || 0) + Number(v)
+        } catch { /* ignora json invalido */ }
+      }
+    }
+    return acc
+  }
+  const bonusMap = bonusAtributos()
+
   const setAtr = (a, delta) =>
     setForm((f) => {
+      const cap = nivel1Cap - (bonusMap[a] || 0) // teto do nível 1 menos o fixo da classe
       const atual = Number(f.atributos[a]) || 0
-      const novo = Math.max(0, Math.min(nivel1Cap, atual + delta))
+      const novo = Math.max(0, Math.min(cap, atual + delta))
       const soma = pontos - atual + novo
       if (delta > 0 && soma > 5) return f
       return { ...f, atributos: { ...f.atributos, [a]: novo } }
@@ -148,6 +165,9 @@ export default function Personagens() {
                   <b className="stat">{form.atributos[a]}</b>
                   <button type="button" className="ghost mini" onClick={() => setAtr(a, +1)}>+</button>
                 </span>
+                <div className="muted" style={{ fontSize: '.7rem' }} title="final (base + fixos da classe)">
+                  = {form.atributos[a] + (bonusMap[a] || 0)}
+                </div>
               </div>
             ))}
           </div>
