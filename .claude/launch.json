@@ -1,0 +1,20 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "frontend (Vite)",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "port": 5173,
+      "cwd": "C:\\Users\\irine\\Downloads\\Asus rpg site\\Asus site\\frontend"
+    },
+    {
+      "name": "backend (Spring Boot)",
+      "runtimeExecutable": "C:\\Users\\irine\\Downloads\\Asus rpg site\\Asus site\\asus-platform\\mvnw.cmd",
+      "runtimeArgs": ["spring-boot:run"],
+      "port": 8080,
+      "cwd": "C:\\Users\\irine\\Downloads\\Asus rpg site\\Asus site\\asus-platform",
+      "env": { "JAVA_HOME": "C:\\Users\\irine\\.jdks\\ms-21.0.10" }
+    }
+  ]
+}
