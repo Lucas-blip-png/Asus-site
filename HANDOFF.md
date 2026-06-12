@@ -27,7 +27,7 @@ rolagens em tempo real, e uma VTT (ficha interativa) no frontend.
 
 ## Regras do sistema ASUS (estado atual, já corrigido)
 - Personagem **nasce no nível 1**; **base de atributos = bônus fixos da classe + 5 pontos distribuíveis** (os 5 valem **só na criação**).
-- Depois de criado, atributos **livres até o teto do nível** (`limiteAtributo` da tabela de progressão; nível 1 = 4).
+- O **valor final** de cada atributo (**base distribuída + bônus fixo da classe/trilha**) não pode passar do **teto do nível** (`limiteAtributo`; nível 1 = 4). Ex.: Cavaleiro dá +2 Força fixo, então no nível 1 a base de Força vai até 2 (2+2=4). Validado no **servidor** (criar/editar) e na **interface** (criação e ficha). Depois da criação a base é livre até esse teto.
 - Perícias: **5 pontos de treino** na criação; teto por perícia = **2× atributo**.
 - **Sem Defesa** (removida da ficha; criaturas do bestiário mantêm defesa).
 - **Deslocamento = 4 + Agilidade/5**. **Carga máx = Força × 2** (em "espaços").
@@ -75,7 +75,6 @@ teto 2× atributo. Enforcement no servidor: criar com >5 pontos de atributo/per�
 - **Bestiário sem seed** de criaturas (não havia fonte oficial; a tela cria/lista/remove via API).
 - **Produção:** trocar H2→Postgres, `ASUS_SECURITY_ENFORCE=true`, `ASUS_JWT_SECRET` forte, volume p/ uploads.
 - Externos (dependem de credenciais): **Google OAuth**, **gateway de pagamento**, **storage em nuvem** (hoje uploads locais), envio de e-mail (notificações só no banco).
-- A trava de teto de atributo hoje é sobre os **pontos da base** (a confirmar se deve ser sobre o **valor final** = base + fixos da classe).
 - Migrations (Flyway/Liquibase) — hoje `ddl-auto: update`.
 
 ## Gotchas
