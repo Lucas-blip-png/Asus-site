@@ -221,6 +221,21 @@ th, td { text-align: left; padding: 6px 6px; border-bottom: 1px solid var(--bord
 .bar.energia > span { background: linear-gradient(180deg, #eab047, var(--energia)); }
 .bar-label { text-align: center; font-weight: 800; margin: 8px 0 3px; font-size: .74rem;
   letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+.bar.sm { height: 18px; }
+.bar.sm > b { font-size: .72rem; }
+
+/* VTT / Escudo — cartoes de status de personagem */
+.vtt-grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+.vtt-card { background: linear-gradient(180deg, var(--panel), var(--panel-2)); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 14px; box-shadow: var(--shadow); }
+.vtt-card .head { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
+.vtt-card .av { width: 46px; height: 46px; border-radius: 10px; background: var(--bg-2) center/cover no-repeat;
+  border: 1px solid var(--border); display: grid; place-items: center; font-weight: 800; color: var(--muted); flex: 0 0 auto; }
+.vtt-card .nm { font-weight: 800; }
+.vtt-card .res { margin: 7px 0; }
+.vtt-card .res .lbl { display: flex; justify-content: space-between; font-size: .64rem; letter-spacing: 1px;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 3px; }
+.vtt-card .ctrls { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 4px; }
 
 /* ---------------- Ficha (VTT) ---------------- */
 .ficha { display: grid; grid-template-columns: 280px 1fr 330px; gap: 18px; align-items: start; }

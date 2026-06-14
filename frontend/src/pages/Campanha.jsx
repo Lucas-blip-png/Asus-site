@@ -64,7 +64,7 @@ export default function Campanha() {
   if (!campanha) return <div className="center">Carregando…</div>
   return (
     <>
-      <div className="row">
+      <div className="page-head">
         <h1>{campanha.nome}</h1>
         <div className="spacer" />
         <Link className="tag" to={`/campanhas/${id}/escudo`}>
@@ -143,15 +143,18 @@ export default function Campanha() {
         </div>
       </div>
 
-      <div className="card">
-        <h2>Personagens na campanha</h2>
-        <div className="row">
-          {personagens.map((cp) => (
-            <Link key={cp.id} className="tag" to={`/personagens/${cp.personagemId}`}>
-              {cp.personagemNome}
-            </Link>
-          ))}
-        </div>
+      <h2 style={{ marginTop: 18 }}>Personagens na campanha</h2>
+      {personagens.length === 0 && <p className="muted">Nenhum personagem vinculado.</p>}
+      <div className="grid">
+        {personagens.map((cp) => (
+          <Link key={cp.id} to={`/personagens/${cp.personagemId}`} className="entity-card">
+            <div className="av">{(cp.personagemNome || '?').charAt(0).toUpperCase()}</div>
+            <div className="body">
+              <div className="name">{cp.personagemNome}</div>
+              <div className="sub">Ver ficha →</div>
+            </div>
+          </Link>
+        ))}
       </div>
     </>
   )
