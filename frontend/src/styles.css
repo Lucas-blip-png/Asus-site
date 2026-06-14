@@ -307,6 +307,26 @@ th, td { text-align: left; padding: 6px 6px; border-bottom: 1px solid var(--bord
 @keyframes pop { from { transform: scale(.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
 .carousel { display: flex; gap: 16px; justify-content: center; align-items: center; margin-top: 30px; }
-.carousel .slide { width: 200px; height: 280px; background: var(--panel); border: 1px solid var(--border);
-  border-radius: 12px; }
+.carousel .slide { width: 200px; height: 280px;
+  background: linear-gradient(160deg, var(--panel-2), var(--bg-2));
+  border: 1px solid var(--border); border-radius: 12px;
+  box-shadow: var(--shadow); position: relative; overflow: hidden; }
+.carousel .slide::after { content: ''; position: absolute; inset: 10px;
+  border: 1px solid var(--border-2); border-radius: 8px;
+  background: radial-gradient(120px 120px at 50% 30%, rgba(224,168,46,.06), transparent 70%); }
 .carousel .slide.mid { width: 240px; height: 330px; }
+
+/* Home — hub de atalhos */
+.home-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px; margin-top: 30px; }
+.home-card { display: flex; flex-direction: column; gap: 6px;
+  padding: 18px 18px 16px; border-radius: var(--radius);
+  background: linear-gradient(180deg, var(--panel-2), var(--panel));
+  border: 1px solid var(--border); box-shadow: var(--shadow);
+  text-decoration: none; color: var(--text);
+  transition: transform .12s ease, border-color .12s ease, box-shadow .12s ease; }
+.home-card:hover { transform: translateY(-3px); border-color: var(--gold-2);
+  box-shadow: var(--shadow-lg); text-decoration: none; }
+.home-card .ic { font-size: 1.5rem; }
+.home-card b { font-size: 1.02rem; }
+.home-card .muted { font-size: .82rem; }
