@@ -78,31 +78,40 @@ export default function Personagens() {
 
   return (
     <>
-      <div className="row">
+      <div className="page-head">
         <h1>Personagens</h1>
-        <span className="muted">{lista.length}/99</span>
+        <span className="count-badge"><b>{lista.length}</b>/99</span>
       </div>
       {erro && <p className="error">{erro}</p>}
-      <input
-        placeholder="🔍 Buscar"
-        value={busca}
-        onChange={(e) => setBusca(e.target.value)}
-        style={{ maxWidth: 420, marginBottom: 16 }}
-      />
+      <div className="search-wrap">
+        <span className="ic">🔍</span>
+        <input placeholder="Buscar" value={busca} onChange={(e) => setBusca(e.target.value)} />
+      </div>
       <div className="grid">
         {filtrados.map((p) => (
-          <Link key={p.id} to={`/personagens/${p.id}`} className="card">
-            <b>{p.nome}</b>
-            <div className="muted">
-              {p.racaNome} · {p.classeNome}{p.trilhaNome ? ` · ${p.trilhaNome}` : ''} · Nv {p.nivel}
+          <Link key={p.id} to={`/personagens/${p.id}`} className="entity-card">
+            <div
+              className="av"
+              style={p.avatarAssetId ? { backgroundImage: `url(/api/assets/${p.avatarAssetId}/conteudo)` } : undefined}
+            >
+              {!p.avatarAssetId && (p.nome || '?').charAt(0).toUpperCase()}
             </div>
-            <div className="row" style={{ marginTop: 8 }}>
-              <span className="tag">PV {p.status.pvMax}</span>
-              <span className="tag">PM {p.status.pmMax}</span>
-              <span className="tag">PE {p.status.peMax}</span>
+            <div className="body">
+              <div className="name">
+                {p.nome}<span className="tag gold mini-lvl">Nv {p.nivel}</span>
+              </div>
+              <div className="sub">
+                {p.racaNome} · {p.classeNome}{p.trilhaNome ? ` · ${p.trilhaNome}` : ''}
+              </div>
+              <div className="foot">
+                <span className="tag">PV {p.status.pvMax}</span>
+                <span className="tag">PM {p.status.pmMax}</span>
+                <span className="tag">PE {p.status.peMax}</span>
+              </div>
             </div>
           </Link>
         ))}
+        {filtrados.length === 0 && <p className="muted">Nenhum personagem encontrado.</p>}
       </div>
 
       <div className="card">
