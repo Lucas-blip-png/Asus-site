@@ -91,12 +91,14 @@ export default function Ficha() {
     } catch (e) { setErro(e.message) }
   }
 
-  // ----- atributos: após criar, livres até o teto por nível (limiteAtributo) -----
+  // ----- atributos: o valor FINAL (base + fixos da classe) não passa do teto do nível -----
   const tetoAtributo = (p && p.limiteAtributo > 0) ? p.limiteAtributo : 99
+  const bonusClasse = (attr) => (p ? ((p.atributosFinais[attr] || 0) - (p.atributosBase[attr] || 0)) : 0)
   function setAtr(attr, delta) {
+    const cap = tetoAtributo - bonusClasse(attr) // teto menos o bônus fixo da classe
     setBase((b) => {
       const atual = Number(b[attr]) || 0
-      const novo = Math.max(0, Math.min(tetoAtributo, atual + delta))
+      const novo = Math.max(0, Math.min(cap, atual + delta))
       return { ...b, [attr]: novo }
     })
   }
@@ -284,7 +286,7 @@ export default function Ficha() {
                     <b className="stat">{base[k] ?? 0}</b>
                     <button className="ghost mini" onClick={() => setAtr(k, +1)}>+</button>
                   </span>
-                  <span className="muted" title="final (base + fixos da classe)">= {p.atributosFinais[k]}</span>
+                  <span className="muted" title="final (base + fixos da classe)">= {(base[k] ?? 0) + bonusClasse(k)}</span>
                 </div>
               ))}
             </div>
