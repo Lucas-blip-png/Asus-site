@@ -75,7 +75,7 @@ class NovasSecoesIntegrationTest {
         // Conteúdo da ficha: ataques e feitiços
         long pId = readId("/api/organizacoes/" + orgId + "/personagens",
                 "{\"nome\":\"Heitor\",\"racaCodigo\":\"HUMANO\",\"classeCodigo\":\"CAVALEIRO\",\"nivel\":1,"
-                + "\"atributosBase\":{\"forca\":2,\"constituicao\":3,\"destreza\":0,\"agilidade\":0,"
+                + "\"atributosBase\":{\"forca\":0,\"constituicao\":2,\"destreza\":2,\"agilidade\":1,"
                 + "\"inteligencia\":0,\"sabedoria\":0,\"carisma\":0}}");
         mockMvc.perform(post("/api/personagens/" + pId + "/ataques")
                         .contentType(MediaType.APPLICATION_JSON)

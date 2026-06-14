@@ -104,7 +104,8 @@ public class PersonagemService {
 
         // Personagem nasce no nivel 1 (regra ASUS): fixos da classe + 5 pontos distribuiveis.
         int nivelInicial = req.nivel() == null ? 1 : Math.max(1, req.nivel());
-        validarDistribuicaoCriacao(req.atributosBase(), req.pericias(), nivelInicial);
+        validarDistribuicaoCriacao(req.atributosBase(), req.pericias(), nivelInicial,
+                req.classeCodigo(), req.trilhaCodigo());
         Personagem p = montarSalvar(organizacaoId, req.nome(), req.jogador(),
                 req.racaCodigo(), req.classeCodigo(), req.trilhaCodigo(), req.divindade(),
                 nivelInicial, 0, req.atributosBase(), req.pericias());
@@ -156,11 +157,11 @@ public class PersonagemService {
             p.setAvatarAssetId(req.avatarAssetId() < 0 ? null : req.avatarAssetId());
         }
         if (req.atributosBase() != null) {
-            int teto = tetoNivel(p.getNivel());
-            if (maxAtributo(req.atributosBase()) > teto) {
-                throw new IllegalArgumentException(
-                        "Atributo acima do teto do nivel " + p.getNivel() + " (max " + teto + ").");
-            }
+            String classeCod = p.getClasseId() == null ? null
+                    : classeRepository.findById(p.getClasseId()).map(Classe::getCodigo).orElse(null);
+            String trilhaCod = p.getTrilhaId() == null ? null
+                    : classeRepository.findById(p.getTrilhaId()).map(Classe::getCodigo).orElse(null);
+            validarTetoAtributo(req.atributosBase(), p.getNivel(), classeCod, trilhaCod);
             p.setAtributosBase(req.atributosBase().paraEntidade());
         }
         if (req.anotacoes() != null) {
@@ -424,18 +425,15 @@ public class PersonagemService {
 
     /** Regra ASUS: na criacao (nivel 1) distribui-se 5 pontos de atributo e 5 de pericia,
      *  cada atributo limitado ao teto do nivel. */
-    private void validarDistribuicaoCriacao(AtributosDto a, Map<String, Integer> pericias, int nivel) {
+    private void validarDistribuicaoCriacao(AtributosDto a, Map<String, Integer> pericias, int nivel,
+                                            String classeCodigo, String trilhaCodigo) {
         if (a != null) {
             int soma = somaAtributos(a);
             if (soma > 5) {
                 throw new IllegalArgumentException(
                         "Na criacao voce distribui no maximo 5 pontos de atributo (usou " + soma + ").");
             }
-            int teto = tetoNivel(nivel);
-            if (maxAtributo(a) > teto) {
-                throw new IllegalArgumentException(
-                        "Atributo acima do teto do nivel " + nivel + " (max " + teto + ").");
-            }
+            validarTetoAtributo(a, nivel, classeCodigo, trilhaCodigo);
         }
         if (pericias != null) {
             int sp = pericias.values().stream().mapToInt(v -> v == null ? 0 : v).sum();
@@ -446,14 +444,61 @@ public class PersonagemService {
         }
     }
 
+    /** O valor FINAL (pontos distribuidos + bonus fixo de classe/trilha) nao pode passar do teto do nivel. */
+    private void validarTetoAtributo(AtributosDto a, int nivel, String classeCodigo, String trilhaCodigo) {
+        int teto = tetoNivel(nivel);
+        int[] base = aArray(a);
+        int[] bonus = bonusFixosAtributo(classeCodigo, trilhaCodigo);
+        String[] nomes = {"Forca", "Constituicao", "Destreza", "Agilidade", "Inteligencia", "Sabedoria", "Carisma"};
+        for (int i = 0; i < 7; i++) {
+            if (base[i] + bonus[i] > teto) {
+                throw new IllegalArgumentException(nomes[i] + " passa do teto do nivel " + nivel + " (" + teto
+                        + "): " + base[i] + " distribuido + " + bonus[i] + " fixo da classe = " + (base[i] + bonus[i]) + ".");
+            }
+        }
+    }
+
     private int somaAtributos(AtributosDto a) {
         return a.forca() + a.constituicao() + a.destreza() + a.agilidade()
                 + a.inteligencia() + a.sabedoria() + a.carisma();
     }
 
-    private int maxAtributo(AtributosDto a) {
-        return Math.max(Math.max(Math.max(a.forca(), a.constituicao()), Math.max(a.destreza(), a.agilidade())),
-                Math.max(Math.max(a.inteligencia(), a.sabedoria()), a.carisma()));
+    private int[] aArray(AtributosDto a) {
+        return new int[]{a.forca(), a.constituicao(), a.destreza(), a.agilidade(),
+                a.inteligencia(), a.sabedoria(), a.carisma()};
+    }
+
+    /** Soma do bonus fixo de atributo da classe (e trilha), por ordinal de Atributo. */
+    private int[] bonusFixosAtributo(String... codigos) {
+        int[] b = new int[7];
+        Long sid = asus().getId();
+        for (String cod : codigos) {
+            if (cod == null || cod.isBlank()) {
+                continue;
+            }
+            var opt = classeRepository.findByGameSystemIdAndCodigo(sid, cod);
+            if (opt.isEmpty() || opt.get().getJsonBonus() == null || opt.get().getJsonBonus().isBlank()) {
+                continue;
+            }
+            try {
+                com.fasterxml.jackson.databind.JsonNode atrs =
+                        objectMapper.readTree(opt.get().getJsonBonus()).get("atributos");
+                if (atrs != null && atrs.isObject()) {
+                    var it = atrs.fields();
+                    while (it.hasNext()) {
+                        var e = it.next();
+                        try {
+                            b[Atributo.valueOf(e.getKey().toUpperCase(Locale.ROOT)).ordinal()] += e.getValue().asInt();
+                        } catch (Exception ignored) {
+                            // chave que nao e atributo conhecido
+                        }
+                    }
+                }
+            } catch (Exception ignored) {
+                // json invalido
+            }
+        }
+        return b;
     }
 
     private int tetoNivel(int nivel) {
