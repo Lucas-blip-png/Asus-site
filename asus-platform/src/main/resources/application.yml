@@ -51,3 +51,31 @@ asus:
   security:
     # false (dev): API aberta, so /api/auth/me exige token. true (prod): exige token em /api/**
     enforce: ${ASUS_SECURITY_ENFORCE:false}
+
+  # --- Integracoes externas (plugar credenciais). Ver INTEGRACOES.md na raiz. ---
+  # Storage de assets: 'local' (padrao) ou 's3' (S3/R2/GCS S3-compativel).
+  storage:
+    tipo: ${ASUS_STORAGE_TIPO:local}
+    s3:
+      bucket: ${ASUS_S3_BUCKET:}
+      region: ${ASUS_S3_REGION:auto}
+      endpoint: ${ASUS_S3_ENDPOINT:}            # R2/GCS: endpoint S3-compativel; AWS S3: deixe vazio
+      access-key: ${ASUS_S3_ACCESS_KEY:}
+      secret-key: ${ASUS_S3_SECRET_KEY:}
+      public-base-url: ${ASUS_S3_PUBLIC_BASE_URL:}
+  # Pagamentos: 'manual' (padrao), 'stripe' ou 'mercadopago'.
+  payments:
+    provider: ${ASUS_PAYMENTS_PROVIDER:manual}
+    success-url: ${ASUS_PAYMENTS_SUCCESS_URL:}
+    cancel-url: ${ASUS_PAYMENTS_CANCEL_URL:}
+    stripe:
+      secret-key: ${STRIPE_SECRET_KEY:}
+      webhook-secret: ${STRIPE_WEBHOOK_SECRET:}
+    mercadopago:
+      access-token: ${MERCADOPAGO_ACCESS_TOKEN:}
+  # Login social Google (OAuth2). Requer a dependencia spring-boot-starter-oauth2-client.
+  oauth:
+    google:
+      enabled: ${ASUS_OAUTH_GOOGLE_ENABLED:false}
+      client-id: ${GOOGLE_CLIENT_ID:}
+      client-secret: ${GOOGLE_CLIENT_SECRET:}
