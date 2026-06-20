@@ -11,6 +11,10 @@ import Escudo from './pages/Escudo.jsx'
 import Bestiario from './pages/Bestiario.jsx'
 import Livros from './pages/Livros.jsx'
 import Overlay from './pages/Overlay.jsx'
+import Notificacoes from './pages/Notificacoes.jsx'
+import Marketplace from './pages/Marketplace.jsx'
+import Templates from './pages/Templates.jsx'
+import Conta from './pages/Conta.jsx'
 
 function Protected({ children }) {
   const { user, carregando } = useAuth()
@@ -38,6 +42,10 @@ export default function App() {
         <Route path="/campanhas/:id" element={<Campanha />} />
         <Route path="/campanhas/:id/escudo" element={<Escudo />} />
         <Route path="/bestiario" element={<Bestiario />} />
+        <Route path="/marketplace" element={<Marketplace />} />
+        <Route path="/templates" element={<Templates />} />
+        <Route path="/notificacoes" element={<Notificacoes />} />
+        <Route path="/conta" element={<Conta />} />
         <Route path="/livros" element={<Livros />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

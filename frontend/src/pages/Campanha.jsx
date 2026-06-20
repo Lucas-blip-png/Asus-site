@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { api } from '../api.js'
 import { inscrever } from '../ws.js'
 import { useAuth } from '../auth.jsx'
+import { dataHora } from '../format.js'
 
 export default function Campanha() {
   const { id } = useParams()
@@ -15,6 +16,10 @@ export default function Campanha() {
   const [rotulo, setRotulo] = useState('')
   const [oculta, setOculta] = useState(false)
   const [convite, setConvite] = useState(null)
+  const [sessoes, setSessoes] = useState([])
+  const [sessaoForm, setSessaoForm] = useState({ titulo: '', inicio: '' })
+  const [toast, setToast] = useState(null)
+  const toastTimer = useRef(null)
   const [erro, setErro] = useState(null)
 
   function carregar() {
@@ -22,15 +27,27 @@ export default function Campanha() {
     api(`/api/campanhas/${id}/rolagens`).then(setRolagens)
     api(`/api/campanhas/${id}/membros`).then(setMembros)
     api(`/api/campanhas/${id}/personagens`).then(setPersonagens)
+    api(`/api/campanhas/${id}/sessoes`).then(setSessoes).catch(() => {})
   }
+
+  function flashToast(r) {
+    setToast(r)
+    clearTimeout(toastTimer.current)
+    toastTimer.current = setTimeout(() => setToast(null), 4500)
+  }
+  useEffect(() => () => clearTimeout(toastTimer.current), [])
   useEffect(() => {
     carregar()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id])
 
-  // Tempo real (Fase 6): novas rolagens entram no topo
+  // Tempo real (Fase 6): novas rolagens entram no topo + toast
   useEffect(
-    () => inscrever(`/topic/campanhas/${id}/rolagens`, (r) => setRolagens((prev) => [r, ...prev])),
+    () =>
+      inscrever(`/topic/campanhas/${id}/rolagens`, (r) => {
+        setRolagens((prev) => [r, ...prev])
+        if (r && r.total != null) flashToast(r)
+      }),
     [id],
   )
 
@@ -45,6 +62,25 @@ export default function Campanha() {
     } catch (ex) {
       setErro(ex.message)
     }
+  }
+
+  async function criarSessao(e) {
+    e.preventDefault()
+    if (!sessaoForm.titulo.trim()) return
+    setErro(null)
+    try {
+      await api(`/api/campanhas/${id}/sessoes`, {
+        method: 'POST',
+        body: { titulo: sessaoForm.titulo, inicio: sessaoForm.inicio || null },
+      })
+      setSessaoForm({ titulo: '', inicio: '' })
+      api(`/api/campanhas/${id}/sessoes`).then(setSessoes)
+    } catch (ex) { setErro(ex.message) }
+  }
+  async function presenca(sessaoId, status) {
+    setErro(null)
+    try { await api(`/api/sessoes/${sessaoId}/presenca`, { method: 'POST', body: { usuarioId: user?.id, status } }) }
+    catch (ex) { setErro(ex.message) }
   }
 
   async function criarConvite() {
@@ -143,6 +179,42 @@ export default function Campanha() {
         </div>
       </div>
 
+      <div className="card">
+        <h2>Sessões</h2>
+        <div className="lista-vert">
+          {sessoes.map((s) => (
+            <div key={s.id} className="sessao-row">
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div className="row" style={{ gap: 8 }}>
+                  <b>{s.titulo}</b>
+                  <span className="tag">{s.status}</span>
+                  {s.inicio && <span className="muted" style={{ fontSize: '.78rem' }}>{dataHora(s.inicio)}</span>}
+                </div>
+                {s.descricao && <div className="muted" style={{ fontSize: '.82rem' }}>{s.descricao}</div>}
+              </div>
+              <div className="row" style={{ gap: 4 }}>
+                <button className="ghost mini" onClick={() => presenca(s.id, 'CONFIRMADO')} title="Confirmar">✓</button>
+                <button className="ghost mini" onClick={() => presenca(s.id, 'TALVEZ')} title="Talvez">?</button>
+                <button className="ghost mini" onClick={() => presenca(s.id, 'RECUSADO')} title="Recusar">✕</button>
+              </div>
+            </div>
+          ))}
+          {!sessoes.length && <span className="muted">Nenhuma sessão agendada.</span>}
+        </div>
+        <form onSubmit={criarSessao} className="row" style={{ gap: 8, marginTop: 12 }}>
+          <div style={{ flex: 1, minWidth: 140 }}>
+            <label>Título</label>
+            <input value={sessaoForm.titulo} onChange={(e) => setSessaoForm((s) => ({ ...s, titulo: e.target.value }))} />
+          </div>
+          <div>
+            <label>Início</label>
+            <input type="datetime-local" value={sessaoForm.inicio}
+              onChange={(e) => setSessaoForm((s) => ({ ...s, inicio: e.target.value }))} />
+          </div>
+          <button style={{ alignSelf: 'end' }}>Agendar</button>
+        </form>
+      </div>
+
       <h2 style={{ marginTop: 18 }}>Personagens na campanha</h2>
       {personagens.length === 0 && <p className="muted">Nenhum personagem vinculado.</p>}
       <div className="grid">
@@ -156,6 +228,16 @@ export default function Campanha() {
           </Link>
         ))}
       </div>
+
+      {toast && (
+        <div className={`roll-toast ${toast.critico ? 'crit' : toast.falhaCritica ? 'fumble' : ''}`}>
+          <div className="muted">{toast.rotulo || toast.expressao}</div>
+          <div className="rt-total">
+            {toast.total}{toast.critico ? ' ✦' : ''}{toast.falhaCritica ? ' ✗' : ''}
+          </div>
+          {toast.detalhe && <div className="muted" style={{ fontSize: '.75rem' }}>{toast.detalhe}</div>}
+        </div>
+      )}
     </>
   )
 }
