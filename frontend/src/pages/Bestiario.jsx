@@ -39,19 +39,18 @@ export default function Bestiario() {
 
   return (
     <>
-      <div className="row">
+      <div className="page-head">
         <h1>Bestiário</h1>
+        <span className="count-badge"><b>{criaturas.length}</b></span>
         <div className="spacer" />
         <button onClick={() => setAbrirForm((v) => !v)}>{abrirForm ? 'Fechar' : '+ Nova criatura'}</button>
       </div>
       {erro && <p className="error">{erro}</p>}
 
-      <input
-        placeholder="🔍 Buscar criatura"
-        value={busca}
-        onChange={(e) => setBusca(e.target.value)}
-        style={{ maxWidth: 420, marginBottom: 16 }}
-      />
+      <div className="search-wrap">
+        <span className="ic">🔍</span>
+        <input placeholder="Buscar criatura" value={busca} onChange={(e) => setBusca(e.target.value)} />
+      </div>
 
       {abrirForm && (
         <div className="card add-form" style={{ marginBottom: 16 }}>
@@ -78,9 +77,9 @@ export default function Bestiario() {
         {filtradas.map((c) => (
           <div key={c.id} className="card">
             <div className="row">
-              <b>{c.nome}</b>
+              <b style={{ fontSize: '1.02rem' }}>{c.nome}</b>
               <div className="spacer" />
-              <span className="tag">Nível {c.nivel}</span>
+              <span className="tag gold">Nv {c.nivel}</span>
             </div>
             <div className="muted" style={{ margin: '4px 0' }}>
               {[c.especie, c.tipo].filter(Boolean).join(' · ') || 'Criatura'}
@@ -91,13 +90,12 @@ export default function Bestiario() {
               {c.pe ? <span className="tag">PE {c.pe}</span> : null}
               <span className="tag">Defesa {c.defesa}</span>
             </div>
-            {c.descricao && <p className="s" style={{ marginTop: 6 }}>{c.descricao}</p>}
-            {!c.oficial && (
-              <div className="row" style={{ marginTop: 6 }}>
-                <div className="spacer" />
-                <button className="ghost mini" onClick={() => apagar(c.id)}>Remover</button>
-              </div>
-            )}
+            {c.descricao && <p className="muted" style={{ marginTop: 6, fontSize: '.82rem' }}>{c.descricao}</p>}
+            <div className="row" style={{ marginTop: 8 }}>
+              {c.oficial && <span className="tag">Oficial</span>}
+              <div className="spacer" />
+              {!c.oficial && <button className="ghost mini" onClick={() => apagar(c.id)}>Remover</button>}
+            </div>
           </div>
         ))}
       </div>
