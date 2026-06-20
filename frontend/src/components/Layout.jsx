@@ -9,7 +9,9 @@ export default function Layout() {
   return (
     <div>
       <header className="topbar">
-        <Link to="/" className="brand">ASUS</Link>
+        <Link to="/" className="brand">
+          <span className="brand-mark">A</span>ASUS
+        </Link>
         <nav className="topnav">
           <NavLink to="/personagens" className={cls}>Personagens</NavLink>
           <NavLink to="/campanhas" className={cls}>Campanhas</NavLink>

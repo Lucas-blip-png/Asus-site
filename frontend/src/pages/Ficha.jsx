@@ -248,7 +248,12 @@ export default function Ficha() {
         </div>
       )}
 
-      <h1>{p.nome}</h1>
+      <div className="page-head">
+        <h1>{p.nome}</h1>
+        <span className="count-badge">
+          {p.classeNome}{p.trilhaNome ? ` · ${p.trilhaNome}` : ''} · Nv {p.nivel}
+        </span>
+      </div>
       <div className="ficha">
         {/* Coluna esquerda: identidade, atributos e status */}
         <div className="ficha-col">

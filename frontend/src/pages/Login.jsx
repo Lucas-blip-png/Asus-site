@@ -29,7 +29,10 @@ export default function Login() {
 
   return (
     <div className="container" style={{ maxWidth: 380 }}>
-      <h1 className="brand" style={{ textAlign: 'center' }}>ASUS RPG</h1>
+      <h1 className="brand" style={{ textAlign: 'center', justifyContent: 'center' }}>ASUS RPG</h1>
+      <p className="muted" style={{ textAlign: 'center', marginTop: -6, marginBottom: 18 }}>
+        Plataforma de RPG de mesa
+      </p>
       <div className="card">
         <h2>{modo === 'login' ? 'Entrar' : 'Criar conta'}</h2>
         <form onSubmit={submit}>

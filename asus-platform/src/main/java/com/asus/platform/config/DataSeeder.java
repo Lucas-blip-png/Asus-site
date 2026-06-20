@@ -33,6 +33,7 @@ public class DataSeeder implements CommandLineRunner {
     private final HabilidadeRepository habilidadeRepository;
     private final ItemJogoRepository itemJogoRepository;
     private final ProgressaoNivelRepository progressaoNivelRepository;
+    private final CriaturaRepository criaturaRepository;
     private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
 
     private Long sid;
@@ -50,6 +51,7 @@ public class DataSeeder implements CommandLineRunner {
                       HabilidadeRepository habilidadeRepository,
                       ItemJogoRepository itemJogoRepository,
                       ProgressaoNivelRepository progressaoNivelRepository,
+                      CriaturaRepository criaturaRepository,
                       org.springframework.security.crypto.password.PasswordEncoder passwordEncoder) {
         this.gameSystemRepository = gameSystemRepository;
         this.racaRepository = racaRepository;
@@ -64,6 +66,7 @@ public class DataSeeder implements CommandLineRunner {
         this.habilidadeRepository = habilidadeRepository;
         this.itemJogoRepository = itemJogoRepository;
         this.progressaoNivelRepository = progressaoNivelRepository;
+        this.criaturaRepository = criaturaRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -86,11 +89,13 @@ public class DataSeeder implements CommandLineRunner {
         seedProgressao();
         seedItens();
         seedHabilidades();
+        seedBestiario();
         seedComunidade(asus);
 
-        log.info("Seed ASUS concluido: {} racas, {} pericias, {} classes, {} niveis, {} itens, {} habilidades.",
+        log.info("Seed ASUS concluido: {} racas, {} pericias, {} classes, {} niveis, {} itens, {} habilidades, {} criaturas.",
                 racaRepository.count(), periciaRepository.count(), classeRepository.count(),
-                progressaoNivelRepository.count(), itemJogoRepository.count(), habilidadeRepository.count());
+                progressaoNivelRepository.count(), itemJogoRepository.count(), habilidadeRepository.count(),
+                criaturaRepository.count());
     }
 
     // ---------------- Progressao de 50 niveis (planilha) ----------------
@@ -228,6 +233,58 @@ public class DataSeeder implements CommandLineRunner {
                 .gameSystemId(sid).codigo(codigo).nome(nome).categoria("MUNICAO")
                 .preco(new java.math.BigDecimal(preco)).moeda("T$")
                 .espacos(1).oficial(true).build());
+    }
+
+    // ---------------- Bestiario (conjunto inicial de criaturas oficiais) ----------------
+
+    private void seedBestiario() {
+        // nome, nivel, especie, tipo, pv, pm, pe, defesa, descricao
+        criatura("Kobold", 1, "Kobold", "Humanoide", 8, 0, 4, 13,
+                "Reptiliano pequeno e covarde que ataca em bandos e adora armadilhas.");
+        criatura("Goblin Batedor", 1, "Goblin", "Humanoide", 10, 0, 6, 13,
+                "Saqueador agil e oportunista; prefere emboscadas a combate aberto.");
+        criatura("Rato Gigante", 1, "Besta", "Animal", 6, 0, 3, 12,
+                "Roedor do tamanho de um cao; sua mordida pode transmitir doencas.");
+        criatura("Lobo", 1, "Besta", "Animal", 12, 0, 6, 14,
+                "Cacador de matilha; derruba presas com investidas coordenadas.");
+        criatura("Esqueleto", 1, "Morto-vivo", "Morto-vivo", 12, 0, 0, 13,
+                "Ossada reanimada por necromancia; obediente e incansavel.");
+        criatura("Bandido", 2, "Humano", "Humanoide", 16, 0, 8, 13,
+                "Salteador de estrada armado com espada e besta leve.");
+        criatura("Zumbi", 2, "Morto-vivo", "Morto-vivo", 22, 0, 0, 11,
+                "Cadaver lento e resistente; avanca sem medo nem dor.");
+        criatura("Aranha Gigante", 3, "Verme", "Monstro", 20, 0, 10, 14,
+                "Predadora que prende as vitimas em teias e injeta veneno paralisante.");
+        criatura("Orc Guerreiro", 3, "Orc", "Humanoide", 28, 0, 12, 15,
+                "Brutamontes de pele esverdeada; brutal e sedento por batalha.");
+        criatura("Harpia", 4, "Harpia", "Monstro", 26, 8, 12, 15,
+                "Hibrido de mulher e ave cujo canto enfeitica os incautos.");
+        criatura("Ogro", 5, "Gigante", "Gigante", 55, 0, 18, 15,
+                "Bruto enorme e estupido que esmaga inimigos com um porrete.");
+        criatura("Lobo Atroz", 5, "Besta", "Animal", 45, 0, 16, 15,
+                "Versao monstruosa do lobo, do tamanho de um cavalo.");
+        criatura("Elemental do Fogo", 6, "Elemental", "Elemental", 50, 20, 0, 16,
+                "Vortice de chamas vivas; incendeia tudo o que toca.");
+        criatura("Basilisco", 7, "Monstro", "Monstro", 60, 0, 20, 16,
+                "Lagarto de oito patas cujo olhar pode petrificar suas vitimas.");
+        criatura("Troll", 8, "Gigante", "Gigante", 85, 0, 24, 16,
+                "Predador regenerativo; so o fogo ou o acido detem sua cura.");
+        criatura("Golem de Pedra", 10, "Construto", "Construto", 110, 0, 0, 18,
+                "Guardiao de pedra animado por magia; lento, mas quase incansavel.");
+        criatura("Vampiro", 12, "Morto-vivo", "Morto-vivo", 95, 40, 30, 19,
+                "Nobre amaldicoado que drena o sangue dos vivos e comanda a noite.");
+        criatura("Quimera", 13, "Monstro", "Monstro", 120, 18, 30, 18,
+                "Aberracao de tres cabecas - leao, cabra e dragao - que cospe fogo.");
+        criatura("Dragao Vermelho Jovem", 15, "Dragao", "Dragao", 180, 60, 40, 21,
+                "Dragao arrogante e ganancioso cujo bafo incinera tudo em seu cone.");
+    }
+
+    private void criatura(String nome, int nivel, String especie, String tipo,
+                          int pv, int pm, int pe, int defesa, String descricao) {
+        criaturaRepository.save(Criatura.builder()
+                .gameSystemId(sid).nome(nome).nivel(nivel).especie(especie).tipo(tipo)
+                .pv(pv).pm(pm).pe(pe).defesa(defesa).descricao(descricao)
+                .oficial(true).build());
     }
 
     // ---------------- Habilidades (representativas, gerais + por classe) ----------------

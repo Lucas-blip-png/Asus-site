@@ -23,7 +23,10 @@ export default function Livros() {
 
   return (
     <>
-      <h1>Livro de Regras — ASUS</h1>
+      <div className="page-head">
+        <h1>Livro de Regras</h1>
+        <span className="count-badge">ASUS</span>
+      </div>
       {erro && <p className="error">{erro}</p>}
       <div className="abas">
         {ABAS.map((a) => (

@@ -2,6 +2,14 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api, obterOrgId } from '../api.js'
 
+const fmtData = (iso) => {
+  try {
+    return new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' })
+  } catch {
+    return ''
+  }
+}
+
 export default function Campanhas() {
   const [orgId, setOrgId] = useState(null)
   const [lista, setLista] = useState([])
@@ -32,22 +40,32 @@ export default function Campanhas() {
 
   return (
     <>
-      <div className="row">
+      <div className="page-head">
         <h1>Campanhas</h1>
-        <span className="muted">{lista.length}</span>
+        <span className="count-badge"><b>{lista.length}</b></span>
       </div>
       {erro && <p className="error">{erro}</p>}
       <div className="grid">
         {lista.map((c) => (
-          <div key={c.id} className="card">
-            <b>{c.nome}</b>
-            <div className="muted">{c.descricao || 'Sem descrição'}</div>
-            <div className="row" style={{ marginTop: 10 }}>
-              <Link to={`/campanhas/${c.id}`}><button className="mini">Acessar</button></Link>
-              <Link to={`/campanhas/${c.id}/escudo`} className="tag">Escudo</Link>
+          <div key={c.id} className="cover-card">
+            <div
+              className={`cover${c.capaAssetId ? '' : ' placeholder'}`}
+              style={c.capaAssetId ? { backgroundImage: `url(/api/assets/${c.capaAssetId}/conteudo)` } : undefined}
+            >
+              {!c.capaAssetId && (c.nome || '?').charAt(0).toUpperCase()}
+              {c.criadoEm && <span className="chip right">{fmtData(c.criadoEm)}</span>}
+            </div>
+            <div className="body">
+              <div className="name">{c.nome}</div>
+              <div className="muted" style={{ fontSize: '.8rem' }}>{c.descricao || 'Sem descrição'}</div>
+              <div className="foot">
+                <Link to={`/campanhas/${c.id}`}><button className="mini">Acessar</button></Link>
+                <Link to={`/campanhas/${c.id}/escudo`} className="tag">Escudo</Link>
+              </div>
             </div>
           </div>
         ))}
+        {lista.length === 0 && <p className="muted">Nenhuma campanha ainda.</p>}
       </div>
       <div className="card">
         <h2>Nova campanha</h2>
