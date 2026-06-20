@@ -4,28 +4,23 @@ import com.asus.platform.domain.Asset;
 import com.asus.platform.domain.LimitesPlano;
 import com.asus.platform.domain.TipoAsset;
 import com.asus.platform.repository.AssetRepository;
+import com.asus.platform.service.storage.ArmazenamentoAssets;
 import com.asus.platform.web.LimiteExcedidoException;
 import com.asus.platform.web.NotFoundException;
 import com.asus.platform.web.dto.AssetResponse;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.List;
-import java.util.UUID;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * Upload/listagem/download/exclusao de assets em storage local (plano, Seção 13 / Fase 11).
+ * Upload/listagem/download/exclusao de assets (plano, Seção 13 / Fase 11).
  *
- * <p>MVP grava em {@code asus.uploads-dir} (padrao {@code uploads/}). Em producao,
- * trocar por S3/R2/GCS implementando outra estrategia de gravacao.</p>
+ * <p>A gravação física é delegada a {@link ArmazenamentoAssets} — local por padrão,
+ * S3/R2/GCS via {@code asus.storage.tipo=s3} (ver {@code INTEGRACOES.md}).</p>
  */
 @Service
 public class AssetService {
@@ -34,18 +29,18 @@ public class AssetService {
     private final OrganizacaoService organizacaoService;
     private final PlanoService planoService;
     private final AuditoriaService auditoriaService;
-    private final Path uploadsRoot;
+    private final ArmazenamentoAssets armazenamento;
 
     public AssetService(AssetRepository assetRepository,
                         OrganizacaoService organizacaoService,
                         PlanoService planoService,
                         AuditoriaService auditoriaService,
-                        @Value("${asus.uploads-dir:uploads}") String uploadsDir) {
+                        ArmazenamentoAssets armazenamento) {
         this.assetRepository = assetRepository;
         this.organizacaoService = organizacaoService;
         this.planoService = planoService;
         this.auditoriaService = auditoriaService;
-        this.uploadsRoot = Paths.get(uploadsDir).toAbsolutePath().normalize();
+        this.armazenamento = armazenamento;
     }
 
     public List<AssetResponse> listar(Long organizacaoId) {
@@ -79,14 +74,8 @@ public class AssetService {
         String nomeOriginal = StringUtils.cleanPath(
                 arquivo.getOriginalFilename() == null ? "arquivo" : arquivo.getOriginalFilename());
         String storagePath;
-        try {
-            Path dirOrg = uploadsRoot.resolve(String.valueOf(organizacaoId));
-            Files.createDirectories(dirOrg);
-            Path destino = dirOrg.resolve(UUID.randomUUID() + "_" + nomeOriginal);
-            try (InputStream in = arquivo.getInputStream()) {
-                Files.copy(in, destino, StandardCopyOption.REPLACE_EXISTING);
-            }
-            storagePath = uploadsRoot.relativize(destino).toString().replace('\\', '/');
+        try (InputStream in = arquivo.getInputStream()) {
+            storagePath = armazenamento.gravar(organizacaoId, nomeOriginal, in, tamanho);
         } catch (IOException ex) {
             throw new IllegalStateException("Falha ao gravar o arquivo: " + ex.getMessage(), ex);
         }
@@ -110,12 +99,8 @@ public class AssetService {
 
     public Conteudo baixar(Long id) {
         Asset asset = carregar(id);
-        Path arquivo = uploadsRoot.resolve(asset.getStoragePath()).normalize();
-        if (!arquivo.startsWith(uploadsRoot)) {
-            throw new IllegalArgumentException("Caminho de asset invalido");
-        }
         try {
-            byte[] dados = Files.readAllBytes(arquivo);
+            byte[] dados = armazenamento.ler(asset.getStoragePath());
             return new Conteudo(asset.getMimeType(), asset.getNomeOriginal(), dados);
         } catch (IOException ex) {
             throw new NotFoundException("Conteudo do asset " + id + " indisponivel");
@@ -125,11 +110,7 @@ public class AssetService {
     @Transactional
     public void apagar(Long id) {
         Asset asset = carregar(id);
-        try {
-            Files.deleteIfExists(uploadsRoot.resolve(asset.getStoragePath()).normalize());
-        } catch (IOException ignored) {
-            // arquivo ja removido: segue para apagar o registro
-        }
+        armazenamento.apagar(asset.getStoragePath());
         assetRepository.delete(asset);
         auditoriaService.registrar(asset.getOrganizacaoId(), asset.getUsuarioId(), "ASSET_REMOVIDO",
                 "Asset", id, null, asset.getNomeOriginal(), null);
