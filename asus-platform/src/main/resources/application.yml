@@ -66,6 +66,7 @@ asus:
   # Pagamentos: 'manual' (padrao), 'stripe' ou 'mercadopago'.
   payments:
     provider: ${ASUS_PAYMENTS_PROVIDER:manual}
+    currency: ${ASUS_PAYMENTS_CURRENCY:brl}
     success-url: ${ASUS_PAYMENTS_SUCCESS_URL:}
     cancel-url: ${ASUS_PAYMENTS_CANCEL_URL:}
     stripe:
@@ -73,8 +74,9 @@ asus:
       webhook-secret: ${STRIPE_WEBHOOK_SECRET:}
     mercadopago:
       access-token: ${MERCADOPAGO_ACCESS_TOKEN:}
-  # Login social Google (OAuth2). Requer a dependencia spring-boot-starter-oauth2-client.
+  # Login social Google (OAuth2).
   oauth:
+    frontend-redirect: ${ASUS_OAUTH_REDIRECT:/login}
     google:
       enabled: ${ASUS_OAUTH_GOOGLE_ENABLED:false}
       client-id: ${GOOGLE_CLIENT_ID:}

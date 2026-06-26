@@ -78,6 +78,25 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- Integracoes externas: ativadas por flags (@ConditionalOnProperty); inertes por padrao -->
+        <!-- Storage em nuvem S3/R2/GCS (asus.storage.tipo=s3) -->
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3</artifactId>
+            <version>2.28.16</version>
+        </dependency>
+        <!-- Pagamento Stripe (asus.payments.provider=stripe) -->
+        <dependency>
+            <groupId>com.stripe</groupId>
+            <artifactId>stripe-java</artifactId>
+            <version>28.2.0</version>
+        </dependency>
+        <!-- Login social Google / OAuth2 (asus.oauth.google.enabled=true) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-client</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>

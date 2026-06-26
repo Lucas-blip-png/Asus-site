@@ -81,6 +81,27 @@ public class AuthService {
                 .orElseThrow(() -> new UnauthorizedException("Usuario nao encontrado")));
     }
 
+    /**
+     * Login social (Google/OAuth2): encontra o usuário pelo e-mail ou cria uma
+     * conta só-OAuth (sem senha) e emite o par de tokens JWT.
+     */
+    @Transactional
+    public AuthResponse loginSocial(String email, String nome) {
+        Usuario usuario = usuarioRepository.findByEmail(email).orElseGet(() -> {
+            Usuario novo = usuarioRepository.save(Usuario.builder()
+                    .nome(nome == null || nome.isBlank() ? email : nome)
+                    .email(email)
+                    .build());
+            auditoriaService.registrar(null, novo.getId(), "USUARIO_REGISTRADO_OAUTH",
+                    "Usuario", novo.getId(), null, null, email);
+            return novo;
+        });
+        if (usuario.isAnonimizado()) {
+            throw new UnauthorizedException("Conta indisponivel");
+        }
+        return tokensPara(usuario);
+    }
+
     private AuthResponse tokensPara(Usuario usuario) {
         String access = jwtService.gerarAccess(usuario.getId(), usuario.getEmail());
         String refresh = jwtService.gerarRefresh(usuario.getId(), usuario.getEmail());
