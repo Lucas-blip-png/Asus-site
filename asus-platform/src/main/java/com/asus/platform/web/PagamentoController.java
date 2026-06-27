@@ -34,11 +34,14 @@ public class PagamentoController {
 
     @PostMapping("/organizacoes/{orgId}/checkout")
     public GatewayPagamento.Checkout checkout(@PathVariable Long orgId, @RequestParam Plano plano) {
-        GatewayPagamento.Checkout checkout = gateway.criarCheckout(orgId, plano, successUrl, cancelUrl);
-        // Sem cobrança externa (gateway manual) ou plano gratuito: ativa imediatamente.
-        if (checkout.manual() || plano == Plano.FREE) {
-            assinaturaService.definirPlano(orgId, plano);
+        // FREE nao tem cobranca: pode ativar direto.
+        if (plano == Plano.FREE) {
+            assinaturaService.definirPlano(orgId, Plano.FREE);
+            return new GatewayPagamento.Checkout(null, null, true);
         }
-        return checkout;
+        // Planos PAGOS NUNCA sao ativados aqui — a ativacao so acontece apos pagamento
+        // confirmado: via webhook (Stripe) ou, no modo manual, via PUT /assinatura por um
+        // admin. Assim ninguem ativa um plano pago sem pagar.
+        return gateway.criarCheckout(orgId, plano, successUrl, cancelUrl);
     }
 }

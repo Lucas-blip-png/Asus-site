@@ -40,10 +40,15 @@ public class StripeWebhookController {
                                          @RequestHeader(value = "Stripe-Signature", required = false) String assinatura) {
         Event event;
         try {
+            // constructEvent valida a assinatura HMAC E rejeita eventos fora da
+            // tolerancia de tempo padrao (5 min), o que ja barra replays antigos.
             event = Webhook.constructEvent(payload, assinatura, webhookSecret);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("assinatura invalida");
         }
+        // definirPlano e idempotente: reprocessar o mesmo evento apenas reativa o
+        // mesmo plano (nenhuma escalada/duplicidade). Para auditoria fina de eventos
+        // ja processados, persista event.getId() (ver INTEGRACOES.md).
         if ("checkout.session.completed".equals(event.getType())) {
             StripeObject obj = event.getDataObjectDeserializer().getObject().orElse(null);
             if (obj instanceof Session session && session.getMetadata() != null) {
