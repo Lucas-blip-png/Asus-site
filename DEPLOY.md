@@ -7,6 +7,24 @@ no Spring Boot e roda o `.jar`. O backend serve a API, o WebSocket e a SPA na
 > Arquivos que tornam isso pronto: `Dockerfile`, `.dockerignore`, `railway.json`,
 > `.env.example`, `SpaConfig.java` (serve a SPA) e `application.yml` lendo `PORT`.
 
+## ⚡ Smoke test sem banco (H2) — ver de pé em 1 variável
+
+A imagem Docker já vem com `SPRING_PROFILES_ACTIVE=postgres`, que **exige um
+PostgreSQL acessível**. Se você fizer deploy sem banco/variáveis, o app não
+conecta e o **healthcheck falha com `service unavailable` (503)** — o build passou,
+mas a aplicação não subiu.
+
+Pra confirmar que a aplicação sobe **antes** de configurar o Postgres, defina
+**uma** variável no serviço do app:
+
+```
+SPRING_PROFILES_ACTIVE=default
+```
+
+Isso usa **H2 em memória** → o app sobe na hora e o healthcheck passa (dados
+**não persistem** entre restarts/deploys). Para produção, troque pelo Postgres
+(passos abaixo).
+
 ## Pré-requisitos
 - Conta no [Railway](https://railway.app) (login com GitHub).
 - O repositório no GitHub (já está: `Lucas-blip-png/Asus-site`).
@@ -37,9 +55,20 @@ no Spring Boot e roda o `.jar`. O backend serve a API, o WebSocket e a SPA na
    | `ASUS_JWT_SECRET` | um segredo aleatório (≥ 32 bytes — ver abaixo) |
    | `ASUS_CORS_ORIGINS` | a URL pública do app (passo 4) |
 
-   > **Dica Railway:** em vez de copiar a senha na mão, você pode referenciar as
-   > variáveis do Postgres: `DB_URL=jdbc:postgresql://${{Postgres.PGHOST}}:${{Postgres.PGPORT}}/${{Postgres.PGDATABASE}}`,
-   > `DB_USER=${{Postgres.PGUSER}}`, `DB_PASSWORD=${{Postgres.PGPASSWORD}}`.
+   > ✅ **Jeito recomendado (referencie o Postgres, sem copiar nada na mão):**
+   > ```
+   > DB_URL=jdbc:postgresql://${{Postgres.PGHOST}}:${{Postgres.PGPORT}}/${{Postgres.PGDATABASE}}
+   > DB_USER=${{Postgres.PGUSER}}
+   > DB_PASSWORD=${{Postgres.PGPASSWORD}}
+   > ```
+   >
+   > ⚠️ **Gotcha mais comum (causa do healthcheck 503):** **NÃO** jogue a
+   > `DATABASE_URL` crua do Railway (`postgresql://user:senha@host:porta/banco`) em
+   > `DB_URL`. O Spring precisa de:
+   > - prefixo **`jdbc:`** → `jdbc:postgresql://host:porta/banco`;
+   > - **sem** usuário/senha embutidos na URL — eles vão **separados** em `DB_USER` e `DB_PASSWORD`.
+   >
+   > Com a URL no formato errado, o Hikari não conecta e o app não sobe (503).
 
 ### 4. Domínio público
 6. Serviço do app → **Settings** → **Networking** → **Generate Domain**.
