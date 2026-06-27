@@ -35,15 +35,16 @@ export default function Layout() {
           <NavLink to="/templates" className={cls}>Templates</NavLink>
           <NavLink to="/livros" className={cls}>Livros</NavLink>
         </nav>
-        <div className="spacer" />
-        <NavLink to="/notificacoes" className="bell" title="Notificações">
-          🔔{naoLidas > 0 && <span className="badge">{naoLidas > 9 ? '9+' : naoLidas}</span>}
-        </NavLink>
-        <Link to="/conta" className="user-chip" title="Minha conta">
-          <span className="dot">{(user?.nome || '?').charAt(0).toUpperCase()}</span>
-          {user?.nome}
-        </Link>
-        <button className="ghost mini" title="Sair" onClick={() => { logout(); nav('/login') }}>Sair</button>
+        <div className="topbar-right">
+          <NavLink to="/notificacoes" className="bell" title="Notificações">
+            🔔{naoLidas > 0 && <span className="badge">{naoLidas > 9 ? '9+' : naoLidas}</span>}
+          </NavLink>
+          <Link to="/conta" className="user-chip" title="Minha conta">
+            <span className="dot">{(user?.nome || '?').charAt(0).toUpperCase()}</span>
+            {user?.nome}
+          </Link>
+          <button className="ghost mini" title="Sair" onClick={() => { logout(); nav('/login') }}>Sair</button>
+        </div>
       </header>
       <main className="container">
         <Outlet />
