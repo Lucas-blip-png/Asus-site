@@ -393,3 +393,19 @@ th, td { text-align: left; padding: 6px 6px; border-bottom: 1px solid var(--bord
 
 /* --- add-form: select e textarea acompanham os inputs --- */
 .add-form select, .add-form textarea { flex: 1 1 120px; min-width: 90px; margin: 0; }
+
+/* --- Login: separador "ou" + botao Google --- */
+.ou-sep { display: flex; align-items: center; gap: 10px; margin: 16px 0 12px; color: var(--muted); font-size: .78rem; }
+.ou-sep::before, .ou-sep::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.btn-google {
+  display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%;
+  padding: 10px 14px; border-radius: var(--radius-sm); text-decoration: none;
+  background: #fff; color: #1f1f1f; font-weight: 700; border: 1px solid #dadce0;
+  transition: filter .15s;
+}
+.btn-google:hover { filter: brightness(.96); text-decoration: none; }
+.btn-google .g {
+  width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center;
+  background: conic-gradient(from -45deg, #ea4335 0 25%, #fbbc05 0 50%, #34a853 0 75%, #4285f4 0);
+  color: #fff; font-weight: 900; font-size: .8rem;
+}

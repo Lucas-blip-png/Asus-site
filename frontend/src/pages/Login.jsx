@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth.jsx'
+import { api } from '../api.js'
 
 export default function Login() {
   const { login, registrar } = useAuth()
@@ -11,6 +12,23 @@ export default function Login() {
   const [senha, setSenha] = useState('dev12345')
   const [erro, setErro] = useState(null)
   const [carregando, setCarregando] = useState(false)
+  const [googleOn, setGoogleOn] = useState(false)
+
+  // Retorno do login social (Google): os tokens chegam no fragmento da URL.
+  useEffect(() => {
+    const hash = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : ''
+    const params = new URLSearchParams(hash)
+    const at = params.get('access_token')
+    const rt = params.get('refresh_token')
+    if (at && rt) {
+      localStorage.setItem('accessToken', at)
+      localStorage.setItem('refreshToken', rt)
+      window.location.replace('/') // recarrega para o AuthProvider ler o token
+      return
+    }
+    if (params.get('erro')) setErro('Falha no login social: ' + params.get('erro'))
+    api('/api/auth/config', { auth: false }).then((c) => setGoogleOn(!!c?.googleOAuth)).catch(() => {})
+  }, [])
 
   async function submit(e) {
     e.preventDefault()
@@ -60,6 +78,14 @@ export default function Login() {
             </button>
           </div>
         </form>
+        {googleOn && (
+          <>
+            <div className="ou-sep"><span>ou</span></div>
+            <a className="btn-google" href="/oauth2/authorization/google">
+              <span className="g">G</span> Entrar com Google
+            </a>
+          </>
+        )}
       </div>
       <p className="muted" style={{ textAlign: 'center', fontSize: '.8rem' }}>
         Dev: dev@asus.local / dev12345

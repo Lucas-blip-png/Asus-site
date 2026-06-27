@@ -8,6 +8,8 @@ import com.asus.platform.web.dto.RefreshRequest;
 import com.asus.platform.web.dto.RegisterRequest;
 import com.asus.platform.web.dto.UsuarioResponse;
 import jakarta.validation.Valid;
+import java.util.Map;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -19,8 +21,17 @@ public class AuthController {
 
     private final AuthService service;
 
+    @Value("${asus.oauth.google.enabled:false}")
+    private boolean googleOAuth;
+
     public AuthController(AuthService service) {
         this.service = service;
+    }
+
+    /** Config pública pro frontend (ex.: mostrar ou não o botão "Entrar com Google"). */
+    @GetMapping("/config")
+    public Map<String, Object> config() {
+        return Map.of("googleOAuth", googleOAuth);
     }
 
     @PostMapping("/register")
