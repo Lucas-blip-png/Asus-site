@@ -1,14 +1,15 @@
 :root {
-  --bg: #1c1813;
-  --bg-2: #15110c;
-  --bg-3: #0f0c08;
-  --panel: #2a231a;
-  --panel-2: #332a1f;
-  --panel-3: #3a3024;
-  --border: #3d3225;
-  --border-2: #4d4030;
+  /* Tema escuro estilo CRIS (quase preto), mantendo o dourado do ASUS */
+  --bg: #0e0c0a;
+  --bg-2: #080705;
+  --bg-3: #040302;
+  --panel: #171410;
+  --panel-2: #1f1b16;
+  --panel-3: #28231c;
+  --border: #2b261f;
+  --border-2: #3a342a;
   --text: #f3ece0;
-  --muted: #b0a187;
+  --muted: #9a8f7d;
   --gold: #e0a82e;
   --gold-2: #c98f1f;
   --gold-3: #f4c451;
@@ -19,15 +20,15 @@
   --fumble: #e3534a;
   --radius: 12px;
   --radius-sm: 8px;
-  --shadow: 0 6px 20px rgba(0,0,0,.35);
-  --shadow-lg: 0 14px 40px rgba(0,0,0,.5);
+  --shadow: 0 6px 20px rgba(0,0,0,.45);
+  --shadow-lg: 0 16px 44px rgba(0,0,0,.6);
 }
 
 * { box-sizing: border-box; }
 body {
   margin: 0;
   background:
-    radial-gradient(1200px 600px at 50% -200px, rgba(224,168,46,.07), transparent 70%),
+    radial-gradient(1100px 520px at 50% -240px, rgba(224,168,46,.06), transparent 70%),
     var(--bg);
   color: var(--text);
   font-family: system-ui, "Segoe UI", Roboto, sans-serif;
@@ -41,60 +42,64 @@ a:hover { text-decoration: underline; }
 .error { color: var(--vida); font-size: .85rem; }
 .stat { font-variant-numeric: tabular-nums; }
 
-/* ---------------- Top bar (dourada, fixa, com linha de brilho) ---------------- */
+/* ---------------- Top bar estilo CRIS: dark, links centralizados, linha de brilho ---------------- */
 .topbar {
   position: sticky; top: 0; z-index: 30;
-  display: flex; align-items: center; gap: 26px;
-  padding: 12px 26px;
-  background: linear-gradient(180deg, var(--gold-3), var(--gold-2));
-  color: #1c1813;
-  box-shadow: 0 4px 18px rgba(0,0,0,.45);
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 18px;
+  padding: 12px 30px;
+  background: linear-gradient(180deg, #14110d, #0b0907);
+  color: var(--text);
+  box-shadow: 0 6px 24px rgba(0,0,0,.55);
 }
 .topbar::after {
-  content: ""; position: absolute; left: 0; right: 0; bottom: -3px; height: 3px;
-  background: linear-gradient(90deg, transparent, var(--gold-3), #fff3d6, var(--gold-3), transparent);
+  content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold-2), var(--gold-3), #fff3d6, var(--gold-3), var(--gold-2), transparent);
   background-size: 200% 100%;
-  animation: shimmer 4s linear infinite;
+  animation: shimmer 5s linear infinite;
   opacity: .9;
 }
 @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
 
 .brand {
-  display: flex; align-items: center; gap: 9px;
-  font-weight: 900; letter-spacing: 2px; font-size: 1.5rem; color: #fff;
-  font-style: italic; text-shadow: 0 1px 0 rgba(0,0,0,.25);
+  display: flex; align-items: center; gap: 10px; justify-self: start;
+  font-weight: 900; letter-spacing: 3px; font-size: 1.35rem; font-style: italic;
+  background: linear-gradient(180deg, #fff6df, var(--gold));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
 }
 .brand:hover { text-decoration: none; }
 .brand .brand-mark {
-  width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center;
-  background: #1c1813; color: var(--gold-3); font-style: normal; font-size: .95rem;
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,.18);
+  width: 32px; height: 32px; border-radius: 9px; display: grid; place-items: center;
+  background: linear-gradient(180deg, var(--gold-3), var(--gold-2));
+  color: #1c1813; -webkit-text-fill-color: #1c1813;
+  font-style: normal; font-size: 1rem; font-weight: 900;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.15), 0 2px 8px rgba(0,0,0,.5);
 }
-.topnav { display: flex; gap: 22px; }
+.topnav { display: flex; gap: 30px; justify-self: center; }
 .topnav a {
-  position: relative; color: #fff; font-weight: 700; opacity: .85; padding: 4px 2px;
-  transition: opacity .15s;
+  position: relative; color: var(--text); font-weight: 600; font-size: 1.05rem; opacity: .7;
+  letter-spacing: .3px; padding: 6px 2px; transition: opacity .15s, color .15s;
 }
 .topnav a:hover { opacity: 1; text-decoration: none; }
-.topnav a.ativo { opacity: 1; }
+.topnav a.ativo { opacity: 1; color: var(--gold-3); }
 .topnav a.ativo::after {
-  content: ""; position: absolute; left: 0; right: 0; bottom: -2px; height: 2px;
-  background: #fff; border-radius: 2px;
+  content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px;
+  background: var(--gold); border-radius: 2px;
 }
+.topbar-right { display: flex; align-items: center; gap: 12px; justify-self: end; }
 .user-chip {
-  display: flex; align-items: center; gap: 9px; color: #1c1813; font-weight: 800; cursor: pointer;
-  padding: 5px 10px 5px 5px; border-radius: 999px; background: rgba(0,0,0,.12);
-  transition: background .15s;
+  display: flex; align-items: center; gap: 9px; color: var(--text); font-weight: 700; cursor: pointer;
+  padding: 5px 12px 5px 5px; border-radius: 999px; background: rgba(255,255,255,.05);
+  border: 1px solid var(--border-2); transition: background .15s, border-color .15s;
 }
-.user-chip:hover { background: rgba(0,0,0,.22); }
+.user-chip:hover { background: rgba(255,255,255,.09); border-color: var(--gold-2); }
 .user-chip .dot {
-  width: 30px; height: 30px; border-radius: 50%; border: 2px solid #1c1813;
-  display: grid; place-items: center; font-size: .85rem; background: var(--bg); color: var(--gold-3);
+  width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--gold-2);
+  display: grid; place-items: center; font-size: .85rem; background: var(--bg-2); color: var(--gold-3);
   overflow: hidden;
 }
 .user-chip .dot img { width: 100%; height: 100%; object-fit: cover; }
 
-.container { max-width: 1140px; margin: 0 auto; padding: 26px 26px 80px; }
+.container { max-width: 1240px; margin: 0 auto; padding: 28px 26px 90px; }
 
 /* ---------------- Cabeçalho de página (título + contador + ações) ---------------- */
 .page-head {
@@ -118,7 +123,7 @@ a:hover { text-decoration: underline; }
 
 /* ---------------- Cards ---------------- */
 .card {
-  background: linear-gradient(180deg, var(--panel), var(--panel-2));
+  background: var(--panel);
   border: 1px solid var(--border);
   border-radius: var(--radius); padding: 16px 18px; margin-bottom: 16px;
   box-shadow: var(--shadow);
@@ -263,12 +268,13 @@ th, td { text-align: left; padding: 6px 6px; border-bottom: 1px solid var(--bord
 .pericias td { padding: 3px 4px; font-size: .82rem; }
 .pericias .step { display: inline-flex; gap: 4px; align-items: center; }
 
-/* Abas */
-.abas { display: flex; gap: 14px; border-bottom: 1px solid var(--border); margin-bottom: 12px; flex-wrap: wrap; }
+/* Abas estilo CRIS (maiusculas, espacadas, underline dourado) */
+.abas { display: flex; gap: 26px; border-bottom: 1px solid var(--border); margin-bottom: 14px; flex-wrap: wrap; }
 .abas button { background: none; color: var(--muted); border: 0; border-bottom: 2px solid transparent;
-  padding: 6px 2px; border-radius: 0; font-weight: 700; }
+  padding: 9px 2px; border-radius: 0; font-weight: 700; font-size: .82rem;
+  text-transform: uppercase; letter-spacing: 1.2px; }
 .abas button:hover { filter: none; color: var(--text); }
-.abas button.ativo { color: var(--gold); border-bottom-color: var(--gold); }
+.abas button.ativo { color: var(--gold-3); border-bottom-color: var(--gold); }
 .item-card { background: var(--panel-2); border: 1px solid var(--border); border-radius: var(--radius-sm);
   padding: 8px 10px; margin-bottom: 8px; }
 .item-card .t { font-weight: 700; }
@@ -343,18 +349,21 @@ th, td { text-align: left; padding: 6px 6px; border-bottom: 1px solid var(--bord
 .home-card .muted { font-size: .82rem; }
 
 /* --- Nav: sino de notificacoes + responsivo --- */
-.bell { position: relative; color: #1c1813; font-size: 1.15rem; text-decoration: none; padding: 2px 4px; }
-.bell:hover { text-decoration: none; filter: brightness(.8); }
+.bell { position: relative; color: var(--text); opacity: .8; font-size: 1.15rem; text-decoration: none; padding: 2px 4px; }
+.bell:hover { text-decoration: none; opacity: 1; color: var(--gold-3); }
 .bell .badge {
   position: absolute; top: -4px; right: -6px; min-width: 16px; height: 16px; padding: 0 4px;
   border-radius: 999px; background: var(--vida); color: #fff; font-size: .64rem; font-weight: 800;
-  display: grid; place-items: center; box-shadow: 0 0 0 2px var(--gold-2);
+  display: grid; place-items: center; box-shadow: 0 0 0 2px #0b0907;
 }
 .user-chip, .user-chip:hover { text-decoration: none; }
 
-@media (max-width: 820px) {
-  .topbar { flex-wrap: wrap; gap: 12px 16px; padding: 10px 16px; }
-  .topnav { gap: 14px; order: 3; width: 100%; overflow-x: auto; }
+@media (max-width: 860px) {
+  .topbar { grid-template-columns: 1fr auto; gap: 10px 14px; padding: 10px 16px; }
+  .brand { font-size: 1.2rem; }
+  .topnav { grid-column: 1 / -1; justify-self: stretch; gap: 18px; order: 3;
+    overflow-x: auto; padding-bottom: 2px; }
+  .topbar-right { gap: 8px; }
   .container { padding: 18px 16px 70px; }
 }
 
