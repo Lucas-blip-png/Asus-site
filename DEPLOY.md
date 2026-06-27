@@ -51,7 +51,17 @@ no Spring Boot e roda o `.jar`. O backend serve a API, o WebSocket e a SPA na
    `/app/uploads`. Depois adicione a variável `ASUS_UPLOADS_DIR=/app/uploads`.
    Sem volume, os arquivos enviados somem a cada novo deploy.
 
-### 6. Pronto
+### 6. Integrações externas (opcional)
+As três já estão implementadas e desligadas por padrão — é só adicionar variáveis.
+Guia completo em **[`INTEGRACOES.md`](INTEGRACOES.md)**. Resumo:
+
+| Integração | Variáveis-chave | Cadastro externo |
+|---|---|---|
+| **Storage S3/R2/GCS** | `ASUS_STORAGE_TIPO=s3`, `ASUS_S3_BUCKET/REGION/ENDPOINT/ACCESS_KEY/SECRET_KEY` | bucket + chaves no provedor (dispensa o Volume de uploads) |
+| **Pagamento Stripe** | `ASUS_PAYMENTS_PROVIDER=stripe`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `ASUS_PAYMENTS_SUCCESS_URL/CANCEL_URL` | Webhook → `https://SEU-APP/api/webhooks/stripe` (evento `checkout.session.completed`) |
+| **Login Google** | `ASUS_OAUTH_GOOGLE_ENABLED=true`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Redirect URI → `https://SEU-APP/login/oauth2/code/google` |
+
+### 7. Pronto
 9. Abra a URL pública. Login inicial semeado: **`dev@asus.local` / `dev12345`**.
    **Troque/remova esse usuário** antes de divulgar.
 

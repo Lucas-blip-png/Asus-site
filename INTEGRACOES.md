@@ -1,40 +1,28 @@
-# Integrações externas — só plugar credenciais
+# Integrações externas — já implementadas, só plugar credenciais
 
-As três pendências que dependem de credenciais/infra do cliente já têm o **seam
-pronto no código**. O padrão é sempre o modo "sem credencial" (local / manual /
-sem login social), então o app roda e os 22 testes passam sem nada configurado.
-Para ativar cada integração: adicione a dependência (quando indicado), defina as
-variáveis de ambiente e — onde houver — cole a classe de implementação.
+As três integrações estão **implementadas no código** e ficam **atrás de flags**
+(`@ConditionalOnProperty`). O padrão é sempre o modo sem credencial
+(local / manual / login social desligado), então o app roda e os **22 testes
+passam** sem nada configurado. As dependências (AWS SDK S3, Stripe, Spring
+OAuth2 Client) **já estão no `pom.xml`**. Para ativar: defina as variáveis de
+ambiente. Nenhuma classe nova é necessária.
 
-| Integração | Padrão (já ativo) | Ativar com |
-|-----------|-------------------|-----------|
-| Storage de assets | `ArmazenamentoLocal` (disco) | `asus.storage.tipo=s3` + classe `ArmazenamentoS3` |
-| Pagamento | `GatewayManual` (no-op) | `asus.payments.provider=stripe` + classe `GatewayStripe` |
-| Login Google | desligado | `spring-boot-starter-oauth2-client` + config OAuth2 |
+| Integração | Padrão (ativo) | Ativar com | Classe |
+|-----------|----------------|-----------|--------|
+| Storage de assets | `ArmazenamentoLocal` | `ASUS_STORAGE_TIPO=s3` | `ArmazenamentoS3` |
+| Pagamento | `GatewayManual` | `ASUS_PAYMENTS_PROVIDER=stripe` | `GatewayStripe` + `StripeWebhookController` |
+| Login Google | desligado | `ASUS_OAUTH_GOOGLE_ENABLED=true` | `GoogleOAuthConfig` + `OAuth2SuccessHandler` |
 
-As variáveis estão modeladas em [`.env.example`](.env.example) e mapeadas em
+Variáveis modeladas em [`.env.example`](.env.example) e mapeadas em
 [`application.yml`](asus-platform/src/main/resources/application.yml).
 
 ---
 
 ## 1. Storage em nuvem (S3 / Cloudflare R2 / GCS)
 
-O `AssetService` já depende da interface
-[`ArmazenamentoAssets`](asus-platform/src/main/java/com/asus/platform/service/storage/ArmazenamentoAssets.java).
-Hoje o bean ativo é `ArmazenamentoLocal`. Para nuvem:
+`AssetService` já usa a interface `ArmazenamentoAssets`. Com `ASUS_STORAGE_TIPO=s3`,
+o bean ativo passa a ser `ArmazenamentoS3` (AWS SDK v2, S3-compatível). **Nada mais muda.**
 
-### 1.1 Dependência (pom.xml do `asus-platform`)
-O AWS SDK v2 fala com S3, **Cloudflare R2** e **GCS** (ambos S3-compatíveis via endpoint):
-
-```xml
-<dependency>
-    <groupId>software.amazon.awssdk</groupId>
-    <artifactId>s3</artifactId>
-    <version>2.31.6</version>
-</dependency>
-```
-
-### 1.2 Variáveis (.env)
 ```
 ASUS_STORAGE_TIPO=s3
 ASUS_S3_BUCKET=meu-bucket
@@ -42,261 +30,86 @@ ASUS_S3_REGION=auto                 # AWS: us-east-1, etc.
 ASUS_S3_ENDPOINT=https://<accountid>.r2.cloudflarestorage.com   # AWS S3: deixe vazio
 ASUS_S3_ACCESS_KEY=...
 ASUS_S3_SECRET_KEY=...
-ASUS_S3_PUBLIC_BASE_URL=https://cdn.seu-dominio.com   # opcional (CDN)
 ```
 
-### 1.3 Implementação (criar o arquivo)
-`asus-platform/src/main/java/com/asus/platform/service/storage/ArmazenamentoS3.java`:
-
-```java
-package com.asus.platform.service.storage;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.util.UUID;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.stereotype.Component;
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
-import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
-import software.amazon.awssdk.core.ResponseBytes;
-import software.amazon.awssdk.core.sync.RequestBody;
-import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-
-@Component
-@ConditionalOnProperty(name = "asus.storage.tipo", havingValue = "s3")
-public class ArmazenamentoS3 implements ArmazenamentoAssets {
-
-    private final S3Client s3;
-    private final String bucket;
-
-    public ArmazenamentoS3(
-            @Value("${asus.storage.s3.bucket}") String bucket,
-            @Value("${asus.storage.s3.region:auto}") String region,
-            @Value("${asus.storage.s3.endpoint:}") String endpoint,
-            @Value("${asus.storage.s3.access-key}") String accessKey,
-            @Value("${asus.storage.s3.secret-key}") String secretKey) {
-        this.bucket = bucket;
-        var builder = S3Client.builder()
-                .region(Region.of(region))
-                .credentialsProvider(StaticCredentialsProvider.create(
-                        AwsBasicCredentials.create(accessKey, secretKey)));
-        if (endpoint != null && !endpoint.isBlank()) {
-            builder.endpointOverride(URI.create(endpoint)).forcePathStyle(true); // R2/GCS/MinIO
-        }
-        this.s3 = builder.build();
-    }
-
-    @Override
-    public String gravar(Long organizacaoId, String nomeOriginal, InputStream conteudo, long tamanho)
-            throws IOException {
-        String key = organizacaoId + "/" + UUID.randomUUID() + "_" + nomeOriginal;
-        s3.putObject(PutObjectRequest.builder().bucket(bucket).key(key).build(),
-                RequestBody.fromInputStream(conteudo, tamanho));
-        return key; // guardamos a key como storagePath
-    }
-
-    @Override
-    public byte[] ler(String storagePath) throws IOException {
-        ResponseBytes<?> obj = s3.getObjectAsBytes(
-                GetObjectRequest.builder().bucket(bucket).key(storagePath).build());
-        return obj.asByteArray();
-    }
-
-    @Override
-    public void apagar(String storagePath) {
-        s3.deleteObject(DeleteObjectRequest.builder().bucket(bucket).key(storagePath).build());
-    }
-}
-```
-
-Pronto: com `ASUS_STORAGE_TIPO=s3`, o Spring desativa `ArmazenamentoLocal`
-(`matchIfMissing`) e usa o `ArmazenamentoS3`. Nenhuma outra mudança é necessária —
-`AssetService` continua igual.
-
-> **Cloudflare R2:** crie um bucket + token R2, use o endpoint
-> `https://<accountid>.r2.cloudflarestorage.com` e `region=auto`.
-> **GCS:** ative a "interoperability" (chaves HMAC) e use o endpoint
-> `https://storage.googleapis.com`.
+- **Cloudflare R2:** crie bucket + token R2; endpoint `https://<accountid>.r2.cloudflarestorage.com`, `region=auto`.
+- **GCS:** ative a *interoperability* (chaves HMAC) e use `https://storage.googleapis.com`.
+- Com S3 ativo, o volume de uploads do Railway deixa de ser necessário.
 
 ---
 
-## 2. Gateway de pagamento (Stripe / Mercado Pago)
+## 2. Pagamento (Stripe)
 
-O seam é a interface
-[`GatewayPagamento`](asus-platform/src/main/java/com/asus/platform/service/pagamento/GatewayPagamento.java)
-(padrão `GatewayManual`). A ativação do plano em si já existe e é reaproveitada:
-`AssinaturaService.definirPlano(orgId, plano)`. O fluxo recomendado é
-**checkout → webhook → `definirPlano`**.
+Com `ASUS_PAYMENTS_PROVIDER=stripe`, o `GatewayStripe` cria uma sessão de
+Checkout e o `StripeWebhookController` (`/api/webhooks/stripe`) **ativa o plano só
+após o pagamento confirmado**.
 
-### 2.1 Dependência (Stripe)
-```xml
-<dependency>
-    <groupId>com.stripe</groupId>
-    <artifactId>stripe-java</artifactId>
-    <version>28.2.0</version>
-</dependency>
-```
-
-### 2.2 Variáveis (.env)
 ```
 ASUS_PAYMENTS_PROVIDER=stripe
+ASUS_PAYMENTS_CURRENCY=brl
 ASUS_PAYMENTS_SUCCESS_URL=https://SEU-APP/conta?pago=1
 ASUS_PAYMENTS_CANCEL_URL=https://SEU-APP/conta?cancelado=1
 STRIPE_SECRET_KEY=sk_live_...
 STRIPE_WEBHOOK_SECRET=whsec_...
 ```
 
-### 2.3 Implementação (criar o arquivo)
-`asus-platform/src/main/java/com/asus/platform/service/pagamento/GatewayStripe.java`:
+**Fluxo (já implementado):**
+1. Frontend chama `POST /api/organizacoes/{orgId}/checkout?plano=PRO` → recebe `url` do Stripe e redireciona.
+2. Usuário paga no Stripe.
+3. Stripe chama `POST /api/webhooks/stripe` → o handler valida a assinatura e ativa o plano via `AssinaturaService.definirPlano`.
 
-```java
-package com.asus.platform.service.pagamento;
+**Configurar no Stripe Dashboard:** *Developers → Webhooks → Add endpoint* →
+`https://SEU-APP/api/webhooks/stripe`, evento `checkout.session.completed`; copie o
+*Signing secret* para `STRIPE_WEBHOOK_SECRET`.
 
-import com.asus.platform.domain.Plano;
-import com.stripe.Stripe;
-import com.stripe.model.checkout.Session;
-import com.stripe.param.checkout.SessionCreateParams;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.stereotype.Component;
+**Importante (regras de segurança aplicadas):**
+- Planos **pagos nunca** são ativados no `/checkout` — só pelo webhook (pagamento real). Apenas `FREE` ativa direto.
+- No modo `manual` (padrão), planos pagos são ativados por um admin via `PUT /api/organizacoes/{orgId}/assinatura`.
+- O webhook usa `Webhook.constructEvent` (valida HMAC + tolerância de 5 min contra replay); `definirPlano` é idempotente.
+- Ajuste os preços em `GatewayStripe.precoCentavos(...)`.
 
-@Component
-@ConditionalOnProperty(name = "asus.payments.provider", havingValue = "stripe")
-public class GatewayStripe implements GatewayPagamento {
-
-    public GatewayStripe(@Value("${asus.payments.stripe.secret-key}") String secretKey) {
-        Stripe.apiKey = secretKey;
-    }
-
-    @Override
-    public Checkout criarCheckout(Long organizacaoId, Plano plano, String urlSucesso, String urlCancelamento) {
-        try {
-            SessionCreateParams params = SessionCreateParams.builder()
-                    .setMode(SessionCreateParams.Mode.SUBSCRIPTION)
-                    .setSuccessUrl(urlSucesso)
-                    .setCancelUrl(urlCancelamento)
-                    .putMetadata("organizacaoId", String.valueOf(organizacaoId))
-                    .putMetadata("plano", plano.name())
-                    // .addLineItem(... priceId do plano ...)
-                    .build();
-            Session s = Session.create(params);
-            return new Checkout(s.getUrl(), s.getId(), false);
-        } catch (Exception e) {
-            throw new IllegalStateException("Falha ao criar checkout Stripe: " + e.getMessage(), e);
-        }
-    }
-
-    @Override
-    public String provedor() { return "stripe"; }
-}
-```
-
-### 2.4 Endpoints (criar o controller)
-`PagamentoController` — um para iniciar o checkout e outro para o webhook que
-confirma e ativa o plano:
-
-```java
-@RestController
-@RequestMapping("/api")
-public class PagamentoController {
-    private final GatewayPagamento gateway;
-    private final AssinaturaService assinaturaService;
-    @Value("${asus.payments.success-url:}") String sucesso;
-    @Value("${asus.payments.cancel-url:}")  String cancel;
-    @Value("${asus.payments.stripe.webhook-secret:}") String webhookSecret;
-
-    public PagamentoController(GatewayPagamento g, AssinaturaService a) { this.gateway = g; this.assinaturaService = a; }
-
-    @PostMapping("/organizacoes/{orgId}/checkout")
-    public GatewayPagamento.Checkout checkout(@PathVariable Long orgId, @RequestParam Plano plano) {
-        return gateway.criarCheckout(orgId, plano, sucesso, cancel);
-    }
-
-    // Stripe: valide a assinatura com Webhook.constructEvent(payload, sigHeader, webhookSecret)
-    @PostMapping("/webhooks/stripe")
-    public ResponseEntity<String> webhook(@RequestBody String payload,
-                                          @RequestHeader("Stripe-Signature") String sig) {
-        // 1) Webhook.constructEvent(payload, sig, webhookSecret)
-        // 2) se "checkout.session.completed": ler metadata organizacaoId/plano
-        // 3) assinaturaService.definirPlano(orgId, Plano.valueOf(plano))
-        return ResponseEntity.ok("ok");
-    }
-}
-```
-
-Lembre de liberar `/api/webhooks/**` no `SecurityConfig` (`permitAll`).
-
-> **Mercado Pago:** análogo — dependência `com.mercadopago:sdk-java`,
+> **Mercado Pago** (alternativa, não incluída): dependência `com.mercadopago:sdk-java`,
 > `ASUS_PAYMENTS_PROVIDER=mercadopago`, crie `GatewayMercadoPago` com
-> `@ConditionalOnProperty(havingValue="mercadopago")` usando `MERCADOPAGO_ACCESS_TOKEN`,
-> e trate o webhook de `payment` chamando `definirPlano`.
+> `@ConditionalOnProperty(name="asus.payments.provider", havingValue="mercadopago")`
+> usando `MERCADOPAGO_ACCESS_TOKEN`, e um webhook que chame `definirPlano` na confirmação.
 
 ---
 
 ## 3. Login social Google (OAuth2)
 
-O Spring Security já está configurado (Fase 7, JWT). Para somar "Entrar com Google":
+Implementado e desligado por padrão. Com a flag ligada, surge o botão
+"Entrar com Google" no login (o frontend consulta `GET /api/auth/config`), e o
+`OAuth2SuccessHandler` emite **o mesmo par de tokens JWT** do login normal.
 
-### 3.1 Dependência
-```xml
-<dependency>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-oauth2-client</artifactId>
-</dependency>
-```
-
-### 3.2 Variáveis (.env)
 ```
 ASUS_OAUTH_GOOGLE_ENABLED=true
 GOOGLE_CLIENT_ID=...apps.googleusercontent.com
 GOOGLE_CLIENT_SECRET=...
 ```
-No Google Cloud Console → *APIs & Services → Credentials → OAuth client ID (Web)*,
-e cadastre o redirect: `https://SEU-APP/login/oauth2/code/google`.
 
-### 3.3 Registro do provedor (application.yml)
-```yaml
-spring:
-  security:
-    oauth2:
-      client:
-        registration:
-          google:
-            client-id: ${GOOGLE_CLIENT_ID:}
-            client-secret: ${GOOGLE_CLIENT_SECRET:}
-            scope: openid,email,profile
-```
+**Configurar no Google Cloud Console** (*APIs & Services → Credentials → OAuth client ID → Web*):
+- **Authorized redirect URI:** `https://SEU-APP/login/oauth2/code/google`
+- (Single-service: o backend serve a SPA, então a mesma origem cobre tudo.)
 
-### 3.4 Habilitar no SecurityConfig
-Dentro do `securityFilterChain`, adicione (guardado pela flag para não exigir a
-dependência quando desligado):
-
-```java
-@Value("${asus.oauth.google.enabled:false}") boolean googleEnabled;
-// ...
-if (googleEnabled) {
-    http.oauth2Login(o -> o.successHandler(oAuth2SuccessHandler));
-}
-```
-
-`OAuth2SuccessHandler`: após o login Google, encontre/registre o usuário pelo
-e-mail e **emita o mesmo par de tokens JWT** já usado no login normal
-(`JwtService` + o fluxo do `AuthService`), redirecionando para o frontend com o
-token (ex.: `#access_token=...`). Assim o resto do app continua usando JWT sem
-saber que a origem foi o Google.
+**Nota de segurança:** os tokens chegam ao SPA no *fragmento* da URL
+(`#access_token=...`) e são guardados em `localStorage` — **mesma postura que o
+login normal** já adota. O frontend faz `location.replace('/')` em seguida para
+não deixar o token no histórico navegável. Para endurecer (cookies `HttpOnly`
++ *code-exchange*), seria preciso migrar todo o esquema de auth do app — fica
+como evolução futura.
 
 ---
 
+## Produção — checklist
+
+- **`ASUS_SECURITY_ENFORCE=true`** (obrigatório): com isso todo `/api/**` exige
+  JWT — incluindo `/checkout` e `PUT /assinatura`. (Em dev, `enforce=false` deixa
+  a API aberta por design.) As rotas públicas continuam: `auth/{login,register,refresh,config}`,
+  `legal`, `sistemas`, `webhooks`, `oauth2`.
+- Defina `ASUS_JWT_SECRET` (≥ 32 bytes) e `ASUS_CORS_ORIGINS` com a URL pública.
+- Veja o passo a passo de deploy em [`DEPLOY.md`](DEPLOY.md).
+
 ## Resumo
 
-- **Nada quebra sem credenciais:** os padrões (`local`, `manual`, Google off)
-  mantêm o app e os testes verdes.
-- **Ativar = variáveis + (quando indicado) dependência + 1 classe**; o `seam` no
-  código já existe e o resto da aplicação não muda.
-- Modelo de variáveis: [`.env.example`](.env.example).
+- **Nada quebra sem credenciais:** padrões `local`/`manual`/Google-off → app e 22 testes verdes.
+- **Ativar = só variáveis de ambiente** (deps e classes já estão no repo).
