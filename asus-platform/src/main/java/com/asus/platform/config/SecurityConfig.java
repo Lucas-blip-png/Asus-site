@@ -4,6 +4,7 @@ import com.asus.platform.security.JwtAuthFilter;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Arrays;
 import java.util.List;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,6 +32,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
+    private final ObjectProvider<OAuth2SuccessHandler> oauthSuccessHandler;
 
     @Value("${asus.security.enforce:false}")
     private boolean enforce;
@@ -38,8 +40,13 @@ public class SecurityConfig {
     @Value("${asus.cors.allowed-origins:*}")
     private String allowedOrigins;
 
-    public SecurityConfig(JwtAuthFilter jwtAuthFilter) {
+    @Value("${asus.oauth.google.enabled:false}")
+    private boolean googleEnabled;
+
+    public SecurityConfig(JwtAuthFilter jwtAuthFilter,
+                          ObjectProvider<OAuth2SuccessHandler> oauthSuccessHandler) {
         this.jwtAuthFilter = jwtAuthFilter;
+        this.oauthSuccessHandler = oauthSuccessHandler;
     }
 
     @Bean
@@ -56,9 +63,11 @@ public class SecurityConfig {
                 .headers(h -> h.frameOptions(f -> f.disable())) // H2 console
                 .authorizeHttpRequests(reg -> {
                     reg.requestMatchers("/api/auth/login", "/api/auth/register",
-                            "/api/auth/refresh").permitAll();
+                            "/api/auth/refresh", "/api/auth/config").permitAll();
                     reg.requestMatchers("/api/auth/me").authenticated();
                     reg.requestMatchers("/api/legal/**", "/api/sistemas/**").permitAll();
+                    // Webhooks (ex.: Stripe) e o fluxo OAuth2 do Google sao publicos.
+                    reg.requestMatchers("/api/webhooks/**", "/oauth2/**", "/login/oauth2/**").permitAll();
                     reg.requestMatchers("/ws/**", "/ws-sockjs/**", "/h2-console/**", "/error").permitAll();
                     if (enforce) {
                         reg.requestMatchers("/api/**").authenticated();
@@ -70,6 +79,12 @@ public class SecurityConfig {
                 .exceptionHandling(e -> e.authenticationEntryPoint(
                         (req, res, ex) -> res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Nao autenticado")))
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+
+        // "Entrar com Google": só ativa quando asus.oauth.google.enabled=true
+        // (e o ClientRegistrationRepository do GoogleOAuthConfig existe).
+        if (googleEnabled) {
+            http.oauth2Login(o -> o.successHandler(oauthSuccessHandler.getObject()));
+        }
         return http.build();
     }
 
