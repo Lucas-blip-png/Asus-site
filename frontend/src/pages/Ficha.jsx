@@ -134,6 +134,7 @@ export default function Ficha() {
   const [nivelInput, setNivelInput] = useState('0')
   const [xpInput, setXpInput] = useState('0')
   const [statusInput, setStatusInput] = useState({ pvAtual: 0, pmAtual: 0, peAtual: 0 })
+  const [editStatus, setEditStatus] = useState(null)
   const [levelUp, setLevelUp] = useState(null)
   const [habChosen, setHabChosen] = useState([])
   const [habDisp, setHabDisp] = useState([])
@@ -212,6 +213,33 @@ export default function Ficha() {
     try {
       const novo = Math.max(0, Number(statusInput[campo]) || 0)
       await api(`/api/personagens/${id}/status`, { method: 'PATCH', body: { [campo]: novo } })
+      carregar()
+    } catch (e) { setErro(e.message) }
+  }
+  function abrirEditStatus(k, rot) {
+    setEditStatus({ k, rot, atual: p.status[k + 'Atual'], max: p.status[k + 'Max'] })
+  }
+  async function salvarEditStatus() {
+    if (!editStatus) return
+    const { k } = editStatus
+    try {
+      await api(`/api/personagens/${id}/status`, {
+        method: 'PATCH',
+        body: {
+          [k + 'Atual']: Math.max(0, Number(editStatus.atual) || 0),
+          [k + 'Max']: Math.max(1, Number(editStatus.max) || 1),
+        },
+      })
+      setEditStatus(null)
+      carregar()
+    } catch (e) { setErro(e.message) }
+  }
+  // Volta o teto a ser calculado automaticamente pelas regras (limpa o override).
+  async function resetStatusMax() {
+    if (!editStatus) return
+    try {
+      await api(`/api/personagens/${id}/status`, { method: 'PATCH', body: { [editStatus.k + 'Max']: 0 } })
+      setEditStatus(null)
       carregar()
     } catch (e) { setErro(e.message) }
   }
@@ -445,6 +473,39 @@ export default function Ficha() {
         </div>
       )}
 
+      {editStatus && (
+        <div className="modal" onClick={() => setEditStatus(null)}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 380 }}>
+            <div className="row">
+              <h2 style={{ margin: 0 }}>Editar {editStatus.rot}</h2>
+              <div className="spacer" />
+              <button className="ghost mini" onClick={() => setEditStatus(null)}>✕</button>
+            </div>
+            <div className="row" style={{ gap: 8, marginTop: 8 }}>
+              <div style={{ flex: 1 }}>
+                <label>Atual</label>
+                <input type="number" min="0" autoFocus value={editStatus.atual}
+                  onChange={(e) => setEditStatus((s) => ({ ...s, atual: e.target.value }))}
+                  onKeyDown={(e) => { if (e.key === 'Enter') salvarEditStatus() }} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label>Máximo (teto)</label>
+                <input type="number" min="1" value={editStatus.max}
+                  onChange={(e) => setEditStatus((s) => ({ ...s, max: e.target.value }))}
+                  onKeyDown={(e) => { if (e.key === 'Enter') salvarEditStatus() }} />
+              </div>
+            </div>
+            <p className="muted" style={{ fontSize: '.78rem', marginTop: 6 }}>
+              Mudar o teto fixa um valor manual. Use “Voltar ao automático” para recalcular pelas regras.
+            </p>
+            <div className="row" style={{ marginTop: 10, gap: 8 }}>
+              <button onClick={salvarEditStatus}>Salvar</button>
+              <button className="ghost" onClick={resetStatusMax}>Voltar ao automático</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {apagarOpen && (
         <div className="modal" onClick={() => setApagarOpen(false)}>
           <div className="modal-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 460 }}>
@@ -555,12 +616,16 @@ export default function Ficha() {
             const pct = max > 0 ? Math.min(100, Math.round((atual / max) * 100)) : 0
             return (
               <div key={k} className="recurso">
-                <div className="rec-rot">{rot}</div>
+                <div className="rec-rot">
+                  {rot}
+                  <button className="rec-edit" title="Editar valor e teto" onClick={() => abrirEditStatus(k, rot)}>✎</button>
+                </div>
                 <div className={`rec-bar ${cls}`}>
                   <span className="rec-fill" style={{ width: pct + '%' }} />
                   <button className="rec-step lg" title="-5" onClick={() => ajustar(k + 'Atual', -5)}>«</button>
                   <button className="rec-step" title="-1" onClick={() => ajustar(k + 'Atual', -1)}>‹</button>
-                  <b className="rec-val">{atual}/{max}</b>
+                  <b className="rec-val" title="Editar valor e teto" style={{ cursor: 'pointer' }}
+                    onClick={() => abrirEditStatus(k, rot)}>{atual}/{max}</b>
                   <button className="rec-step" title="+1" onClick={() => ajustar(k + 'Atual', +1)}>›</button>
                   <button className="rec-step lg" title="+5" onClick={() => ajustar(k + 'Atual', +5)}>»</button>
                 </div>

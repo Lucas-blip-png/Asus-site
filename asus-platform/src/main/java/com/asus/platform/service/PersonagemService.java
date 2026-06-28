@@ -208,15 +208,8 @@ public class PersonagemService {
         }
 
         ResultadoCalculo r = calculoService.calcular(p);
-        Status novo = r.status();
-        Status antigo = p.getStatus();
-        if (antigo != null) {
-            novo.setPvAtual(Math.min(antigo.getPvAtual(), novo.getPvMax()));
-            novo.setPmAtual(Math.min(antigo.getPmAtual(), novo.getPmMax()));
-            novo.setPeAtual(Math.min(antigo.getPeAtual(), novo.getPeMax()));
-        }
         p.setAtributosFinais(r.atributosFinais());
-        p.setStatus(novo);
+        aplicarStatus(p, r.status());
         p = personagemRepository.save(p);
 
         boolean subiuNivel = p.getNivel() > nivelAntigo;
@@ -239,8 +232,28 @@ public class PersonagemService {
 
     @Transactional
     public PersonagemResponse atualizarStatus(Long id, Integer pvAtual, Integer pmAtual, Integer peAtual) {
+        return atualizarStatus(id, pvAtual, pmAtual, peAtual, null, null, null);
+    }
+
+    @Transactional
+    public PersonagemResponse atualizarStatus(Long id, Integer pvAtual, Integer pmAtual, Integer peAtual,
+                                              Integer pvMax, Integer pmMax, Integer peMax) {
         Personagem p = carregar(id);
         var status = p.getStatus();
+
+        // Tetos manuais (override que persiste entre recalculos); valor <= 0 limpa o override.
+        if (pvMax != null) {
+            p.setPvMaxManual(pvMax > 0 ? pvMax : null);
+            if (pvMax > 0) { status.setPvMax(pvMax); if (status.getPvAtual() > pvMax) status.setPvAtual(pvMax); }
+        }
+        if (pmMax != null) {
+            p.setPmMaxManual(pmMax > 0 ? pmMax : null);
+            if (pmMax > 0) { status.setPmMax(pmMax); if (status.getPmAtual() > pmMax) status.setPmAtual(pmMax); }
+        }
+        if (peMax != null) {
+            p.setPeMaxManual(peMax > 0 ? peMax : null);
+            if (peMax > 0) { status.setPeMax(peMax); if (status.getPeAtual() > peMax) status.setPeAtual(peMax); }
+        }
 
         if (pvAtual != null && pvAtual != status.getPvAtual()) {
             auditoriaService.registrar(p.getOrganizacaoId(), p.getUsuarioId(), "STATUS_ALTERADO",
@@ -261,6 +274,20 @@ public class PersonagemService {
         p = personagemRepository.save(p);
         realtimeNotifier.statusPersonagem(p.getId(), StatusDto.de(p.getStatus()));
         return toResponse(p);
+    }
+
+    /** Aplica os tetos manuais (se houver) sobre o status recem-calculado e ajusta o atual ao teto. */
+    private void aplicarStatus(Personagem p, Status novo) {
+        if (p.getPvMaxManual() != null) novo.setPvMax(p.getPvMaxManual());
+        if (p.getPmMaxManual() != null) novo.setPmMax(p.getPmMaxManual());
+        if (p.getPeMaxManual() != null) novo.setPeMax(p.getPeMaxManual());
+        Status antigo = p.getStatus();
+        if (antigo != null) {
+            novo.setPvAtual(Math.min(antigo.getPvAtual(), novo.getPvMax()));
+            novo.setPmAtual(Math.min(antigo.getPmAtual(), novo.getPmMax()));
+            novo.setPeAtual(Math.min(antigo.getPeAtual(), novo.getPeMax()));
+        }
+        p.setStatus(novo);
     }
 
     /** Define XP e/ou nivel, sobe de nivel automaticamente pelo XP e devolve os ganhos (popup). */
@@ -291,15 +318,8 @@ public class PersonagemService {
         p.setNivel(nivelAlvo);
 
         ResultadoCalculo r = calculoService.calcular(p);
-        Status novo = r.status();
-        Status antigo = p.getStatus();
-        if (antigo != null) {
-            novo.setPvAtual(Math.min(antigo.getPvAtual(), novo.getPvMax()));
-            novo.setPmAtual(Math.min(antigo.getPmAtual(), novo.getPmMax()));
-            novo.setPeAtual(Math.min(antigo.getPeAtual(), novo.getPeMax()));
-        }
         p.setAtributosFinais(r.atributosFinais());
-        p.setStatus(novo);
+        aplicarStatus(p, r.status());
         p = personagemRepository.save(p);
 
         if (nivelAlvo != nivelAntes) {
