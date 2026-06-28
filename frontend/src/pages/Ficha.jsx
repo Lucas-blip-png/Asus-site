@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { api } from '../api.js'
 import Heptagono from '../components/Heptagono.jsx'
@@ -40,6 +40,18 @@ export default function Ficha() {
   const [novoItem, setNovoItem] = useState({ nome: '', categoria: 'GERAL', espacos: 1, quantidade: 1 })
   const [outros, setOutros] = useState([])
   const [novaPericia, setNovaPericia] = useState({ nome: '', atributo: 'FORCA' })
+  const [rolagem, setRolagem] = useState(null)
+  const rolTimer = useRef(null)
+
+  // Rola 1d20 + modificador (treino da perícia) e mostra o resultado.
+  function rolar(rotulo, mod = 0) {
+    const d = 1 + Math.floor(Math.random() * 20)
+    const total = d + (Number(mod) || 0)
+    setRolagem({ rotulo, d, mod: Number(mod) || 0, total, crit: d === 20, fumble: d === 1 })
+    clearTimeout(rolTimer.current)
+    rolTimer.current = setTimeout(() => setRolagem(null), 5000)
+  }
+  useEffect(() => () => clearTimeout(rolTimer.current), [])
 
   function aplicar(d) {
     setP(d)
@@ -341,19 +353,8 @@ export default function Ficha() {
             )
           })}
 
-          <div className="def-row">
-            <div className="escudo">{10 + (p.atributosFinais.agilidade || 0)}</div>
-            <div>
-              <div className="lbl">Defesa</div>
-              <div className="muted" style={{ fontSize: '.74rem' }}>10 + Agilidade</div>
-            </div>
-            <div className="spacer" />
-            <div style={{ textAlign: 'right' }}>
-              <div className="lbl">Limites</div>
-              <div className="muted" style={{ fontSize: '.74rem' }}>
-                Hab {p.limiteHabilidades} · Fei {p.limiteFeiticos} · Bên {p.limiteBencaos}
-              </div>
-            </div>
+          <div className="kv" style={{ marginTop: 12 }}>
+            <b>Limites</b><span>Hab {p.limiteHabilidades} · Fei {p.limiteFeiticos} · Bên {p.limiteBencaos}</span>
           </div>
         </div>
 
@@ -362,6 +363,7 @@ export default function Ficha() {
           <div className="row">
             <h2>Perícias</h2>
             <div className="spacer" />
+            <button className="mini ghost" title="Rolar um d20" onClick={() => rolar('d20', 0)}>🎲 d20</button>
             <button className="mini" onClick={() => salvar({ pericias: treino, periciasCustom: outros })}>Salvar</button>
           </div>
           <table className="pericias">
@@ -369,7 +371,13 @@ export default function Ficha() {
             <tbody>
               {p.pericias.filter((pe) => !pe.custom).map((pe) => (
                 <tr key={pe.codigo}>
-                  <td>{pe.nome}</td>
+                  <td>
+                    <span className="per-nome">
+                      <button className="d20-btn" title={`Rolar ${pe.nome}`}
+                        onClick={() => rolar(pe.nome, treino[pe.codigo] ?? 0)}>d20</button>
+                      {pe.nome}
+                    </span>
+                  </td>
                   <td className="muted">{pe.sigla}</td>
                   <td>
                     <span className="step">
@@ -385,7 +393,13 @@ export default function Ficha() {
                 const cap = 2 * ((p.atributosFinais[o.atributo.toLowerCase()]) || 0)
                 return (
                   <tr key={'outro-' + idx}>
-                    <td>{o.nome} <span className="tag">Outros</span></td>
+                    <td>
+                      <span className="per-nome">
+                        <button className="d20-btn" title={`Rolar ${o.nome}`}
+                          onClick={() => rolar(o.nome, o.treino)}>d20</button>
+                        {o.nome} <span className="tag">Outros</span>
+                      </span>
+                    </td>
                     <td className="muted">{siglaDe(o.atributo)}</td>
                     <td>
                       <span className="step">
@@ -579,6 +593,19 @@ export default function Ficha() {
           )}
         </div>
       </div>
+
+      {rolagem && (
+        <div className={`roll-toast ${rolagem.crit ? 'crit' : rolagem.fumble ? 'fumble' : ''}`}>
+          <div className="muted">{rolagem.rotulo}</div>
+          <div className="rt-total">
+            {rolagem.total}{rolagem.crit ? ' ✦' : ''}{rolagem.fumble ? ' ✗' : ''}
+          </div>
+          <div className="muted" style={{ fontSize: '.75rem' }}>
+            d20 ({rolagem.d}){rolagem.mod ? ` + ${rolagem.mod}` : ''}
+            {rolagem.crit ? ' · CRÍTICO!' : ''}{rolagem.fumble ? ' · FALHA!' : ''}
+          </div>
+        </div>
+      )}
     </>
   )
 }

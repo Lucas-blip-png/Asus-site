@@ -448,11 +448,13 @@ th, td { text-align: left; padding: 6px 6px; border-bottom: 1px solid var(--bord
 .rec-val { position: relative; z-index: 1; flex: 1; display: grid; place-items: center; font-weight: 900;
   color: #fff; font-variant-numeric: tabular-nums; text-shadow: 0 1px 3px rgba(0,0,0,.85); letter-spacing: .5px; }
 
-/* Defesa (escudo) + secundarios */
-.def-row { display: flex; align-items: center; gap: 14px; margin-top: 14px; flex-wrap: wrap; }
-.escudo { width: 52px; height: 58px; flex: 0 0 auto; display: grid; place-items: center;
-  font-weight: 900; font-size: 1.4rem; color: var(--gold-3);
-  background: radial-gradient(circle at 50% 32%, var(--panel-3), var(--bg-2));
+/* d20 ao lado das pericias (rolar) */
+.per-nome { display: inline-flex; align-items: center; gap: 8px; }
+.d20-btn {
+  flex: 0 0 auto; width: 26px; height: 26px; padding: 0; display: inline-grid; place-items: center;
+  cursor: pointer; line-height: 1; font-size: .56rem; font-weight: 900; letter-spacing: .2px;
+  color: var(--gold-3); background: linear-gradient(180deg, var(--panel-3), var(--panel));
   border: 1px solid var(--gold-2);
-  clip-path: polygon(50% 0, 100% 16%, 100% 60%, 50% 100%, 0 60%, 0 16%); }
-.def-row .lbl { font-size: .62rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); font-weight: 800; }
+  clip-path: polygon(50% 0, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
+}
+.d20-btn:hover { filter: brightness(1.2); }
