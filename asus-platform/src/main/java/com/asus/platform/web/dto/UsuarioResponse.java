@@ -7,11 +7,16 @@ public record UsuarioResponse(
         Long id,
         String nome,
         String email,
+        boolean dono,
         boolean anonimizado,
         LocalDateTime criadoEm) {
 
     public static UsuarioResponse de(Usuario u) {
-        return new UsuarioResponse(u.getId(), u.getNome(), u.getEmail(),
+        return de(u, false);
+    }
+
+    public static UsuarioResponse de(Usuario u, boolean dono) {
+        return new UsuarioResponse(u.getId(), u.getNome(), u.getEmail(), dono,
                 u.isAnonimizado(), u.getCriadoEm());
     }
 }

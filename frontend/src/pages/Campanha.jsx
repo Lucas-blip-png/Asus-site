@@ -278,7 +278,7 @@ export default function Campanha() {
   }, [id])
   // Anotações são privadas: carrega via endpoint gateado, só se for o mestre.
   useEffect(() => {
-    const mestre = !!user && campanha?.mestreId === user.id
+    const mestre = !!user && (campanha?.mestreId === user.id || user.dono)
     if (mestre) {
       api(`/api/campanhas/${id}/anotacoes?usuarioId=${user.id}`)
         .then((r) => setAnotacoesTxt(r.anotacoes || ''))
@@ -304,7 +304,7 @@ export default function Campanha() {
       body: { expressao, rotulo: rot, oculta: !!privada, usuarioId: user?.id },
     })
   }
-  const ehMestre = !!user && campanha?.mestreId === user.id
+  const ehMestre = !!user && (campanha?.mestreId === user.id || user.dono)
 
   async function criarSessao(e) {
     e.preventDefault()
@@ -439,18 +439,24 @@ export default function Campanha() {
     <>
       {/* Barra de ações (estilo CRIS) */}
       <div className="camp-actions">
-        <label className="act" title="Trocar a capa da campanha">
-          🖼 Foto de Capa
-          <input type="file" accept="image/*" style={{ display: 'none' }}
-            onChange={(e) => trocarCapa(e.target.files[0])} />
-        </label>
         <button className="act" onClick={abrirAddPerso}>＋ Adicionar Agentes</button>
-        <button className="act" onClick={criarConvite}>✉ Convidar Jogadores</button>
-        <button className="act" onClick={abrirEdit}>✎ Editar Campanha</button>
-        <button className="act" onClick={criarCombate}>⚔ Criar Combate</button>
-        <Link className="act" to={`/campanhas/${id}/escudo`}>🛡 Escudo do Mestre</Link>
         <Link className="act" to={`/overlay/${id}`}>📺 Overlay OBS</Link>
-        <button className="act danger" onClick={() => setConfirmarApagar(true)}>🗑 Apagar campanha</button>
+        {ehMestre ? (
+          <>
+            <label className="act" title="Trocar a capa da campanha">
+              🖼 Foto de Capa
+              <input type="file" accept="image/*" style={{ display: 'none' }}
+                onChange={(e) => trocarCapa(e.target.files[0])} />
+            </label>
+            <button className="act" onClick={criarConvite}>✉ Convidar Jogadores</button>
+            <button className="act" onClick={abrirEdit}>✎ Editar Campanha</button>
+            <button className="act" onClick={criarCombate}>⚔ Criar Combate</button>
+            <Link className="act" to={`/campanhas/${id}/escudo`}>🛡 Escudo do Mestre</Link>
+            <button className="act danger" onClick={() => setConfirmarApagar(true)}>🗑 Apagar campanha</button>
+          </>
+        ) : (
+          <span className="tag" style={{ alignSelf: 'center' }}>Você é jogador nesta campanha</span>
+        )}
       </div>
 
       <h1 style={{ margin: '4px 0 6px' }}>{campanha.nome}</h1>
@@ -585,9 +591,11 @@ export default function Campanha() {
 
       {aba === 'Combates' && (
         <>
-          <div className="row" style={{ marginBottom: 12, gap: 8 }}>
-            <button onClick={criarCombate}>⚔ Criar Combate</button>
-          </div>
+          {ehMestre && (
+            <div className="row" style={{ marginBottom: 12, gap: 8 }}>
+              <button onClick={criarCombate}>⚔ Criar Combate</button>
+            </div>
+          )}
           {combateAtivo ? (
             <CombateTracker
               combate={combateAtivo}

@@ -22,6 +22,7 @@ import com.asus.platform.repository.ConviteRepository;
 import com.asus.platform.repository.GameSystemRepository;
 import com.asus.platform.repository.PersonagemRepository;
 import com.asus.platform.repository.UsuarioRepository;
+import org.springframework.beans.factory.annotation.Value;
 import com.asus.platform.web.NotFoundException;
 import com.asus.platform.web.dto.AtualizarCampanhaRequest;
 import com.asus.platform.web.dto.CampanhaMembroResponse;
@@ -58,6 +59,10 @@ public class CampanhaService {
     private final CombateParticipanteRepository combateParticipanteRepository;
     private final AuditoriaService auditoriaService;
     private final PlanoService planoService;
+
+    /** Email do dono/dev (config asus.admin.email): vê todas as campanhas. */
+    @Value("${asus.admin.email:dev@asus.local}")
+    private String adminEmail;
 
     public CampanhaService(CampanhaRepository campanhaRepository,
                            CampanhaPersonagemRepository campanhaPersonagemRepository,
@@ -97,11 +102,28 @@ public class CampanhaService {
     /** Campanhas das quais o usuario e membro (mestre ou jogador), de qualquer organizacao. */
     public List<CampanhaResponse> listarDoUsuario(Long usuarioId) {
         String systemId = asus().getCodigo();
+        // O dono/dev enxerga todas as campanhas (acesso total).
+        if (ehDono(usuarioId)) {
+            return campanhaRepository.findAll().stream()
+                    .filter(c -> !c.isArquivada())
+                    .map(c -> CampanhaResponse.de(c, systemIdDe(c)))
+                    .toList();
+        }
         return campanhaMembroRepository.findByUsuarioId(usuarioId).stream()
                 .map(m -> campanhaRepository.findById(m.getCampanhaId()).orElse(null))
                 .filter(c -> c != null && !c.isArquivada())
                 .map(c -> CampanhaResponse.de(c, systemId))
                 .toList();
+    }
+
+    /** True se o usuario e o dono/dev configurado (asus.admin.email). */
+    public boolean ehDono(Long usuarioId) {
+        if (usuarioId == null || adminEmail == null) {
+            return false;
+        }
+        return usuarioRepository.findById(usuarioId)
+                .map(u -> adminEmail.equalsIgnoreCase(u.getEmail()))
+                .orElse(false);
     }
 
     public CampanhaResponse buscar(Long id) {
@@ -110,12 +132,14 @@ public class CampanhaService {
     }
 
     @Transactional
-    public CampanhaResponse criar(Long organizacaoId, CriarCampanhaRequest req) {
+    public CampanhaResponse criar(Long organizacaoId, Long criadorId, CriarCampanhaRequest req) {
         Organizacao org = organizacaoService.buscar(organizacaoId);
         planoService.validarNovaCampanha(organizacaoId); // Fase 10: limite do plano
         GameSystem asus = asus();
 
-        Long mestreId = req.mestreId() != null ? req.mestreId() : org.getDonoId();
+        // O criador é o mestre (cai pro dono da org se nao vier no token).
+        Long mestreId = req.mestreId() != null ? req.mestreId()
+                : (criadorId != null ? criadorId : org.getDonoId());
 
         Campanha campanha = Campanha.builder()
                 .organizacaoId(organizacaoId)
@@ -328,6 +352,9 @@ public class CampanhaService {
 
     /** Lanca 403 (mapeado de IllegalState) quando o usuario nao tem a permissao. */
     public void exigirPermissao(Long campanhaId, Long usuarioId, Permissao permissao) {
+        if (ehDono(usuarioId)) {
+            return; // dono/dev tem acesso total a qualquer campanha
+        }
         PapelCampanha papel = papelDe(campanhaId, usuarioId)
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Usuario " + usuarioId + " nao e membro da campanha " + campanhaId));

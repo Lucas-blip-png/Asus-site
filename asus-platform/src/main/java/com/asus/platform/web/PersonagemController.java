@@ -10,6 +10,7 @@ import com.asus.platform.repository.ItemPersonagemRepository;
 import com.asus.platform.repository.PersonagemRepository;
 import com.asus.platform.repository.PersonagemSnapshotRepository;
 import com.asus.platform.security.UsuarioPrincipal;
+import com.asus.platform.service.DonoService;
 import com.asus.platform.service.PersonagemService;
 import com.asus.platform.web.dto.AtualizarPersonagemRequest;
 import com.asus.platform.web.dto.AtualizarStatusRequest;
@@ -43,6 +44,7 @@ public class PersonagemController {
     private final PersonagemSnapshotRepository snapshotRepository;
     private final CampanhaPersonagemRepository campanhaPersonagemRepository;
     private final CampanhaRepository campanhaRepository;
+    private final DonoService donoService;
 
     public PersonagemController(PersonagemService service,
                                 PersonagemRepository personagemRepository,
@@ -52,7 +54,8 @@ public class PersonagemController {
                                 HabilidadePersonagemRepository habilidadeRepository,
                                 PersonagemSnapshotRepository snapshotRepository,
                                 CampanhaPersonagemRepository campanhaPersonagemRepository,
-                                CampanhaRepository campanhaRepository) {
+                                CampanhaRepository campanhaRepository,
+                                DonoService donoService) {
         this.service = service;
         this.personagemRepository = personagemRepository;
         this.itemRepository = itemRepository;
@@ -62,6 +65,7 @@ public class PersonagemController {
         this.snapshotRepository = snapshotRepository;
         this.campanhaPersonagemRepository = campanhaPersonagemRepository;
         this.campanhaRepository = campanhaRepository;
+        this.donoService = donoService;
     }
 
     /** Campanhas em que este personagem está vinculado (para o chat de resultados na ficha). */
@@ -81,7 +85,12 @@ public class PersonagemController {
     }
 
     @GetMapping("/organizacoes/{orgId}/personagens")
-    public List<PersonagemResponse> listar(@PathVariable Long orgId) {
+    public List<PersonagemResponse> listar(@PathVariable Long orgId,
+                                           @org.springframework.security.core.annotation.AuthenticationPrincipal UsuarioPrincipal principal) {
+        // O dono/dev vê todos os personagens (acesso total).
+        if (principal != null && donoService.ehDono(principal.id())) {
+            return service.listarTodos();
+        }
         return service.listar(orgId);
     }
 

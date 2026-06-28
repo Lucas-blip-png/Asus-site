@@ -23,17 +23,20 @@ public class AuthService {
     private final JwtService jwtService;
     private final RateLimiter rateLimiter;
     private final AuditoriaService auditoriaService;
+    private final DonoService donoService;
 
     public AuthService(UsuarioRepository usuarioRepository,
                        PasswordEncoder passwordEncoder,
                        JwtService jwtService,
                        RateLimiter rateLimiter,
-                       AuditoriaService auditoriaService) {
+                       AuditoriaService auditoriaService,
+                       DonoService donoService) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.rateLimiter = rateLimiter;
         this.auditoriaService = auditoriaService;
+        this.donoService = donoService;
     }
 
     @Transactional
@@ -77,8 +80,9 @@ public class AuthService {
     }
 
     public UsuarioResponse me(Long usuarioId) {
-        return UsuarioResponse.de(usuarioRepository.findById(usuarioId)
-                .orElseThrow(() -> new UnauthorizedException("Usuario nao encontrado")));
+        Usuario u = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new UnauthorizedException("Usuario nao encontrado"));
+        return UsuarioResponse.de(u, donoService.ehDono(usuarioId));
     }
 
     /**
@@ -106,6 +110,6 @@ public class AuthService {
         String access = jwtService.gerarAccess(usuario.getId(), usuario.getEmail());
         String refresh = jwtService.gerarRefresh(usuario.getId(), usuario.getEmail());
         return new AuthResponse(access, refresh, "Bearer",
-                jwtService.accessTtlSegundos(), UsuarioResponse.de(usuario));
+                jwtService.accessTtlSegundos(), UsuarioResponse.de(usuario, donoService.ehDono(usuario.getId())));
     }
 }
