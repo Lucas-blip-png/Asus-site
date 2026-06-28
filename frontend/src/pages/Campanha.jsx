@@ -242,6 +242,7 @@ export default function Campanha() {
   const [personagens, setPersonagens] = useState([])
   const [convite, setConvite] = useState(null)
   const [sessoes, setSessoes] = useState([])
+  const [presencas, setPresencas] = useState({})
   const [sessaoForm, setSessaoForm] = useState({ titulo: '', inicio: '' })
   const [toast, setToast] = useState(null)
   const toastTimer = useRef(null)
@@ -276,6 +277,14 @@ export default function Campanha() {
     carregar()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id])
+  // Carrega as presenças de cada sessão (para mostrar quem confirmou).
+  useEffect(() => {
+    sessoes.forEach((s) =>
+      api(`/api/sessoes/${s.id}/presencas`)
+        .then((ps) => setPresencas((m) => ({ ...m, [s.id]: ps })))
+        .catch(() => {}),
+    )
+  }, [sessoes])
   // Anotações são privadas: carrega via endpoint gateado, só se for o mestre.
   useEffect(() => {
     const mestre = !!user && (campanha?.mestreId === user.id || user.dono)
@@ -339,9 +348,23 @@ export default function Campanha() {
       carregar()
     } catch (ex) { setErro(ex.message) }
   }
+  const carregarPresencas = (sid) =>
+    api(`/api/sessoes/${sid}/presencas`).then((ps) => setPresencas((m) => ({ ...m, [sid]: ps }))).catch(() => {})
   async function presenca(sessaoId, status) {
     setErro(null)
-    try { await api(`/api/sessoes/${sessaoId}/presenca`, { method: 'POST', body: { usuarioId: user?.id, status } }) }
+    try {
+      await api(`/api/sessoes/${sessaoId}/presenca`, { method: 'POST', body: { usuarioId: user?.id, status } })
+      carregarPresencas(sessaoId)
+    } catch (ex) { setErro(ex.message) }
+  }
+  async function apagarSessao(sid) {
+    setErro(null)
+    try { await api(`/api/sessoes/${sid}`, { method: 'DELETE' }); api(`/api/campanhas/${id}/sessoes`).then(setSessoes) }
+    catch (ex) { setErro(ex.message) }
+  }
+  async function notificarSessao(sid) {
+    setErro(null)
+    try { await api(`/api/sessoes/${sid}/notificar`, { method: 'POST' }); setErro('Presentes notificados ✓'); setTimeout(() => setErro(null), 2000) }
     catch (ex) { setErro(ex.message) }
   }
 
@@ -555,37 +578,54 @@ export default function Campanha() {
       {aba === 'Sessões' && (
         <div className="card">
           <div className="lista-vert">
-            {sessoes.map((s) => (
-              <div key={s.id} className="sessao-row">
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div className="row" style={{ gap: 8 }}>
-                    <b>{s.titulo}</b>
-                    <span className="tag">{s.status}</span>
-                    {s.inicio && <span className="muted" style={{ fontSize: '.78rem' }}>{dataHora(s.inicio)}</span>}
+            {sessoes.map((s) => {
+              const ps = presencas[s.id] || []
+              const minha = ps.find((x) => x.usuarioId === user?.id)?.status
+              const conta = (st) => ps.filter((x) => x.status === st).length
+              return (
+                <div key={s.id} className="sessao-row">
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div className="row" style={{ gap: 8 }}>
+                      <b>{s.titulo}</b>
+                      <span className="tag">{s.status}</span>
+                      {s.inicio && <span className="muted" style={{ fontSize: '.78rem' }}>{dataHora(s.inicio)}</span>}
+                    </div>
+                    {s.descricao && <div className="muted" style={{ fontSize: '.82rem' }}>{s.descricao}</div>}
+                    <div className="muted" style={{ fontSize: '.74rem', marginTop: 2 }}>
+                      ✓ {conta('CONFIRMADO')} · ? {conta('TALVEZ')} · ✕ {conta('RECUSADO')}
+                      {minha && <span> · você: {minha === 'CONFIRMADO' ? '✓ vai' : minha === 'TALVEZ' ? '? talvez' : '✕ não vai'}</span>}
+                    </div>
                   </div>
-                  {s.descricao && <div className="muted" style={{ fontSize: '.82rem' }}>{s.descricao}</div>}
+                  <div className="row" style={{ gap: 4, alignItems: 'center' }}>
+                    <button className={`ghost mini${minha === 'CONFIRMADO' ? ' ativo' : ''}`} onClick={() => presenca(s.id, 'CONFIRMADO')} title="Confirmar">✓</button>
+                    <button className={`ghost mini${minha === 'TALVEZ' ? ' ativo' : ''}`} onClick={() => presenca(s.id, 'TALVEZ')} title="Talvez">?</button>
+                    <button className={`ghost mini${minha === 'RECUSADO' ? ' ativo' : ''}`} onClick={() => presenca(s.id, 'RECUSADO')} title="Recusar">✕</button>
+                    {ehMestre && (
+                      <>
+                        <button className="ghost mini" onClick={() => notificarSessao(s.id)} title="Avisar quem confirmou">🔔</button>
+                        <button className="ghost mini" onClick={() => apagarSessao(s.id)} title="Apagar sessão">🗑</button>
+                      </>
+                    )}
+                  </div>
                 </div>
-                <div className="row" style={{ gap: 4 }}>
-                  <button className="ghost mini" onClick={() => presenca(s.id, 'CONFIRMADO')} title="Confirmar">✓</button>
-                  <button className="ghost mini" onClick={() => presenca(s.id, 'TALVEZ')} title="Talvez">?</button>
-                  <button className="ghost mini" onClick={() => presenca(s.id, 'RECUSADO')} title="Recusar">✕</button>
-                </div>
-              </div>
-            ))}
+              )
+            })}
             {!sessoes.length && <span className="muted">Nenhuma sessão agendada.</span>}
           </div>
-          <form onSubmit={criarSessao} className="row" style={{ gap: 8, marginTop: 12 }}>
-            <div style={{ flex: 1, minWidth: 140 }}>
-              <label>Título</label>
-              <input value={sessaoForm.titulo} onChange={(e) => setSessaoForm((s) => ({ ...s, titulo: e.target.value }))} />
-            </div>
-            <div>
-              <label>Início</label>
-              <input type="datetime-local" value={sessaoForm.inicio}
-                onChange={(e) => setSessaoForm((s) => ({ ...s, inicio: e.target.value }))} />
-            </div>
-            <button style={{ alignSelf: 'end' }}>Agendar</button>
-          </form>
+          {ehMestre && (
+            <form onSubmit={criarSessao} className="row" style={{ gap: 8, marginTop: 12 }}>
+              <div style={{ flex: 1, minWidth: 140 }}>
+                <label>Título</label>
+                <input value={sessaoForm.titulo} onChange={(e) => setSessaoForm((s) => ({ ...s, titulo: e.target.value }))} />
+              </div>
+              <div>
+                <label>Início</label>
+                <input type="datetime-local" value={sessaoForm.inicio}
+                  onChange={(e) => setSessaoForm((s) => ({ ...s, inicio: e.target.value }))} />
+              </div>
+              <button style={{ alignSelf: 'end' }}>Agendar</button>
+            </form>
+          )}
         </div>
       )}
 
