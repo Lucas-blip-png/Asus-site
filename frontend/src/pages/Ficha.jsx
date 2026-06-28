@@ -272,7 +272,9 @@ export default function Ficha() {
             </div>
           </div>
 
-          <Heptagono atributos={p.atributosFinais} max={20} />
+          <div className="mandala">
+            <Heptagono atributos={p.atributosFinais} max={20} />
+          </div>
 
           {/* Editor de atributos (5 pontos distribuíveis sobre os fixos da classe) */}
           <div className="atr-edit">
@@ -323,25 +325,36 @@ export default function Ficha() {
           {BARRAS.map(([rot, cls, k]) => {
             const atual = p.status[k + 'Atual']
             const max = p.status[k + 'Max']
-            const pct = max > 0 ? Math.round((atual / max) * 100) : 0
+            const pct = max > 0 ? Math.min(100, Math.round((atual / max) * 100)) : 0
             return (
-              <div key={k} style={{ marginTop: 8 }}>
-                <div className="bar-label">{rot}</div>
-                <div className="row" style={{ gap: 6, flexWrap: 'nowrap' }}>
-                  <button className="ghost mini" onClick={() => ajustar(k + 'Atual', -1)}>−</button>
-                  <div className={`bar ${cls}`} style={{ flex: 1 }}>
-                    <span style={{ width: pct + '%' }} /><b>{atual}/{max}</b>
-                  </div>
-                  <button className="ghost mini" onClick={() => ajustar(k + 'Atual', +1)}>+</button>
-                  <input className="mini-num" type="number" min="0" value={statusInput[k + 'Atual']}
-                    onChange={(e) => setStatusInput((s) => ({ ...s, [k + 'Atual']: e.target.value }))}
-                    onBlur={() => definirStatus(k + 'Atual')} title="definir valor atual" />
+              <div key={k} className="recurso">
+                <div className="rec-rot">{rot}</div>
+                <div className={`rec-bar ${cls}`}>
+                  <span className="rec-fill" style={{ width: pct + '%' }} />
+                  <button className="rec-step lg" title="-5" onClick={() => ajustar(k + 'Atual', -5)}>«</button>
+                  <button className="rec-step" title="-1" onClick={() => ajustar(k + 'Atual', -1)}>‹</button>
+                  <b className="rec-val">{atual}/{max}</b>
+                  <button className="rec-step" title="+1" onClick={() => ajustar(k + 'Atual', +1)}>›</button>
+                  <button className="rec-step lg" title="+5" onClick={() => ajustar(k + 'Atual', +5)}>»</button>
                 </div>
               </div>
             )
           })}
 
-          <div className="kv" style={{ marginTop: 10 }}><b>Limites</b><span>Hab {p.limiteHabilidades} · Fei {p.limiteFeiticos} · Bên {p.limiteBencaos}</span></div>
+          <div className="def-row">
+            <div className="escudo">{10 + (p.atributosFinais.agilidade || 0)}</div>
+            <div>
+              <div className="lbl">Defesa</div>
+              <div className="muted" style={{ fontSize: '.74rem' }}>10 + Agilidade</div>
+            </div>
+            <div className="spacer" />
+            <div style={{ textAlign: 'right' }}>
+              <div className="lbl">Limites</div>
+              <div className="muted" style={{ fontSize: '.74rem' }}>
+                Hab {p.limiteHabilidades} · Fei {p.limiteFeiticos} · Bên {p.limiteBencaos}
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Centro: perícias com treino */}
