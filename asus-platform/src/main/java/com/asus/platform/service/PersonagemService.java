@@ -546,7 +546,20 @@ public class PersonagemService {
         Classe trilha = p.getTrilhaId() == null ? null : classeRepository.findById(p.getTrilhaId()).orElse(null);
 
         ResultadoCalculo r = calculoService.calcular(p);
-        List<PericiaCalculadaDto> pericias = new ArrayList<>(r.pericias().stream().map(this::toPericiaDto).toList());
+
+        // Carga atual = soma de espacos x quantidade do inventario (max = Forca x 2).
+        int cargaAtual = 0;
+        for (ItemPersonagem it : itemPersonagemRepository.findByPersonagemId(p.getId())) {
+            int esp = it.getEspacos() == null ? 0 : it.getEspacos();
+            int qtd = it.getQuantidade() == null ? 1 : it.getQuantidade();
+            cargaAtual += esp * qtd;
+        }
+        // Sobrecarga: cada ponto acima da carga maxima tira 1 de Agilidade (recalcula tudo).
+        int excessoCarga = Math.max(0, cargaAtual - r.cargaMaxima());
+        ResultadoCalculo rEf = excessoCarga > 0 ? calculoService.calcular(p, excessoCarga) : r;
+        var finaisEf = rEf.atributosFinais();
+
+        List<PericiaCalculadaDto> pericias = new ArrayList<>(rEf.pericias().stream().map(this::toPericiaDto).toList());
         // Perícias "Outros" (concedidas por itens), com teto = 2x atributo final.
         if (p.getJsonPericiasCustom() != null && !p.getJsonPericiasCustom().isBlank()) {
             try {
@@ -563,7 +576,7 @@ public class PersonagemService {
                         } catch (Exception e) {
                             at = Atributo.FORCA;
                         }
-                        int finalAttr = p.getAtributosFinais() == null ? 0 : p.getAtributosFinais().get(at);
+                        int finalAttr = finaisEf == null ? 0 : finaisEf.get(at);
                         int cap = Math.max(0, finalAttr * 2);
                         int treino = Math.max(0, Math.min(node.path("treino").asInt(0), cap));
                         pericias.add(new PericiaCalculadaDto("OUTROS:" + nome, nome, at.name(), at.getSigla(), treino, cap, true));
@@ -586,17 +599,6 @@ public class PersonagemService {
             }
         }
 
-        // Carga atual = soma de espacos x quantidade do inventario (max = Forca x 2).
-        int cargaAtual = 0;
-        for (ItemPersonagem it : itemPersonagemRepository.findByPersonagemId(p.getId())) {
-            int esp = it.getEspacos() == null ? 0 : it.getEspacos();
-            int qtd = it.getQuantidade() == null ? 1 : it.getQuantidade();
-            cargaAtual += esp * qtd;
-        }
-        // Sobrecarga: acima da carga maxima, o deslocamento cai pela metade.
-        boolean sobrecarregado = cargaAtual > r.cargaMaxima();
-        int deslocamentoFinal = sobrecarregado ? Math.max(1, r.deslocamento() / 2) : r.deslocamento();
-
         return new PersonagemResponse(
                 p.getId(),
                 p.getOrganizacaoId(),
@@ -615,9 +617,9 @@ public class PersonagemService {
                 p.getNivel(),
                 p.getXpAtual(),
                 AtributosDto.de(p.getAtributosBase()),
-                AtributosDto.de(p.getAtributosFinais()),
+                AtributosDto.de(finaisEf),
                 StatusDto.de(p.getStatus()),
-                deslocamentoFinal,
+                rEf.deslocamento(),
                 r.cargaMaxima(),
                 cargaAtual,
                 r.limiteHabilidades(),
