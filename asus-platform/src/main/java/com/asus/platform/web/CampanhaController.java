@@ -47,8 +47,9 @@ public class CampanhaController {
     @PostMapping("/organizacoes/{orgId}/campanhas")
     @ResponseStatus(HttpStatus.CREATED)
     public CampanhaResponse criar(@PathVariable Long orgId,
+                                  @AuthenticationPrincipal UsuarioPrincipal principal,
                                   @Valid @RequestBody CriarCampanhaRequest req) {
-        return service.criar(orgId, req);
+        return service.criar(orgId, principal != null ? principal.id() : null, req);
     }
 
     @GetMapping("/campanhas/{id}")

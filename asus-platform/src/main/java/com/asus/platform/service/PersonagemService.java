@@ -93,6 +93,13 @@ public class PersonagemService {
                 .stream().map(this::toResponse).toList();
     }
 
+    /** Todos os personagens (uso do dono/dev — acesso total). */
+    public List<PersonagemResponse> listarTodos() {
+        return personagemRepository.findAll().stream()
+                .filter(p -> !p.isArquivado())
+                .map(this::toResponse).toList();
+    }
+
     public PersonagemResponse buscar(Long id) {
         return toResponse(carregar(id));
     }
