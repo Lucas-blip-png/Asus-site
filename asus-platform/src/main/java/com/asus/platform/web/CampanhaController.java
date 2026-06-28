@@ -1,5 +1,6 @@
 package com.asus.platform.web;
 
+import com.asus.platform.security.UsuarioPrincipal;
 import com.asus.platform.service.CampanhaService;
 import com.asus.platform.web.dto.AdicionarPersonagemCampanhaRequest;
 import com.asus.platform.web.dto.AtualizarCampanhaRequest;
@@ -13,6 +14,7 @@ import com.asus.platform.web.dto.EntrarCampanhaRequest;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 /** Campanhas (plano, secao 21.4). */
@@ -31,6 +33,15 @@ public class CampanhaController {
         return service.listar(orgId);
     }
 
+    /** Campanhas onde o usuario logado e membro (mestre/jogador), de qualquer org. */
+    @GetMapping("/campanhas/minhas")
+    public List<CampanhaResponse> minhas(@AuthenticationPrincipal UsuarioPrincipal principal) {
+        if (principal == null) {
+            return List.of();
+        }
+        return service.listarDoUsuario(principal.id());
+    }
+
     @PostMapping("/organizacoes/{orgId}/campanhas")
     @ResponseStatus(HttpStatus.CREATED)
     public CampanhaResponse criar(@PathVariable Long orgId,
@@ -47,6 +58,12 @@ public class CampanhaController {
     public CampanhaResponse atualizar(@PathVariable Long id,
                                       @RequestBody AtualizarCampanhaRequest req) {
         return service.atualizar(id, req);
+    }
+
+    @DeleteMapping("/campanhas/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void apagar(@PathVariable Long id) {
+        service.apagar(id);
     }
 
     @GetMapping("/campanhas/{id}/personagens")

@@ -679,16 +679,7 @@ public class DataSeeder implements CommandLineRunner {
         membroRepository.save(OrganizacaoMembro.builder()
                 .organizacaoId(org.getId()).usuarioId(dev.getId())
                 .papel(PapelOrganizacao.DONO).build());
-
-        Campanha campanha = campanhaRepository.save(Campanha.builder()
-                .organizacaoId(org.getId()).mestreId(dev.getId()).gameSystemId(asus.getId())
-                .nome("Campanha Inicial").descricao("Campanha de exemplo criada no seed.")
-                .config(CampanhaConfig.builder().rolagemOcultaPermitida(true).build())
-                .arquivada(false).build());
-
-        campanhaMembroRepository.save(CampanhaMembro.builder()
-                .campanhaId(campanha.getId()).usuarioId(dev.getId())
-                .papel(PapelCampanha.MESTRE).build());
+        // (sem campanha inicial — cada um cria a sua)
     }
 
     // ---------------- helpers ----------------

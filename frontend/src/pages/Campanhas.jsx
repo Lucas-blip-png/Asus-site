@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { api, obterOrgId } from '../api.js'
+import { useAuth } from '../auth.jsx'
 
 const fmtData = (iso) => {
   try {
@@ -11,18 +12,30 @@ const fmtData = (iso) => {
 }
 
 export default function Campanhas() {
+  const { user } = useAuth()
+  const nav = useNavigate()
   const [orgId, setOrgId] = useState(null)
   const [lista, setLista] = useState([])
   const [nome, setNome] = useState('')
+  const [codigo, setCodigo] = useState('')
   const [erro, setErro] = useState(null)
 
-  const carregar = (oid) => api(`/api/organizacoes/${oid}/campanhas`).then(setLista)
+  // Junta as campanhas da minha org + as que entrei por convite (de outras orgs).
+  const carregar = async (oid) => {
+    const [orgC, minhas] = await Promise.all([
+      api(`/api/organizacoes/${oid}/campanhas`).catch(() => []),
+      api('/api/campanhas/minhas').catch(() => []),
+    ])
+    const porId = new Map()
+    ;[...(orgC || []), ...(minhas || [])].forEach((c) => porId.set(c.id, c))
+    setLista([...porId.values()])
+  }
 
   useEffect(() => {
     (async () => {
       const oid = await obterOrgId()
       setOrgId(oid)
-      carregar(oid)
+      await carregar(oid)
     })().catch((e) => setErro(e.message))
   }, [])
 
@@ -33,6 +46,19 @@ export default function Campanhas() {
       await api(`/api/organizacoes/${orgId}/campanhas`, { method: 'POST', body: { nome } })
       setNome('')
       carregar(orgId)
+    } catch (ex) {
+      setErro(ex.message)
+    }
+  }
+
+  async function entrar(e) {
+    e.preventDefault()
+    if (!codigo.trim()) return
+    setErro(null)
+    try {
+      const m = await api(`/api/campanhas/entrar/${codigo.trim()}`, { method: 'POST', body: { usuarioId: user?.id } })
+      setCodigo('')
+      nav(`/campanhas/${m.campanhaId}`)
     } catch (ex) {
       setErro(ex.message)
     }
@@ -67,6 +93,7 @@ export default function Campanhas() {
         ))}
         {lista.length === 0 && <p className="muted">Nenhuma campanha ainda.</p>}
       </div>
+
       <div className="card">
         <h2>Nova campanha</h2>
         <form onSubmit={criar} className="row">
@@ -75,6 +102,20 @@ export default function Campanhas() {
             <input value={nome} onChange={(e) => setNome(e.target.value)} required />
           </div>
           <button style={{ alignSelf: 'end' }}>Criar</button>
+        </form>
+      </div>
+
+      <div className="card">
+        <h2>Entrar com código</h2>
+        <p className="muted" style={{ marginTop: -4, fontSize: '.84rem' }}>
+          Cole o código de convite que o mestre gerou (na campanha → Gerar convite).
+        </p>
+        <form onSubmit={entrar} className="row">
+          <div style={{ flex: 1 }}>
+            <label>Código do convite</label>
+            <input value={codigo} onChange={(e) => setCodigo(e.target.value)} placeholder="Ex.: AB12CD" />
+          </div>
+          <button className="ghost" style={{ alignSelf: 'end' }}>Entrar</button>
         </form>
       </div>
     </>

@@ -81,6 +81,16 @@ public class CampanhaService {
                 .stream().map(c -> CampanhaResponse.de(c, systemId)).toList();
     }
 
+    /** Campanhas das quais o usuario e membro (mestre ou jogador), de qualquer organizacao. */
+    public List<CampanhaResponse> listarDoUsuario(Long usuarioId) {
+        String systemId = asus().getCodigo();
+        return campanhaMembroRepository.findByUsuarioId(usuarioId).stream()
+                .map(m -> campanhaRepository.findById(m.getCampanhaId()).orElse(null))
+                .filter(c -> c != null && !c.isArquivada())
+                .map(c -> CampanhaResponse.de(c, systemId))
+                .toList();
+    }
+
     public CampanhaResponse buscar(Long id) {
         Campanha campanha = carregar(id);
         return CampanhaResponse.de(campanha, systemIdDe(campanha));
@@ -144,6 +154,17 @@ public class CampanhaService {
                 "CAMPANHA_ATUALIZADA", "Campanha", campanha.getId(), null, null, campanha.getNome());
 
         return CampanhaResponse.de(campanha, systemIdDe(campanha));
+    }
+
+    /** Apaga a campanha e seus vinculos (membros e personagens). */
+    @Transactional
+    public void apagar(Long id) {
+        Campanha campanha = carregar(id);
+        campanhaMembroRepository.deleteAll(campanhaMembroRepository.findByCampanhaId(id));
+        campanhaPersonagemRepository.deleteAll(campanhaPersonagemRepository.findByCampanhaId(id));
+        campanhaRepository.delete(campanha);
+        auditoriaService.registrar(campanha.getOrganizacaoId(), campanha.getMestreId(),
+                "CAMPANHA_APAGADA", "Campanha", id, null, campanha.getNome(), null);
     }
 
     public List<CampanhaPersonagemResponse> listarPersonagens(Long campanhaId) {
