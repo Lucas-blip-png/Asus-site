@@ -72,6 +72,11 @@ public class Personagem {
     @Embedded
     private Status status;
 
+    // Tetos manuais de PV/PM/PE (override). Null = usa o valor calculado pelas regras.
+    private Integer pvMaxManual;
+    private Integer pmMaxManual;
+    private Integer peMaxManual;
+
     @Column(columnDefinition = "TEXT")
     private String anotacoes;
 

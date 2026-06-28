@@ -89,7 +89,8 @@ public class PersonagemController {
     @PatchMapping("/personagens/{id}/status")
     public PersonagemResponse atualizarStatus(@PathVariable Long id,
                                               @RequestBody AtualizarStatusRequest req) {
-        return service.atualizarStatus(id, req.pvAtual(), req.pmAtual(), req.peAtual());
+        return service.atualizarStatus(id, req.pvAtual(), req.pmAtual(), req.peAtual(),
+                req.pvMax(), req.pmMax(), req.peMax());
     }
 
     /** Atualiza XP/nivel; sobe de nivel automaticamente pelo XP e devolve os ganhos (popup). */
