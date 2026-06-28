@@ -5,21 +5,27 @@ import { useAuth } from '../auth.jsx'
 const TIPOS = ['FICHA', 'CAMPANHA', 'NPC', 'ITEM', 'OUTRO']
 const VAZIO = { tipo: 'FICHA', nome: '', descricao: '', jsonConteudo: '', publico: false }
 
-function CardTemplate({ t, onDelete }) {
+function TemplateRow({ t, onDelete }) {
+  const [open, setOpen] = useState(false)
   return (
-    <div className="card">
-      <div className="row">
-        <b style={{ fontSize: '1.02rem' }}>{t.nome}</b>
+    <div className={`cris-row${open ? ' open' : ''}`}>
+      <div className="cris-head" onClick={() => setOpen((o) => !o)}>
+        <span className="chev">▾</span>
+        <b className="nm">{t.nome}</b>
+        <span className="sub">{t.tipo}</span>
         <div className="spacer" />
-        <span className="tag">{t.tipo}</span>
         {t.oficial && <span className="tag gold">Oficial</span>}
         {t.publico && <span className="tag">Público</span>}
+        {onDelete && !t.oficial && (
+          <button className="ghost mini" title="Remover"
+            onClick={(e) => { e.stopPropagation(); onDelete(t.id) }}>✕</button>
+        )}
       </div>
-      {t.descricao && <p className="muted" style={{ margin: '6px 0', fontSize: '.84rem' }}>{t.descricao}</p>}
-      {onDelete && !t.oficial && (
-        <div className="row" style={{ marginTop: 6 }}>
-          <div className="spacer" />
-          <button className="ghost mini" onClick={() => onDelete(t.id)}>Remover</button>
+      {open && (
+        <div className="cris-body">
+          {t.descricao && <p className="muted" style={{ fontSize: '.84rem', marginTop: 0 }}>{t.descricao}</p>}
+          {t.jsonConteudo && <pre className="legal-conteudo" style={{ maxHeight: 180 }}>{t.jsonConteudo}</pre>}
+          {!t.descricao && !t.jsonConteudo && <span className="muted">Sem detalhes.</span>}
         </div>
       )}
     </div>
@@ -86,14 +92,14 @@ export default function Templates() {
 
       <h2>Da organização</h2>
       {!meus.length && <div className="card muted">Nenhum template seu ainda.</div>}
-      <div className="grid">
-        {meus.map((t) => <CardTemplate key={t.id} t={t} onDelete={apagar} />)}
+      <div className="cris-list">
+        {meus.map((t) => <TemplateRow key={t.id} t={t} onDelete={apagar} />)}
       </div>
 
       <h2 style={{ marginTop: 18 }}>Públicos</h2>
       {!publicos.length && <div className="card muted">Nenhum template público disponível.</div>}
-      <div className="grid">
-        {publicos.map((t) => <CardTemplate key={t.id} t={t} />)}
+      <div className="cris-list">
+        {publicos.map((t) => <TemplateRow key={t.id} t={t} />)}
       </div>
     </>
   )
