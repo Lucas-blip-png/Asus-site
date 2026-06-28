@@ -275,10 +275,11 @@ th, td { text-align: left; padding: 6px 6px; border-bottom: 1px solid var(--bord
   text-transform: uppercase; letter-spacing: 1.2px; }
 .abas button:hover { filter: none; color: var(--text); }
 .abas button.ativo { color: var(--gold-3); border-bottom-color: var(--gold); }
-.item-card { background: var(--panel-2); border: 1px solid var(--border); border-radius: var(--radius-sm);
-  padding: 8px 10px; margin-bottom: 8px; }
+.item-card { background: var(--panel-2); border: 1px solid var(--border);
+  border-left: 3px solid var(--gold); border-radius: var(--radius-sm);
+  padding: 9px 12px; margin-bottom: 8px; }
 .item-card .t { font-weight: 700; }
-.item-card .s { color: var(--muted); font-size: .78rem; }
+.item-card .s { color: var(--muted); font-size: .78rem; margin-top: 2px; }
 
 /* Formularios inline de adicao (ataques, feiticos, criaturas) */
 .add-form { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 10px; }
@@ -418,3 +419,40 @@ th, td { text-align: left; padding: 6px 6px; border-bottom: 1px solid var(--bord
   background: conic-gradient(from -45deg, #ea4335 0 25%, #fbbc05 0 50%, #34a853 0 75%, #4285f4 0);
   color: #fff; font-weight: 900; font-size: .8rem;
 }
+
+/* ===== Ficha estilo CRIS (iteracao 2) ===== */
+.ficha-col { background: var(--panel); }
+
+/* Mandala de atributos (heptagono emoldurado) */
+.mandala { position: relative; margin: 10px auto 4px; display: grid; place-items: center; padding: 6px; }
+.mandala::before {
+  content: ''; position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle, transparent 56%, rgba(224,168,46,.07) 60%, transparent 74%);
+  box-shadow: inset 0 0 28px rgba(224,168,46,.05);
+}
+
+/* Barras de recurso PV/PM/PE com steppers « ‹ › » */
+.recurso { margin-top: 10px; }
+.rec-rot { text-align: center; font-size: .64rem; letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--muted); font-weight: 800; margin-bottom: 4px; }
+.rec-bar { position: relative; display: flex; align-items: stretch; height: 34px; border-radius: 9px;
+  overflow: hidden; border: 1px solid var(--border-2); background: var(--bg-3); }
+.rec-fill { position: absolute; left: 0; top: 0; bottom: 0; z-index: 0; transition: width .4s ease; }
+.rec-bar.vida .rec-fill { background: linear-gradient(180deg, #ef6a61, var(--vida)); }
+.rec-bar.mana .rec-fill { background: linear-gradient(180deg, #6f81e6, var(--mana)); }
+.rec-bar.energia .rec-fill { background: linear-gradient(180deg, #eab047, var(--energia)); }
+.rec-step { position: relative; z-index: 1; background: transparent; color: #fff; border: 0;
+  padding: 0 10px; font-size: 1.05rem; font-weight: 900; cursor: pointer; line-height: 1;
+  text-shadow: 0 1px 2px rgba(0,0,0,.75); opacity: .9; border-radius: 0; }
+.rec-step:hover { background: rgba(0,0,0,.22); filter: none; opacity: 1; }
+.rec-val { position: relative; z-index: 1; flex: 1; display: grid; place-items: center; font-weight: 900;
+  color: #fff; font-variant-numeric: tabular-nums; text-shadow: 0 1px 3px rgba(0,0,0,.85); letter-spacing: .5px; }
+
+/* Defesa (escudo) + secundarios */
+.def-row { display: flex; align-items: center; gap: 14px; margin-top: 14px; flex-wrap: wrap; }
+.escudo { width: 52px; height: 58px; flex: 0 0 auto; display: grid; place-items: center;
+  font-weight: 900; font-size: 1.4rem; color: var(--gold-3);
+  background: radial-gradient(circle at 50% 32%, var(--panel-3), var(--bg-2));
+  border: 1px solid var(--gold-2);
+  clip-path: polygon(50% 0, 100% 16%, 100% 60%, 50% 100%, 0 60%, 0 16%); }
+.def-row .lbl { font-size: .62rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); font-weight: 800; }
