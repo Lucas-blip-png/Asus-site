@@ -15,6 +15,47 @@ const CAMPOS_DESC = [
 ]
 const vazioBase = { forca: 0, constituicao: 0, destreza: 0, agilidade: 0, inteligencia: 0, sabedoria: 0, carisma: 0 }
 
+function ItemInvRow({ it, onQtd, onEquip, onDelete, onEdit }) {
+  const [open, setOpen] = useState(false)
+  const resumo = [it.dano && `Dano ${it.dano}`, it.bonusDefesa != null && `Defesa +${it.bonusDefesa}`].filter(Boolean).join(' · ')
+  return (
+    <div className={`cris-row${open ? ' open' : ''}`}>
+      <div className="cris-head" onClick={() => setOpen((o) => !o)}>
+        <span className="chev">▾</span>
+        <b className="nm">{it.equipado ? '🛡️ ' : ''}{it.nome}</b>
+        {resumo && <span className="sub">{resumo}</span>}
+        <div className="spacer" />
+        <span className="tag">{(it.espacos || 0)}×{it.quantidade || 1} esp</span>
+      </div>
+      {open && (
+        <div className="cris-body">
+          <div className="row" style={{ gap: 6, flexWrap: 'wrap' }}>
+            {it.categoria && <span className="tag">{it.categoria}</span>}
+            {it.dano && <span className="tag">Dano {it.dano}{it.critico ? ` (${it.critico})` : ''}</span>}
+            {it.bonusDefesa != null && <span className="tag">Defesa +{it.bonusDefesa}</span>}
+            {it.alcance && <span className="tag">{it.alcance}</span>}
+            <span className="tag">Espaços {it.espacos || 0}</span>
+          </div>
+          {it.efeito && <p className="muted" style={{ fontSize: '.82rem', marginTop: 7 }}>{it.efeito}</p>}
+          <div className="row" style={{ gap: 10, marginTop: 9, alignItems: 'center' }}>
+            <span className="step">
+              <button className="ghost mini" onClick={() => onQtd(it, -1)}>−</button>
+              <b className="stat">{it.quantidade || 1}</b>
+              <button className="ghost mini" onClick={() => onQtd(it, +1)}>+</button>
+            </span>
+            <label className="muted" style={{ fontSize: '.75rem' }}>
+              <input type="checkbox" checked={!!it.equipado} onChange={() => onEquip(it)} /> equipado
+            </label>
+            <div className="spacer" />
+            <button className="ghost mini" onClick={() => onEdit(it)}>Editar</button>
+            <button className="ghost mini" onClick={() => onDelete(it.id)}>Remover</button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function Ficha() {
   const { id } = useParams()
   const [p, setP] = useState(null)
@@ -40,6 +81,7 @@ export default function Ficha() {
   const [inventario, setInventario] = useState([])
   const [itemCat, setItemCat] = useState('')
   const [novoItem, setNovoItem] = useState({ nome: '', categoria: 'GERAL', espacos: 1, quantidade: 1 })
+  const [editItem, setEditItem] = useState(null)
   const [outros, setOutros] = useState([])
   const [novaPericia, setNovaPericia] = useState({ nome: '', atributo: 'FORCA' })
   const [rolagem, setRolagem] = useState(null)
@@ -226,6 +268,28 @@ export default function Ficha() {
   }
   async function delItem(iid) {
     try { await api(`/api/inventario/${iid}`, { method: 'DELETE' }); recarregarInv() } catch (e) { setErro(e.message) }
+  }
+  async function salvarEdicao() {
+    if (!editItem) return
+    try {
+      await api(`/api/inventario/${editItem.id}`, {
+        method: 'PUT',
+        body: {
+          nome: editItem.nome,
+          categoria: editItem.categoria || '',
+          espacos: Number(editItem.espacos) || 0,
+          quantidade: Number(editItem.quantidade) || 1,
+          equipado: !!editItem.equipado,
+          dano: editItem.dano || '',
+          critico: editItem.critico || '',
+          alcance: editItem.alcance || '',
+          bonusDefesa: editItem.bonusDefesa === '' || editItem.bonusDefesa == null ? null : Number(editItem.bonusDefesa),
+          efeito: editItem.efeito || '',
+        },
+      })
+      setEditItem(null)
+      recarregarInv()
+    } catch (e) { setErro(e.message) }
   }
 
   // ----- habilidades (gated por trilha/nível/atributo; trilha só nível 11) -----
@@ -530,28 +594,12 @@ export default function Ficha() {
               </div>
               {p.cargaAtual > p.cargaMaxima && <div className="error" style={{ marginBottom: 8 }}>Sobrecarregado! Acima da carga máxima.</div>}
 
-              {inventario.map((it) => (
-                <div key={it.id} className="item-card">
-                  <div className="t">
-                    {it.equipado ? '🛡️ ' : ''}{it.nome} <span className="tag">{(it.espacos || 0)}×{it.quantidade || 1} esp</span>
-                    <button className="ghost mini" style={{ float: 'right' }} onClick={() => delItem(it.id)}>✕</button>
-                  </div>
-                  <div className="s">
-                    {[it.dano && `Dano ${it.dano}${it.critico ? ` (${it.critico})` : ''}`,
-                      it.bonusDefesa != null && `Defesa +${it.bonusDefesa}`, it.alcance, it.efeito].filter(Boolean).join(' · ')}
-                  </div>
-                  <div className="row" style={{ gap: 8, marginTop: 4 }}>
-                    <span className="step">
-                      <button className="ghost mini" onClick={() => setQtd(it, -1)}>−</button>
-                      <b className="stat">{it.quantidade || 1}</b>
-                      <button className="ghost mini" onClick={() => setQtd(it, +1)}>+</button>
-                    </span>
-                    <label className="muted" style={{ fontSize: '.75rem' }}>
-                      <input type="checkbox" checked={!!it.equipado} onChange={() => toggleEquip(it)} /> equipado
-                    </label>
-                  </div>
-                </div>
-              ))}
+              <div className="cris-list">
+                {inventario.map((it) => (
+                  <ItemInvRow key={it.id} it={it} onQtd={setQtd} onEquip={toggleEquip}
+                    onDelete={delItem} onEdit={setEditItem} />
+                ))}
+              </div>
               {!inventario.length && <div className="muted">Inventário vazio.</div>}
 
               <div className="add-form">
@@ -586,6 +634,57 @@ export default function Ficha() {
           )}
         </div>
       </div>
+
+      {editItem && (
+        <div className="modal" onClick={() => setEditItem(null)}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 520 }}>
+            <div className="row">
+              <h2 style={{ margin: 0 }}>Editar item</h2>
+              <div className="spacer" />
+              <button className="ghost mini" onClick={() => setEditItem(null)}>✕</button>
+            </div>
+            <label>Nome</label>
+            <input value={editItem.nome || ''} onChange={(e) => setEditItem((s) => ({ ...s, nome: e.target.value }))} />
+            <div className="row" style={{ gap: 8 }}>
+              <div style={{ flex: 1 }}>
+                <label>Categoria</label>
+                <input value={editItem.categoria || ''}
+                  onChange={(e) => setEditItem((s) => ({ ...s, categoria: e.target.value }))} />
+              </div>
+              <div style={{ width: 90 }}>
+                <label>Espaços</label>
+                <input type="number" min="0" value={editItem.espacos ?? 0}
+                  onChange={(e) => setEditItem((s) => ({ ...s, espacos: e.target.value }))} />
+              </div>
+            </div>
+            <div className="row" style={{ gap: 8 }}>
+              <div style={{ flex: 1 }}>
+                <label>Dano</label>
+                <input placeholder="1d8" value={editItem.dano || ''}
+                  onChange={(e) => setEditItem((s) => ({ ...s, dano: e.target.value }))} />
+              </div>
+              <div style={{ width: 90 }}>
+                <label>Crítico</label>
+                <input placeholder="x2" value={editItem.critico || ''}
+                  onChange={(e) => setEditItem((s) => ({ ...s, critico: e.target.value }))} />
+              </div>
+              <div style={{ width: 100 }}>
+                <label>Defesa +</label>
+                <input type="number" value={editItem.bonusDefesa ?? ''}
+                  onChange={(e) => setEditItem((s) => ({ ...s, bonusDefesa: e.target.value }))} />
+              </div>
+            </div>
+            <label>Alcance</label>
+            <input value={editItem.alcance || ''} onChange={(e) => setEditItem((s) => ({ ...s, alcance: e.target.value }))} />
+            <label>Efeito / Descrição</label>
+            <textarea value={editItem.efeito || ''} onChange={(e) => setEditItem((s) => ({ ...s, efeito: e.target.value }))} />
+            <div className="row" style={{ marginTop: 12, gap: 8 }}>
+              <button onClick={salvarEdicao}>Salvar</button>
+              <button className="ghost" onClick={() => setEditItem(null)}>Cancelar</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {modalHab && (
         <div className="modal" onClick={() => setModalHab(false)}>
