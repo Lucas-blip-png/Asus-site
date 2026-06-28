@@ -112,16 +112,21 @@ public class AsusV1Engine implements GameSystemEngine {
         }
         passos.add("Atributos finais: " + descrever(finais));
 
-        // Status derivado
-        int pv = raca.getPvBase() + classePv + finais.getConstituicao() * 2;
-        int pm = raca.getPmBase() + classePm + finais.getInteligencia() * 2;
-        int pe = raca.getPeBase() + classePe + finais.getConstituicao() * 2;
-        passos.add(String.format("PV = racaPV(%d) + classePV(%d) + Con(%d)x2 = %d",
-                raca.getPvBase(), classePv, finais.getConstituicao(), pv));
-        passos.add(String.format("PM = racaPM(%d) + classePM(%d) + Int(%d)x2 = %d",
-                raca.getPmBase(), classePm, finais.getInteligencia(), pm));
-        passos.add(String.format("PE = racaPE(%d) + classePE(%d) + Con(%d)x2 = %d",
-                raca.getPeBase(), classePe, finais.getConstituicao(), pe));
+        // Status derivado: base (raca+classe) ganha +1x essa base a cada 5 niveis;
+        // mais Con x2 (PV/PE) e Int x2 (PM).
+        int blocos = ctx.nivel() / 5; // bonus de classe+raca a cada 5 niveis
+        int pvBase = raca.getPvBase() + classePv;
+        int pmBase = raca.getPmBase() + classePm;
+        int peBase = raca.getPeBase() + classePe;
+        int pv = pvBase * (1 + blocos) + finais.getConstituicao() * 2;
+        int pm = pmBase * (1 + blocos) + finais.getInteligencia() * 2;
+        int pe = peBase * (1 + blocos) + finais.getConstituicao() * 2;
+        passos.add(String.format("PV = (racaPV(%d)+classePV(%d)) x (1 + Nv%d/5=%d) + Con(%d)x2 = %d",
+                raca.getPvBase(), classePv, ctx.nivel(), blocos, finais.getConstituicao(), pv));
+        passos.add(String.format("PM = (racaPM(%d)+classePM(%d)) x (1 + %d) + Int(%d)x2 = %d",
+                raca.getPmBase(), classePm, blocos, finais.getInteligencia(), pm));
+        passos.add(String.format("PE = (racaPE(%d)+classePE(%d)) x (1 + %d) + Con(%d)x2 = %d",
+                raca.getPeBase(), classePe, blocos, finais.getConstituicao(), pe));
 
         Status status = Status.builder()
                 .pvMax(pv).pvAtual(pv)

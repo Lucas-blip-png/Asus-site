@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { api } from '../api.js'
 import { inscrever } from '../ws.js'
 import { useAuth } from '../auth.jsx'
@@ -7,7 +7,9 @@ import { dataHora } from '../format.js'
 
 export default function Campanha() {
   const { id } = useParams()
+  const nav = useNavigate()
   const { user } = useAuth()
+  const [confirmarApagar, setConfirmarApagar] = useState(false)
   const [campanha, setCampanha] = useState(null)
   const [rolagens, setRolagens] = useState([])
   const [membros, setMembros] = useState([])
@@ -77,6 +79,13 @@ export default function Campanha() {
       api(`/api/campanhas/${id}/sessoes`).then(setSessoes)
     } catch (ex) { setErro(ex.message) }
   }
+  async function apagarCampanha() {
+    setErro(null)
+    try {
+      await api(`/api/campanhas/${id}`, { method: 'DELETE' })
+      nav('/campanhas')
+    } catch (ex) { setErro(ex.message); setConfirmarApagar(false) }
+  }
   async function presenca(sessaoId, status) {
     setErro(null)
     try { await api(`/api/sessoes/${sessaoId}/presenca`, { method: 'POST', body: { usuarioId: user?.id, status } }) }
@@ -109,8 +118,22 @@ export default function Campanha() {
         <Link className="tag" to={`/overlay/${id}`}>
           Overlay OBS
         </Link>
+        <button className="ghost mini" onClick={() => setConfirmarApagar(true)}>Apagar campanha</button>
       </div>
       {erro && <p className="error">{erro}</p>}
+
+      {confirmarApagar && (
+        <div className="modal" onClick={() => setConfirmarApagar(false)}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+            <h2>Apagar campanha?</h2>
+            <p className="muted">"{campanha.nome}" e seus vínculos serão removidos. Não dá pra desfazer.</p>
+            <div className="row" style={{ marginTop: 12, gap: 8 }}>
+              <button className="danger" onClick={apagarCampanha}>Sim, apagar</button>
+              <button className="ghost" onClick={() => setConfirmarApagar(false)}>Cancelar</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="card">
         <h2>Rolar dados</h2>
