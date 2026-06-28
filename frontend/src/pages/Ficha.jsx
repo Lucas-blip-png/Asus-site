@@ -901,7 +901,11 @@ export default function Ficha() {
                 <span style={{ width: Math.min(100, p.cargaMaxima ? Math.round((p.cargaAtual / p.cargaMaxima) * 100) : 0) + '%' }} />
                 <b>{p.cargaAtual}/{p.cargaMaxima}</b>
               </div>
-              {p.cargaAtual > p.cargaMaxima && <div className="error" style={{ marginBottom: 8 }}>Sobrecarregado! Acima da carga máxima.</div>}
+              {p.cargaAtual > p.cargaMaxima && (
+                <div className="error" style={{ marginBottom: 8 }}>
+                  Sobrecarregado! −{p.cargaAtual - p.cargaMaxima} de Agilidade (1 por ponto acima da carga máxima).
+                </div>
+              )}
 
               <div className="cris-list">
                 {inventario.map((it) => (

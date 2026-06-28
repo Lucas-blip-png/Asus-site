@@ -1,5 +1,6 @@
 package com.asus.platform.service;
 
+import com.asus.platform.domain.Atributos;
 import com.asus.platform.domain.Classe;
 import com.asus.platform.domain.GameSystem;
 import com.asus.platform.domain.Personagem;
@@ -53,6 +54,15 @@ public class CalculoService {
     }
 
     public ResultadoCalculo calcular(Personagem personagem) {
+        return calcular(personagem, 0);
+    }
+
+    /**
+     * Recalcula com uma penalidade de Agilidade (ex.: sobrecarga de inventario:
+     * cada ponto acima da carga maxima tira 1 de Agilidade). A penalidade entra na
+     * base, entao cascateia para deslocamento, pericias de AGI, etc.
+     */
+    public ResultadoCalculo calcular(Personagem personagem, int penalidadeAgilidade) {
         GameSystem sistema = gameSystemRepository.findById(personagem.getGameSystemId())
                 .orElseThrow(() -> new NotFoundException("Sistema nao encontrado"));
 
@@ -73,8 +83,17 @@ public class CalculoService {
 
         GameSystemEngine engine = registry.getEngine(sistema.getCodigo(), personagem.getRulesetVersion());
 
+        Atributos base = personagem.getAtributosBase();
+        if (penalidadeAgilidade > 0 && base != null) {
+            base = Atributos.builder()
+                    .forca(base.getForca()).constituicao(base.getConstituicao()).destreza(base.getDestreza())
+                    .agilidade(base.getAgilidade() - penalidadeAgilidade)
+                    .inteligencia(base.getInteligencia()).sabedoria(base.getSabedoria()).carisma(base.getCarisma())
+                    .build();
+        }
+
         ContextoCalculo contexto = new ContextoCalculo(
-                raca, fontes, personagem.getAtributosBase(), personagem.getNivel(), pericias, treino);
+                raca, fontes, base, personagem.getNivel(), pericias, treino);
 
         return engine.calcular(contexto);
     }
