@@ -36,4 +36,8 @@ public class CombateParticipante {
 
     /** true = ameaça/inimigo; false = agente. */
     private boolean inimigo;
+
+    /** Condições/efeitos como JSON: [{"nome":"Envenenado","turnos":3}, ...]. */
+    @Column(columnDefinition = "TEXT")
+    private String condicoes;
 }

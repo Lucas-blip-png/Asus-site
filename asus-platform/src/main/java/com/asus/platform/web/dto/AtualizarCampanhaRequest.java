@@ -6,7 +6,6 @@ import jakarta.validation.Valid;
 public record AtualizarCampanhaRequest(
         String nome,
         String descricao,
-        String anotacoes,
         String capaAssetId,
         Boolean arquivada,
         @Valid CampanhaConfigDto config) {}

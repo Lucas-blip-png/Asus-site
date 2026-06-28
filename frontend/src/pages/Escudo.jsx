@@ -54,6 +54,23 @@ export default function Escudo() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, user])
 
+  // Status em tempo real: quando um jogador edita a própria ficha, o card do escudo atualiza.
+  const idsPersonagens = (data?.personagens || []).map((pp) => pp.id).join(',')
+  useEffect(() => {
+    const ids = idsPersonagens ? idsPersonagens.split(',') : []
+    if (!ids.length) return undefined
+    const subs = ids.map((pid) =>
+      inscrever(`/topic/personagens/${pid}/status`, (s) =>
+        setData((prev) => (prev ? {
+          ...prev,
+          personagens: prev.personagens.map((x) =>
+            String(x.id) === String(pid) ? { ...x, status: { ...x.status, ...s } } : x),
+        } : prev)),
+      ),
+    )
+    return () => subs.forEach((u) => u && u())
+  }, [idsPersonagens])
+
   async function ajustar(pid, campo, delta, atual) {
     try {
       await api(`/api/campanhas/${id}/escudo/personagens/${pid}/status?usuarioId=${user?.id}`, {

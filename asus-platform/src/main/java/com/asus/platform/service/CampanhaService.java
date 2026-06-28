@@ -152,9 +152,6 @@ public class CampanhaService {
         if (req.descricao() != null) {
             campanha.setDescricao(com.asus.platform.util.Sanitizador.limpar(req.descricao()));
         }
-        if (req.anotacoes() != null) {
-            campanha.setAnotacoes(com.asus.platform.util.Sanitizador.limpar(req.anotacoes()));
-        }
         if (req.capaAssetId() != null) {
             campanha.setCapaAssetId(req.capaAssetId());
         }
@@ -170,6 +167,22 @@ public class CampanhaService {
                 "CAMPANHA_ATUALIZADA", "Campanha", campanha.getId(), null, null, campanha.getNome());
 
         return CampanhaResponse.de(campanha, systemIdDe(campanha));
+    }
+
+    /** Anotações do mestre (privadas): só quem gerencia a campanha pode ler. */
+    public String obterAnotacoes(Long campanhaId, Long usuarioId) {
+        Campanha campanha = carregar(campanhaId);
+        exigirPermissao(campanhaId, usuarioId, Permissao.GERENCIAR_CAMPANHA);
+        return campanha.getAnotacoes();
+    }
+
+    @Transactional
+    public String salvarAnotacoes(Long campanhaId, Long usuarioId, String texto) {
+        Campanha campanha = carregar(campanhaId);
+        exigirPermissao(campanhaId, usuarioId, Permissao.GERENCIAR_CAMPANHA);
+        campanha.setAnotacoes(texto == null ? null : com.asus.platform.util.Sanitizador.limpar(texto));
+        campanhaRepository.save(campanha);
+        return campanha.getAnotacoes();
     }
 
     /** Apaga a campanha e seus vinculos (membros, personagens e combates). */

@@ -143,6 +143,10 @@ public class CombateController {
         if (body.containsKey("inimigo")) {
             p.setInimigo(Boolean.parseBoolean(String.valueOf(body.get("inimigo"))));
         }
+        if (body.containsKey("condicoes")) {
+            Object cond = body.get("condicoes");
+            p.setCondicoes(cond == null ? null : String.valueOf(cond));
+        }
         return participanteRepository.save(p);
     }
 

@@ -240,6 +240,12 @@ export default function Ficha() {
     return inscrever(`/topic/campanhas/${campanhaAtiva.id}/rolagens`, (r) => setRolagens((prev) => [r, ...prev]))
   }, [campanhaAtiva])
 
+  // Status em tempo real: se o mestre (ou outro) muda PV/PM/PE, a ficha atualiza sozinha.
+  useEffect(() =>
+    inscrever(`/topic/personagens/${id}/status`, (s) =>
+      setP((prev) => (prev ? { ...prev, status: { ...prev.status, ...s } } : prev)),
+    ), [id])
+
   function aplicar(d) {
     setP(d)
     setTreino(Object.fromEntries((d.pericias || []).filter((pe) => !pe.custom).map((pe) => [pe.codigo, pe.treino])))
