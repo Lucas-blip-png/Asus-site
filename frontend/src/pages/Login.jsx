@@ -8,8 +8,8 @@ export default function Login() {
   const nav = useNavigate()
   const [modo, setModo] = useState('login')
   const [nome, setNome] = useState('')
-  const [email, setEmail] = useState('dev@asus.local')
-  const [senha, setSenha] = useState('dev12345')
+  const [email, setEmail] = useState('')
+  const [senha, setSenha] = useState('')
   const [erro, setErro] = useState(null)
   const [carregando, setCarregando] = useState(false)
   const [googleOn, setGoogleOn] = useState(false)
@@ -87,9 +87,6 @@ export default function Login() {
           </>
         )}
       </div>
-      <p className="muted" style={{ textAlign: 'center', fontSize: '.8rem' }}>
-        Dev: dev@asus.local / dev12345
-      </p>
     </div>
   )
 }
