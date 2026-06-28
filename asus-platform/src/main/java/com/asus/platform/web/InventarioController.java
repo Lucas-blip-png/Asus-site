@@ -81,6 +81,14 @@ public class InventarioController {
         if (patch.getNome() != null && !patch.getNome().isBlank()) {
             item.setNome(patch.getNome());
         }
+        // Demais campos editaveis (inclusive de itens vindos do catalogo: editam a copia da ficha)
+        if (patch.getCategoria() != null) item.setCategoria(patch.getCategoria());
+        if (patch.getDano() != null) item.setDano(patch.getDano());
+        if (patch.getCritico() != null) item.setCritico(patch.getCritico());
+        if (patch.getAlcance() != null) item.setAlcance(patch.getAlcance());
+        if (patch.getTipoDano() != null) item.setTipoDano(patch.getTipoDano());
+        if (patch.getBonusDefesa() != null) item.setBonusDefesa(patch.getBonusDefesa());
+        if (patch.getPenalidade() != null) item.setPenalidade(patch.getPenalidade());
         if (patch.getEfeito() != null) {
             item.setEfeito(patch.getEfeito());
         }
