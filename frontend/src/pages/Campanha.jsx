@@ -13,7 +13,145 @@ const fmtData = (iso) => {
   }
 }
 
-const ABAS = ['Agentes', 'Jogadores', 'Sessões', 'Rolagens']
+const ABAS = ['Agentes', 'Jogadores', 'Sessões', 'Combates', 'Rolagens']
+
+const d20 = () => 1 + Math.floor(Math.random() * 20)
+
+// Rastreador de iniciativa de um combate.
+function CombateTracker({ combate, personagens, onClose, onMudou }) {
+  const cid = combate.id
+  const [c, setC] = useState(combate)
+  const [parts, setParts] = useState([])
+  const [erro, setErro] = useState(null)
+  const [selAgente, setSelAgente] = useState('')
+  const [ameaca, setAmeaca] = useState({ nome: '', iniciativa: '', pvMax: '' })
+
+  function recarregar() {
+    api(`/api/combates/${cid}`).then(setC).catch(() => {})
+    api(`/api/combates/${cid}/participantes`).then(setParts).catch(() => {})
+  }
+  useEffect(() => { recarregar() }, [cid]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function proximo() {
+    try { setC(await api(`/api/combates/${cid}/proximo`, { method: 'POST' })); onMudou?.() }
+    catch (e) { setErro(e.message) }
+  }
+  async function reiniciar() {
+    try { setC(await api(`/api/combates/${cid}/reset`, { method: 'POST' })); onMudou?.() }
+    catch (e) { setErro(e.message) }
+  }
+  async function addAgente() {
+    if (!selAgente) return
+    setErro(null)
+    try {
+      const cp = personagens.find((x) => String(x.personagemId) === String(selAgente))
+      let pvMax = 0, pvAtual = 0
+      try {
+        const ficha = await api(`/api/personagens/${selAgente}`)
+        pvMax = ficha?.status?.pvMax ?? 0
+        pvAtual = ficha?.status?.pvAtual ?? pvMax
+      } catch { /* segue com 0 */ }
+      await api(`/api/combates/${cid}/participantes`, {
+        method: 'POST',
+        body: {
+          nome: cp?.personagemNome || 'Agente',
+          personagemId: Number(selAgente),
+          avatarAssetId: cp?.avatarAssetId ?? null,
+          pvMax, pvAtual, iniciativa: d20(), inimigo: false,
+        },
+      })
+      setSelAgente('')
+      recarregar()
+    } catch (e) { setErro(e.message) }
+  }
+  async function addAmeaca() {
+    if (!ameaca.nome.trim()) return
+    setErro(null)
+    try {
+      await api(`/api/combates/${cid}/participantes`, {
+        method: 'POST',
+        body: {
+          nome: ameaca.nome.trim(),
+          iniciativa: ameaca.iniciativa === '' ? d20() : Number(ameaca.iniciativa),
+          pvMax: Number(ameaca.pvMax) || 0,
+          inimigo: true,
+        },
+      })
+      setAmeaca({ nome: '', iniciativa: '', pvMax: '' })
+      recarregar()
+    } catch (e) { setErro(e.message) }
+  }
+  async function patchPart(pid, body) {
+    try { await api(`/api/participantes/${pid}`, { method: 'PUT', body }); recarregar() }
+    catch (e) { setErro(e.message) }
+  }
+  async function removerPart(pid) {
+    try { await api(`/api/participantes/${pid}`, { method: 'DELETE' }); recarregar() }
+    catch (e) { setErro(e.message) }
+  }
+
+  const disponiveis = personagens.filter(
+    (cp) => !parts.some((p) => String(p.personagemId) === String(cp.personagemId)),
+  )
+
+  return (
+    <div className="card">
+      <div className="row" style={{ alignItems: 'center', gap: 10 }}>
+        <h2 style={{ margin: 0 }}>{c.nome}</h2>
+        <span className="tag">Rodada {c.rodada}</span>
+        <div className="spacer" />
+        <button className="mini" onClick={proximo}>▶ Próximo turno</button>
+        <button className="ghost mini" onClick={reiniciar} title="Voltar para a rodada 1">↺</button>
+        <button className="ghost mini" onClick={onClose}>Fechar</button>
+      </div>
+      {erro && <p className="error">{erro}</p>}
+
+      <div className="combate-lista">
+        {parts.map((p, i) => (
+          <div key={p.id} className={`combate-row${i === c.turnoAtual ? ' ativo' : ''}${p.inimigo ? ' inimigo' : ''}`}>
+            <span className="ini" title="Iniciativa">{p.iniciativa}</span>
+            <div className="av-mini"
+              style={p.avatarAssetId ? { backgroundImage: `url(/api/assets/${p.avatarAssetId}/conteudo)` } : undefined}>
+              {!p.avatarAssetId && (p.nome || '?').charAt(0).toUpperCase()}
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div className="nm">{i === c.turnoAtual ? '▶ ' : ''}{p.nome}</div>
+              <div className="muted" style={{ fontSize: '.72rem' }}>{p.inimigo ? 'Ameaça' : 'Agente'}</div>
+            </div>
+            <div className="row" style={{ gap: 4, alignItems: 'center' }}>
+              <button className="ghost mini" title="-5 PV" onClick={() => patchPart(p.id, { pvAtual: Math.max(0, p.pvAtual - 5) })}>«</button>
+              <button className="ghost mini" title="-1 PV" onClick={() => patchPart(p.id, { pvAtual: Math.max(0, p.pvAtual - 1) })}>‹</button>
+              <b className="stat" style={{ minWidth: 54, textAlign: 'center' }}>{p.pvAtual}/{p.pvMax}</b>
+              <button className="ghost mini" title="+1 PV" onClick={() => patchPart(p.id, { pvAtual: p.pvAtual + 1 })}>›</button>
+              <button className="ghost mini" title="Rolar iniciativa" onClick={() => patchPart(p.id, { iniciativa: d20() })}>🎲</button>
+              <button className="ghost mini" title="Remover" onClick={() => removerPart(p.id)}>✕</button>
+            </div>
+          </div>
+        ))}
+        {!parts.length && <div className="muted">Nenhum participante. Adicione agentes e ameaças abaixo.</div>}
+      </div>
+
+      <div className="add-form" style={{ marginTop: 12 }}>
+        <select value={selAgente} onChange={(e) => setSelAgente(e.target.value)} style={{ flex: '1 1 160px' }}>
+          <option value="">— agente da campanha —</option>
+          {disponiveis.map((cp) => (
+            <option key={cp.personagemId} value={cp.personagemId}>{cp.personagemNome}</option>
+          ))}
+        </select>
+        <button className="mini" onClick={addAgente}>+ Agente</button>
+      </div>
+      <div className="add-form">
+        <input placeholder="Ameaça / NPC" value={ameaca.nome}
+          onChange={(e) => setAmeaca((s) => ({ ...s, nome: e.target.value }))} />
+        <input type="number" placeholder="Inic." style={{ maxWidth: 80 }} value={ameaca.iniciativa}
+          onChange={(e) => setAmeaca((s) => ({ ...s, iniciativa: e.target.value }))} />
+        <input type="number" placeholder="PV" style={{ maxWidth: 80 }} value={ameaca.pvMax}
+          onChange={(e) => setAmeaca((s) => ({ ...s, pvMax: e.target.value }))} />
+        <button className="mini" onClick={addAmeaca}>+ Ameaça</button>
+      </div>
+    </div>
+  )
+}
 
 export default function Campanha() {
   const { id } = useParams()
@@ -34,6 +172,14 @@ export default function Campanha() {
   const [toast, setToast] = useState(null)
   const toastTimer = useRef(null)
   const [erro, setErro] = useState(null)
+  // Adicionar personagem / editar campanha / combates
+  const [addPersoOpen, setAddPersoOpen] = useState(false)
+  const [orgPersonagens, setOrgPersonagens] = useState([])
+  const [selAdd, setSelAdd] = useState('')
+  const [editOpen, setEditOpen] = useState(false)
+  const [editForm, setEditForm] = useState({ nome: '', descricao: '' })
+  const [combates, setCombates] = useState([])
+  const [combateAtivo, setCombateAtivo] = useState(null)
 
   function carregar() {
     api(`/api/campanhas/${id}`).then(setCampanha).catch((e) => setErro(e.message))
@@ -41,6 +187,7 @@ export default function Campanha() {
     api(`/api/campanhas/${id}/membros`).then(setMembros)
     api(`/api/campanhas/${id}/personagens`).then(setPersonagens)
     api(`/api/campanhas/${id}/sessoes`).then(setSessoes).catch(() => {})
+    api(`/api/campanhas/${id}/combates`).then(setCombates).catch(() => {})
   }
 
   function flashToast(r) {
@@ -130,7 +277,69 @@ export default function Campanha() {
     }
   }
 
+  // ----- adicionar personagem -----
+  async function abrirAddPerso() {
+    setErro(null)
+    try {
+      const lista = await api(`/api/organizacoes/${campanha.organizacaoId}/personagens`).catch(() => [])
+      setOrgPersonagens(lista || [])
+      setSelAdd('')
+      setAddPersoOpen(true)
+    } catch (e) { setErro(e.message) }
+  }
+  async function adicionarPersonagem() {
+    if (!selAdd) return
+    setErro(null)
+    try {
+      await api(`/api/campanhas/${id}/personagens`, { method: 'POST', body: { personagemId: Number(selAdd) } })
+      setAddPersoOpen(false)
+      api(`/api/campanhas/${id}/personagens`).then(setPersonagens)
+      setAba('Agentes')
+    } catch (e) { setErro(e.message) }
+  }
+
+  // ----- editar campanha -----
+  function abrirEdit() {
+    setEditForm({ nome: campanha.nome || '', descricao: campanha.descricao || '' })
+    setEditOpen(true)
+  }
+  async function salvarEdicao() {
+    setErro(null)
+    try {
+      await api(`/api/campanhas/${id}`, {
+        method: 'PUT',
+        body: { nome: editForm.nome, descricao: editForm.descricao },
+      })
+      setEditOpen(false)
+      api(`/api/campanhas/${id}`).then(setCampanha)
+    } catch (e) { setErro(e.message) }
+  }
+
+  // ----- combates -----
+  const recarregarCombates = () => api(`/api/campanhas/${id}/combates`).then(setCombates).catch(() => {})
+  async function criarCombate() {
+    setErro(null)
+    try {
+      const nome = `Combate ${combates.length + 1}`
+      const c = await api(`/api/campanhas/${id}/combates`, { method: 'POST', body: { nome } })
+      await recarregarCombates()
+      setCombateAtivo(c)
+      setAba('Combates')
+    } catch (e) { setErro(e.message) }
+  }
+  async function apagarCombate(combateId) {
+    setErro(null)
+    try {
+      await api(`/api/combates/${combateId}`, { method: 'DELETE' })
+      if (combateAtivo?.id === combateId) setCombateAtivo(null)
+      recarregarCombates()
+    } catch (e) { setErro(e.message) }
+  }
+
   if (!campanha) return <div className="center">Carregando…</div>
+  const personagensDisponiveis = orgPersonagens.filter(
+    (p) => !personagens.some((cp) => String(cp.personagemId) === String(p.id)),
+  )
   return (
     <>
       {/* Barra de ações (estilo CRIS) */}
@@ -140,7 +349,10 @@ export default function Campanha() {
           <input type="file" accept="image/*" style={{ display: 'none' }}
             onChange={(e) => trocarCapa(e.target.files[0])} />
         </label>
+        <button className="act" onClick={abrirAddPerso}>＋ Adicionar Agentes</button>
         <button className="act" onClick={criarConvite}>✉ Convidar Jogadores</button>
+        <button className="act" onClick={abrirEdit}>✎ Editar Campanha</button>
+        <button className="act" onClick={criarCombate}>⚔ Criar Combate</button>
         <Link className="act" to={`/campanhas/${id}/escudo`}>🛡 Escudo do Mestre</Link>
         <Link className="act" to={`/overlay/${id}`}>📺 Overlay OBS</Link>
         <button className="act danger" onClick={() => setConfirmarApagar(true)}>🗑 Apagar campanha</button>
@@ -186,6 +398,7 @@ export default function Campanha() {
             {x}
             {x === 'Agentes' && personagens.length > 0 ? ` (${personagens.length})` : ''}
             {x === 'Jogadores' && membros.length > 0 ? ` (${membros.length})` : ''}
+            {x === 'Combates' && combates.length > 0 ? ` (${combates.length})` : ''}
           </button>
         ))}
       </div>
@@ -275,6 +488,40 @@ export default function Campanha() {
         </div>
       )}
 
+      {aba === 'Combates' && (
+        <>
+          <div className="row" style={{ marginBottom: 12, gap: 8 }}>
+            <button onClick={criarCombate}>⚔ Criar Combate</button>
+          </div>
+          {combateAtivo ? (
+            <CombateTracker
+              combate={combateAtivo}
+              personagens={personagens}
+              onClose={() => { setCombateAtivo(null); recarregarCombates() }}
+              onMudou={recarregarCombates}
+            />
+          ) : (
+            <div className="lista-vert">
+              {combates.map((c) => (
+                <div key={c.id} className="sessao-row">
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div className="row" style={{ gap: 8 }}>
+                      <b>{c.nome}</b>
+                      <span className="tag">Rodada {c.rodada}</span>
+                    </div>
+                  </div>
+                  <div className="row" style={{ gap: 4 }}>
+                    <button className="mini" onClick={() => setCombateAtivo(c)}>Abrir</button>
+                    <button className="ghost mini" onClick={() => apagarCombate(c.id)} title="Apagar">✕</button>
+                  </div>
+                </div>
+              ))}
+              {!combates.length && <span className="muted">Nenhum combate. Clique em “Criar Combate”.</span>}
+            </div>
+          )}
+        </>
+      )}
+
       {aba === 'Rolagens' && (
         <>
           <div className="card">
@@ -315,6 +562,55 @@ export default function Campanha() {
             </table>
           </div>
         </>
+      )}
+
+      {addPersoOpen && (
+        <div className="modal" onClick={() => setAddPersoOpen(false)}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 440 }}>
+            <div className="row">
+              <h2 style={{ margin: 0 }}>Adicionar agente</h2>
+              <div className="spacer" />
+              <button className="ghost mini" onClick={() => setAddPersoOpen(false)}>✕</button>
+            </div>
+            <label style={{ marginTop: 8 }}>Personagem</label>
+            <select value={selAdd} onChange={(e) => setSelAdd(e.target.value)}>
+              <option value="">— escolha um personagem —</option>
+              {personagensDisponiveis.map((p) => (
+                <option key={p.id} value={p.id}>{p.nome}</option>
+              ))}
+            </select>
+            {!personagensDisponiveis.length && (
+              <p className="muted" style={{ fontSize: '.82rem' }}>
+                Todos os seus personagens já estão na campanha (ou você ainda não criou nenhum).
+              </p>
+            )}
+            <div className="row" style={{ marginTop: 12, gap: 8 }}>
+              <button disabled={!selAdd} onClick={adicionarPersonagem}>Adicionar</button>
+              <button className="ghost" onClick={() => setAddPersoOpen(false)}>Cancelar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {editOpen && (
+        <div className="modal" onClick={() => setEditOpen(false)}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 480 }}>
+            <div className="row">
+              <h2 style={{ margin: 0 }}>Editar campanha</h2>
+              <div className="spacer" />
+              <button className="ghost mini" onClick={() => setEditOpen(false)}>✕</button>
+            </div>
+            <label style={{ marginTop: 8 }}>Nome</label>
+            <input value={editForm.nome} onChange={(e) => setEditForm((s) => ({ ...s, nome: e.target.value }))} />
+            <label>Descrição</label>
+            <textarea value={editForm.descricao}
+              onChange={(e) => setEditForm((s) => ({ ...s, descricao: e.target.value }))} />
+            <div className="row" style={{ marginTop: 12, gap: 8 }}>
+              <button onClick={salvarEdicao}>Salvar</button>
+              <button className="ghost" onClick={() => setEditOpen(false)}>Cancelar</button>
+            </div>
+          </div>
+        </div>
       )}
 
       {toast && (
