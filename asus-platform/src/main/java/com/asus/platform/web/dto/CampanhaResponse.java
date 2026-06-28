@@ -10,7 +10,6 @@ public record CampanhaResponse(
         String rulesetSystemId,
         String nome,
         String descricao,
-        String anotacoes,
         String capaAssetId,
         CampanhaConfigDto config,
         boolean arquivada,
@@ -20,7 +19,7 @@ public record CampanhaResponse(
     public static CampanhaResponse de(Campanha c, String systemId) {
         return new CampanhaResponse(
                 c.getId(), c.getOrganizacaoId(), c.getMestreId(), systemId,
-                c.getNome(), c.getDescricao(), c.getAnotacoes(), c.getCapaAssetId(),
+                c.getNome(), c.getDescricao(), c.getCapaAssetId(),
                 CampanhaConfigDto.de(c.getConfig()), c.isArquivada(),
                 c.getCriadoEm(), c.getAtualizadoEm());
     }

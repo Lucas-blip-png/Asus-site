@@ -13,6 +13,8 @@ import com.asus.platform.web.dto.CriarConviteRequest;
 import com.asus.platform.web.dto.EntrarCampanhaRequest;
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -64,6 +66,21 @@ public class CampanhaController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void apagar(@PathVariable Long id) {
         service.apagar(id);
+    }
+
+    /** Anotações privadas do mestre (gateadas por permissão; não saem no CampanhaResponse). */
+    @GetMapping("/campanhas/{id}/anotacoes")
+    public Map<String, String> obterAnotacoes(@PathVariable Long id,
+                                              @RequestParam(required = false) Long usuarioId) {
+        return Map.of("anotacoes", Optional.ofNullable(service.obterAnotacoes(id, usuarioId)).orElse(""));
+    }
+
+    @PutMapping("/campanhas/{id}/anotacoes")
+    public Map<String, String> salvarAnotacoes(@PathVariable Long id,
+                                               @RequestParam(required = false) Long usuarioId,
+                                               @RequestBody Map<String, String> body) {
+        return Map.of("anotacoes",
+                Optional.ofNullable(service.salvarAnotacoes(id, usuarioId, body.get("anotacoes"))).orElse(""));
     }
 
     @GetMapping("/campanhas/{id}/personagens")

@@ -26,12 +26,16 @@ function CombateTracker({ combate, personagens, onClose, onMudou }) {
   const [erro, setErro] = useState(null)
   const [selAgente, setSelAgente] = useState('')
   const [ameaca, setAmeaca] = useState({ nome: '', iniciativa: '', pvMax: '' })
+  const [bestiario, setBestiario] = useState([])
+  const [selBicho, setSelBicho] = useState('')
+  const [condForm, setCondForm] = useState({ pid: null, nome: '', turnos: '' })
 
   function recarregar() {
     api(`/api/combates/${cid}`).then(setC).catch(() => {})
     api(`/api/combates/${cid}/participantes`).then(setParts).catch(() => {})
   }
   useEffect(() => { recarregar() }, [cid]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { api('/api/bestiario').then(setBestiario).catch(() => {}) }, [])
 
   async function proximo() {
     try { setC(await api(`/api/combates/${cid}/proximo`, { method: 'POST' })); onMudou?.() }
@@ -82,6 +86,20 @@ function CombateTracker({ combate, personagens, onClose, onMudou }) {
       recarregar()
     } catch (e) { setErro(e.message) }
   }
+  async function addBicho() {
+    if (!selBicho) return
+    setErro(null)
+    try {
+      const b = bestiario.find((x) => String(x.id) === String(selBicho))
+      if (!b) return
+      await api(`/api/combates/${cid}/participantes`, {
+        method: 'POST',
+        body: { nome: b.nome, pvMax: b.pv || 0, pvAtual: b.pv || 0, iniciativa: d20(), inimigo: true },
+      })
+      setSelBicho('')
+      recarregar()
+    } catch (e) { setErro(e.message) }
+  }
   async function patchPart(pid, body) {
     try { await api(`/api/participantes/${pid}`, { method: 'PUT', body }); recarregar() }
     catch (e) { setErro(e.message) }
@@ -89,6 +107,29 @@ function CombateTracker({ combate, personagens, onClose, onMudou }) {
   async function removerPart(pid) {
     try { await api(`/api/participantes/${pid}`, { method: 'DELETE' }); recarregar() }
     catch (e) { setErro(e.message) }
+  }
+
+  // ----- condições / efeitos -----
+  const parseCond = (p) => { try { return JSON.parse(p.condicoes || '[]') } catch { return [] } }
+  async function addCond(p) {
+    if (!condForm.nome.trim()) return
+    const lista = [...parseCond(p), { nome: condForm.nome.trim(), turnos: Number(condForm.turnos) || 0 }]
+    setCondForm({ pid: null, nome: '', turnos: '' })
+    await patchPart(p.id, { condicoes: JSON.stringify(lista) })
+  }
+  async function tickCond(p, idx, delta) {
+    const lista = parseCond(p)
+    const cd = lista[idx]
+    if (!cd) return
+    const t = (cd.turnos || 0) + delta
+    if (t <= 0 && delta < 0) lista.splice(idx, 1)
+    else lista[idx] = { ...cd, turnos: t }
+    await patchPart(p.id, { condicoes: JSON.stringify(lista) })
+  }
+  async function removeCond(p, idx) {
+    const lista = parseCond(p)
+    lista.splice(idx, 1)
+    await patchPart(p.id, { condicoes: JSON.stringify(lista) })
   }
 
   const disponiveis = personagens.filter(
@@ -118,6 +159,30 @@ function CombateTracker({ combate, personagens, onClose, onMudou }) {
             <div style={{ flex: 1, minWidth: 0 }}>
               <div className="nm">{i === c.turnoAtual ? '▶ ' : ''}{p.nome}</div>
               <div className="muted" style={{ fontSize: '.72rem' }}>{p.inimigo ? 'Ameaça' : 'Agente'}</div>
+              {parseCond(p).length > 0 && (
+                <div className="cond-chips">
+                  {parseCond(p).map((cd, ci) => (
+                    <span key={ci} className="cond-chip">
+                      <button className="t" title="Clique: −1 turno" onClick={() => tickCond(p, ci, -1)}>
+                        {cd.nome}{cd.turnos ? ` ${cd.turnos}` : ''}
+                      </button>
+                      <button className="x" title="Remover" onClick={() => removeCond(p, ci)}>✕</button>
+                    </span>
+                  ))}
+                </div>
+              )}
+              {condForm.pid === p.id && (
+                <div className="row" style={{ gap: 4, marginTop: 5 }}>
+                  <input autoFocus placeholder="Efeito" value={condForm.nome} style={{ flex: 1, minWidth: 0 }}
+                    onChange={(e) => setCondForm((s) => ({ ...s, nome: e.target.value }))}
+                    onKeyDown={(e) => { if (e.key === 'Enter') addCond(p) }} />
+                  <input type="number" placeholder="Turnos" style={{ width: 70 }} value={condForm.turnos}
+                    onChange={(e) => setCondForm((s) => ({ ...s, turnos: e.target.value }))}
+                    onKeyDown={(e) => { if (e.key === 'Enter') addCond(p) }} />
+                  <button className="ghost mini" onClick={() => addCond(p)}>✓</button>
+                  <button className="ghost mini" onClick={() => setCondForm({ pid: null, nome: '', turnos: '' })}>✕</button>
+                </div>
+              )}
             </div>
             <div className="row" style={{ gap: 4, alignItems: 'center' }}>
               <button className="ghost mini" title="-5 PV" onClick={() => patchPart(p.id, { pvAtual: Math.max(0, p.pvAtual - 5) })}>«</button>
@@ -125,6 +190,8 @@ function CombateTracker({ combate, personagens, onClose, onMudou }) {
               <b className="stat" style={{ minWidth: 54, textAlign: 'center' }}>{p.pvAtual}/{p.pvMax}</b>
               <button className="ghost mini" title="+1 PV" onClick={() => patchPart(p.id, { pvAtual: p.pvAtual + 1 })}>›</button>
               <button className="ghost mini" title="Rolar iniciativa" onClick={() => patchPart(p.id, { iniciativa: d20() })}>🎲</button>
+              <button className="ghost mini" title="Adicionar efeito/condição"
+                onClick={() => setCondForm({ pid: p.id, nome: '', turnos: '' })}>＋ef</button>
               <button className="ghost mini" title="Remover" onClick={() => removerPart(p.id)}>✕</button>
             </div>
           </div>
@@ -142,13 +209,22 @@ function CombateTracker({ combate, personagens, onClose, onMudou }) {
         <button className="mini" onClick={addAgente}>+ Agente</button>
       </div>
       <div className="add-form">
-        <input placeholder="Ameaça / NPC" value={ameaca.nome}
+        <select value={selBicho} onChange={(e) => setSelBicho(e.target.value)} style={{ flex: '1 1 160px' }}>
+          <option value="">— ameaça do bestiário —</option>
+          {bestiario.map((b) => (
+            <option key={b.id} value={b.id}>{b.nome}{b.pv ? ` (PV ${b.pv})` : ''}</option>
+          ))}
+        </select>
+        <button className="mini" onClick={addBicho}>+ Do bestiário</button>
+      </div>
+      <div className="add-form">
+        <input placeholder="Ameaça / NPC avulso" value={ameaca.nome}
           onChange={(e) => setAmeaca((s) => ({ ...s, nome: e.target.value }))} />
         <input type="number" placeholder="Inic." style={{ maxWidth: 80 }} value={ameaca.iniciativa}
           onChange={(e) => setAmeaca((s) => ({ ...s, iniciativa: e.target.value }))} />
         <input type="number" placeholder="PV" style={{ maxWidth: 80 }} value={ameaca.pvMax}
           onChange={(e) => setAmeaca((s) => ({ ...s, pvMax: e.target.value }))} />
-        <button className="mini" onClick={addAmeaca}>+ Ameaça</button>
+        <button className="mini" onClick={addAmeaca}>+ Avulso</button>
       </div>
     </div>
   )
@@ -200,11 +276,16 @@ export default function Campanha() {
     carregar()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id])
-  // Sincroniza o texto das anotações quando a campanha carrega.
+  // Anotações são privadas: carrega via endpoint gateado, só se for o mestre.
   useEffect(() => {
-    if (campanha) setAnotacoesTxt(campanha.anotacoes || '')
+    const mestre = !!user && campanha?.mestreId === user.id
+    if (mestre) {
+      api(`/api/campanhas/${id}/anotacoes?usuarioId=${user.id}`)
+        .then((r) => setAnotacoesTxt(r.anotacoes || ''))
+        .catch(() => {})
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [campanha?.id])
+  }, [campanha?.id, user])
 
   // Tempo real (Fase 6): novas rolagens entram no topo + toast
   useEffect(
@@ -320,8 +401,10 @@ export default function Campanha() {
   async function salvarAnotacoes() {
     setErro(null)
     try {
-      await api(`/api/campanhas/${id}`, { method: 'PUT', body: { anotacoes: anotacoesTxt } })
-      api(`/api/campanhas/${id}`).then(setCampanha)
+      await api(`/api/campanhas/${id}/anotacoes?usuarioId=${user?.id}`, {
+        method: 'PUT',
+        body: { anotacoes: anotacoesTxt },
+      })
       setAnotacoesSalvo(true)
       setTimeout(() => setAnotacoesSalvo(false), 2000)
     } catch (e) { setErro(e.message) }
