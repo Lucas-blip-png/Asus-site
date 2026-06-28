@@ -5,6 +5,31 @@ import { useAuth } from '../auth.jsx'
 const TIPOS = ['FICHA', 'CAMPANHA', 'ITEM', 'CRIATURA', 'MAPA', 'OUTRO']
 const VAZIO = { titulo: '', descricao: '', tipo: 'FICHA', preco: '', moeda: 'BRL', publicado: true }
 
+function ItemRow({ i, onBuy }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div className={`cris-row${open ? ' open' : ''}`}>
+      <div className="cris-head" onClick={() => setOpen((o) => !o)}>
+        <span className="chev">▾</span>
+        <b className="nm">{i.titulo}</b>
+        {i.tipo && <span className="sub">{i.tipo}</span>}
+        <div className="spacer" />
+        <span className={`tag ${i.gratuito ? '' : 'gold'}`}>
+          {i.gratuito ? 'Grátis' : `${i.moeda || ''} ${i.preco}`}
+        </span>
+        <button className="mini" onClick={(e) => { e.stopPropagation(); onBuy(i.id) }}>
+          {i.gratuito ? 'Obter' : 'Comprar'}
+        </button>
+      </div>
+      {open && (
+        <div className="cris-body">
+          <p className="muted" style={{ fontSize: '.84rem', margin: 0 }}>{i.descricao || 'Sem descrição.'}</p>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function Marketplace() {
   const { user } = useAuth()
   const [itens, setItens] = useState([])
@@ -73,24 +98,8 @@ export default function Marketplace() {
       )}
 
       {!filtrados.length && <div className="card muted">Nenhum item publicado ainda.</div>}
-      <div className="grid">
-        {filtrados.map((i) => (
-          <div key={i.id} className="card">
-            <div className="row">
-              <b style={{ fontSize: '1.02rem' }}>{i.titulo}</b>
-              <div className="spacer" />
-              {i.tipo && <span className="tag">{i.tipo}</span>}
-            </div>
-            {i.descricao && <p className="muted" style={{ margin: '6px 0', fontSize: '.84rem' }}>{i.descricao}</p>}
-            <div className="row" style={{ marginTop: 8 }}>
-              <span className={`tag ${i.gratuito ? '' : 'gold'}`}>
-                {i.gratuito ? 'Grátis' : `${i.moeda || ''} ${i.preco}`}
-              </span>
-              <div className="spacer" />
-              <button className="mini" onClick={() => comprar(i.id)}>{i.gratuito ? 'Obter' : 'Comprar'}</button>
-            </div>
-          </div>
-        ))}
+      <div className="cris-list">
+        {filtrados.map((i) => <ItemRow key={i.id} i={i} onBuy={comprar} />)}
       </div>
     </>
   )
