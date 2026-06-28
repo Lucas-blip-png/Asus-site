@@ -13,12 +13,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 /** Limites por plano e upgrade manual de assinatura (Fase 10). */
 @SpringBootTest
 @AutoConfigureMockMvc
+@TestPropertySource(properties = "asus.limites.enforce=true") // valida a logica de limites mesmo com o padrao desligado
 class PlanoLimiteIntegrationTest {
 
     @Autowired
