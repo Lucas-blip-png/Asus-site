@@ -9,11 +9,20 @@ import com.asus.platform.repository.CampanhaRepository;
 import com.asus.platform.repository.OrganizacaoRepository;
 import com.asus.platform.repository.PersonagemRepository;
 import com.asus.platform.web.LimiteExcedidoException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /** Aplica os limites do plano da organizacao (plano, Seção 4 / Fase 10). */
 @Service
 public class PlanoService {
+
+    /** Sem limites por padrao (planos/limites desligados); ligue com asus.limites.enforce=true. */
+    private static final LimitesPlano ILIMITADO = new LimitesPlano(
+            LimitesPlano.ILIMITADO, LimitesPlano.ILIMITADO, LimitesPlano.ILIMITADO,
+            true, LimitesPlano.ILIMITADO, Long.MAX_VALUE);
+
+    @Value("${asus.limites.enforce:false}")
+    private boolean enforceLimites;
 
     private final OrganizacaoRepository organizacaoRepository;
     private final PersonagemRepository personagemRepository;
@@ -36,6 +45,9 @@ public class PlanoService {
     }
 
     public LimitesPlano limitesDa(Long organizacaoId) {
+        if (!enforceLimites) {
+            return ILIMITADO; // planos/limites desligados
+        }
         return LimitesPlano.de(planoDa(organizacaoId));
     }
 

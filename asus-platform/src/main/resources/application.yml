@@ -59,6 +59,10 @@ asus:
     senha: ${ASUS_ADMIN_SENHA:dev12345}
     nome: ${ASUS_ADMIN_NOME:Dono}
 
+  # Planos/limites: DESLIGADOS por padrao (todos sem limite). Ligue com true.
+  limites:
+    enforce: ${ASUS_LIMITES_ENFORCE:false}
+
   # --- Integracoes externas (plugar credenciais). Ver INTEGRACOES.md na raiz. ---
   # Storage de assets: 'local' (padrao) ou 's3' (S3/R2/GCS S3-compativel).
   storage:
