@@ -12,8 +12,9 @@ export default function Personagens() {
   const [busca, setBusca] = useState('')
   const [erro, setErro] = useState(null)
   const [nivel1Cap, setNivel1Cap] = useState(99)
+  const [progressao, setProgressao] = useState([])
   const [form, setForm] = useState({
-    nome: '', racaCodigo: '', classeCodigo: '', trilhaCodigo: '',
+    nome: '', racaCodigo: '', classeCodigo: '', trilhaCodigo: '', nivel: 1,
     atributos: Object.fromEntries(ATRS.map((a) => [a, 0])),
   })
 
@@ -29,6 +30,7 @@ export default function Personagens() {
       setRacas(rs)
       setClasses(cs)
       const prog = await api('/api/sistemas/asus/progressao').catch(() => [])
+      setProgressao(prog || [])
       const n1 = (prog || []).find((x) => x.nivel === 1)
       if (n1 && n1.limiteAtributo > 0) setNivel1Cap(n1.limiteAtributo)
       setForm((f) => ({
@@ -59,9 +61,17 @@ export default function Personagens() {
   }
   const bonusMap = bonusAtributos()
 
+  // Teto de atributo do nível escolhido (maior limite entre os níveis <= nível atual).
+  const capNivel = (() => {
+    const lvl = Number(form.nivel) || 1
+    let cap = nivel1Cap
+    for (const x of progressao) if (x.nivel <= lvl && x.limiteAtributo > 0) cap = Math.max(cap, x.limiteAtributo)
+    return cap
+  })()
+
   const setAtr = (a, delta) =>
     setForm((f) => {
-      const cap = nivel1Cap - (bonusMap[a] || 0) // teto do nível 1 menos o fixo da classe
+      const cap = capNivel - (bonusMap[a] || 0) // teto do nível escolhido menos o fixo da classe
       const atual = Number(f.atributos[a]) || 0
       const novo = Math.max(0, Math.min(cap, atual + delta))
       const soma = pontos - atual + novo
@@ -80,7 +90,7 @@ export default function Personagens() {
           racaCodigo: form.racaCodigo,
           classeCodigo: form.classeCodigo,
           trilhaCodigo: form.trilhaCodigo || null,
-          nivel: 0,
+          nivel: Number(form.nivel) || 1,
           atributosBase: form.atributos,
         },
       })
@@ -161,10 +171,20 @@ export default function Personagens() {
                 {trilhas.map((t) => <option key={t.codigo} value={t.codigo}>{t.nome}</option>)}
               </select>
             </div>
+            <div style={{ maxWidth: 90 }}>
+              <label>Nível</label>
+              <input type="number" min="1" value={form.nivel}
+                onChange={(e) => setForm((f) => ({ ...f, nivel: e.target.value }))} />
+            </div>
           </div>
           <label style={{ marginTop: 10 }}>
-            Atributos — {pontos}/5 pontos distribuíveis · teto {nivel1Cap}/atributo (os fixos da classe entram automaticamente)
+            Atributos — {pontos}/5 pontos distribuíveis · teto {capNivel}/atributo (os fixos da classe entram automaticamente)
           </label>
+          {form.trilhaCodigo && capNivel <= 4 && (
+            <p className="muted" style={{ fontSize: '.8rem', marginTop: 2 }}>
+              Dica: trilha no nível 1 pode estourar o teto de atributo ({capNivel}). Suba o nível se a criação falhar.
+            </p>
+          )}
           <div className="row" style={{ gap: 12, flexWrap: 'wrap' }}>
             {ATRS.map((a) => (
               <div key={a} style={{ textAlign: 'center' }}>

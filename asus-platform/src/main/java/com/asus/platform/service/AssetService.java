@@ -8,8 +8,10 @@ import com.asus.platform.service.storage.ArmazenamentoAssets;
 import com.asus.platform.web.LimiteExcedidoException;
 import com.asus.platform.web.NotFoundException;
 import com.asus.platform.web.dto.AssetResponse;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Base64;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -73,9 +75,15 @@ public class AssetService {
 
         String nomeOriginal = StringUtils.cleanPath(
                 arquivo.getOriginalFilename() == null ? "arquivo" : arquivo.getOriginalFilename());
+
+        // Le os bytes uma vez: vao tanto pro storage (compat) quanto pro banco (persistencia).
+        byte[] bytes;
         String storagePath;
-        try (InputStream in = arquivo.getInputStream()) {
-            storagePath = armazenamento.gravar(organizacaoId, nomeOriginal, in, tamanho);
+        try {
+            bytes = arquivo.getBytes();
+            try (InputStream in = new ByteArrayInputStream(bytes)) {
+                storagePath = armazenamento.gravar(organizacaoId, nomeOriginal, in, tamanho);
+            }
         } catch (IOException ex) {
             throw new IllegalStateException("Falha ao gravar o arquivo: " + ex.getMessage(), ex);
         }
@@ -88,6 +96,7 @@ public class AssetService {
                 .storagePath(storagePath)
                 .mimeType(arquivo.getContentType())
                 .tamanhoBytes(tamanho)
+                .dadosBase64(Base64.getEncoder().encodeToString(bytes))
                 .publico(publico)
                 .build());
 
@@ -99,6 +108,11 @@ public class AssetService {
 
     public Conteudo baixar(Long id) {
         Asset asset = carregar(id);
+        // Preferencia: bytes do banco (persistem). Fallback: storage local (assets antigos).
+        if (asset.getDadosBase64() != null) {
+            byte[] dados = Base64.getDecoder().decode(asset.getDadosBase64());
+            return new Conteudo(asset.getMimeType(), asset.getNomeOriginal(), dados);
+        }
         try {
             byte[] dados = armazenamento.ler(asset.getStoragePath());
             return new Conteudo(asset.getMimeType(), asset.getNomeOriginal(), dados);

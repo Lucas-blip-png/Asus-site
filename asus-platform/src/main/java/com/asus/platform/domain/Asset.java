@@ -38,6 +38,10 @@ public class Asset {
 
     private long tamanhoBytes;
 
+    /** Conteudo em base64 (persiste no banco; sobrevive a redeploys do container efemero). */
+    @Column(columnDefinition = "TEXT")
+    private String dadosBase64;
+
     private boolean publico;
 
     @Column(nullable = false)
