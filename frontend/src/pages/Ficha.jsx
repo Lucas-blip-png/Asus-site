@@ -56,6 +56,70 @@ function ItemInvRow({ it, onQtd, onEquip, onDelete, onEdit }) {
   )
 }
 
+function AtaqueRow({ a, onEdit, onDelete }) {
+  const [open, setOpen] = useState(false)
+  const resumo = [a.dano && `Dano ${a.dano}`, a.critico && `Crít ${a.critico}`].filter(Boolean).join(' · ')
+  return (
+    <div className={`cris-row${open ? ' open' : ''}`}>
+      <div className="cris-head" onClick={() => setOpen((o) => !o)}>
+        <span className="chev">▾</span>
+        <b className="nm">{a.nome}</b>
+        {resumo && <span className="sub">{resumo}</span>}
+        <div className="spacer" />
+        {a.alcance && <span className="tag">{a.alcance}</span>}
+      </div>
+      {open && (
+        <div className="cris-body">
+          <div className="row" style={{ gap: 6, flexWrap: 'wrap' }}>
+            {a.dano && <span className="tag">Dano {a.dano}</span>}
+            {a.critico && <span className="tag">Crítico {a.critico}</span>}
+            {a.alcance && <span className="tag">{a.alcance}</span>}
+            {a.pericia && <span className="tag">{a.pericia}</span>}
+          </div>
+          {a.efeito && <p className="muted" style={{ fontSize: '.82rem', marginTop: 7 }}>{a.efeito}</p>}
+          <div className="row" style={{ gap: 10, marginTop: 9, alignItems: 'center' }}>
+            <div className="spacer" />
+            <button className="ghost mini" onClick={() => onEdit(a)}>Editar</button>
+            <button className="ghost mini" onClick={() => onDelete(a.id)}>Remover</button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function FeiticoRow({ f, onEdit, onDelete }) {
+  const [open, setOpen] = useState(false)
+  const resumo = [f.circulo && `${f.circulo}º círculo`, f.custoPm && `${f.custoPm} PM`].filter(Boolean).join(' · ')
+  return (
+    <div className={`cris-row${open ? ' open' : ''}`}>
+      <div className="cris-head" onClick={() => setOpen((o) => !o)}>
+        <span className="chev">▾</span>
+        <b className="nm">{f.nome}</b>
+        {resumo && <span className="sub">{resumo}</span>}
+        <div className="spacer" />
+        {f.alcance && <span className="tag">{f.alcance}</span>}
+      </div>
+      {open && (
+        <div className="cris-body">
+          <div className="row" style={{ gap: 6, flexWrap: 'wrap' }}>
+            {f.circulo ? <span className="tag">{f.circulo}º círculo</span> : null}
+            {f.custoPm ? <span className="tag">{f.custoPm} PM</span> : null}
+            {f.alcance && <span className="tag">{f.alcance}</span>}
+            {f.duracao && <span className="tag">{f.duracao}</span>}
+          </div>
+          {f.efeito && <p className="muted" style={{ fontSize: '.82rem', marginTop: 7 }}>{f.efeito}</p>}
+          <div className="row" style={{ gap: 10, marginTop: 9, alignItems: 'center' }}>
+            <div className="spacer" />
+            <button className="ghost mini" onClick={() => onEdit(f)}>Editar</button>
+            <button className="ghost mini" onClick={() => onDelete(f.id)}>Remover</button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function Ficha() {
   const { id } = useParams()
   const nav = useNavigate()
@@ -81,6 +145,8 @@ export default function Ficha() {
   const [feiticos, setFeiticos] = useState([])
   const [novoAtaque, setNovoAtaque] = useState({ nome: '', dano: '', critico: '', alcance: '' })
   const [novoFeitico, setNovoFeitico] = useState({ nome: '', circulo: 1, custoPm: 0, alcance: '', efeito: '' })
+  const [editAtaque, setEditAtaque] = useState(null)
+  const [editFeitico, setEditFeitico] = useState(null)
   const [inventario, setInventario] = useState([])
   const [itemCat, setItemCat] = useState('')
   const [novoItem, setNovoItem] = useState({ nome: '', categoria: 'GERAL', espacos: 1, quantidade: 1 })
@@ -239,6 +305,24 @@ export default function Ficha() {
   async function delAtaque(aid) {
     try { await api(`/api/ataques/${aid}`, { method: 'DELETE' }); recarregarAtaques() } catch (e) { setErro(e.message) }
   }
+  async function salvarEdicaoAtaque() {
+    if (!editAtaque) return
+    try {
+      await api(`/api/ataques/${editAtaque.id}`, {
+        method: 'PUT',
+        body: {
+          nome: editAtaque.nome,
+          dano: editAtaque.dano || '',
+          critico: editAtaque.critico || '',
+          alcance: editAtaque.alcance || '',
+          pericia: editAtaque.pericia || '',
+          efeito: editAtaque.efeito || '',
+        },
+      })
+      setEditAtaque(null)
+      recarregarAtaques()
+    } catch (e) { setErro(e.message) }
+  }
   async function addFeitico() {
     if (!novoFeitico.nome.trim()) return
     try {
@@ -252,6 +336,24 @@ export default function Ficha() {
   }
   async function delFeitico(fid) {
     try { await api(`/api/feiticos/${fid}`, { method: 'DELETE' }); recarregarFeiticos() } catch (e) { setErro(e.message) }
+  }
+  async function salvarEdicaoFeitico() {
+    if (!editFeitico) return
+    try {
+      await api(`/api/feiticos/${editFeitico.id}`, {
+        method: 'PUT',
+        body: {
+          nome: editFeitico.nome,
+          circulo: editFeitico.circulo === '' || editFeitico.circulo == null ? null : Number(editFeitico.circulo),
+          custoPm: editFeitico.custoPm === '' || editFeitico.custoPm == null ? null : Number(editFeitico.custoPm),
+          alcance: editFeitico.alcance || '',
+          duracao: editFeitico.duracao || '',
+          efeito: editFeitico.efeito || '',
+        },
+      })
+      setEditFeitico(null)
+      recarregarFeiticos()
+    } catch (e) { setErro(e.message) }
   }
 
   // ----- inventário (carga = Força x 2 espaços) -----
@@ -547,18 +649,11 @@ export default function Ficha() {
 
           {aba === 'Combate' && (
             <div>
-              {ataques.map((a) => (
-                <div key={a.id} className="item-card">
-                  <div className="t">
-                    {a.nome} {a.dano && <span className="tag">{a.dano}</span>}
-                    <button className="ghost mini" style={{ float: 'right' }} onClick={() => delAtaque(a.id)}>✕</button>
-                  </div>
-                  <div className="s">
-                    {[a.critico && `Crít ${a.critico}`, a.alcance, a.pericia].filter(Boolean).join(' · ')}
-                    {a.efeito ? ` · ${a.efeito}` : ''}
-                  </div>
-                </div>
-              ))}
+              <div className="cris-list">
+                {ataques.map((a) => (
+                  <AtaqueRow key={a.id} a={a} onEdit={setEditAtaque} onDelete={delAtaque} />
+                ))}
+              </div>
               {!ataques.length && <div className="muted">Nenhum ataque cadastrado.</div>}
               <div className="add-form">
                 <input placeholder="Nome" value={novoAtaque.nome}
@@ -602,18 +697,11 @@ export default function Ficha() {
               <div className="muted" style={{ marginBottom: 8 }}>
                 Construa feitiços pelas regras em <b>Livros → Feitiços</b> (círculo, alcance, poder, duração).
               </div>
-              {feiticos.map((f) => (
-                <div key={f.id} className="item-card">
-                  <div className="t">
-                    {f.nome} {f.circulo ? <span className="tag">{f.circulo}º círculo</span> : null}
-                    <button className="ghost mini" style={{ float: 'right' }} onClick={() => delFeitico(f.id)}>✕</button>
-                  </div>
-                  <div className="s">
-                    {[f.custoPm ? `${f.custoPm} PM` : null, f.alcance, f.duracao].filter(Boolean).join(' · ')}
-                    {f.efeito ? ` · ${f.efeito}` : ''}
-                  </div>
-                </div>
-              ))}
+              <div className="cris-list">
+                {feiticos.map((f) => (
+                  <FeiticoRow key={f.id} f={f} onEdit={setEditFeitico} onDelete={delFeitico} />
+                ))}
+              </div>
               {!feiticos.length && <div className="muted">Nenhum feitiço cadastrado.</div>}
               <div className="add-form">
                 <input placeholder="Nome" value={novoFeitico.nome}
@@ -727,6 +815,89 @@ export default function Ficha() {
             <div className="row" style={{ marginTop: 12, gap: 8 }}>
               <button onClick={salvarEdicao}>Salvar</button>
               <button className="ghost" onClick={() => setEditItem(null)}>Cancelar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {editAtaque && (
+        <div className="modal" onClick={() => setEditAtaque(null)}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 520 }}>
+            <div className="row">
+              <h2 style={{ margin: 0 }}>Editar ataque</h2>
+              <div className="spacer" />
+              <button className="ghost mini" onClick={() => setEditAtaque(null)}>✕</button>
+            </div>
+            <label>Nome</label>
+            <input value={editAtaque.nome || ''} onChange={(e) => setEditAtaque((s) => ({ ...s, nome: e.target.value }))} />
+            <div className="row" style={{ gap: 8 }}>
+              <div style={{ flex: 1 }}>
+                <label>Dano</label>
+                <input placeholder="1d8" value={editAtaque.dano || ''}
+                  onChange={(e) => setEditAtaque((s) => ({ ...s, dano: e.target.value }))} />
+              </div>
+              <div style={{ width: 110 }}>
+                <label>Crítico</label>
+                <input placeholder="x2" value={editAtaque.critico || ''}
+                  onChange={(e) => setEditAtaque((s) => ({ ...s, critico: e.target.value }))} />
+              </div>
+            </div>
+            <div className="row" style={{ gap: 8 }}>
+              <div style={{ flex: 1 }}>
+                <label>Alcance</label>
+                <input value={editAtaque.alcance || ''}
+                  onChange={(e) => setEditAtaque((s) => ({ ...s, alcance: e.target.value }))} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label>Perícia</label>
+                <input value={editAtaque.pericia || ''}
+                  onChange={(e) => setEditAtaque((s) => ({ ...s, pericia: e.target.value }))} />
+              </div>
+            </div>
+            <label>Efeito / Descrição</label>
+            <textarea value={editAtaque.efeito || ''} onChange={(e) => setEditAtaque((s) => ({ ...s, efeito: e.target.value }))} />
+            <div className="row" style={{ marginTop: 12, gap: 8 }}>
+              <button onClick={salvarEdicaoAtaque}>Salvar</button>
+              <button className="ghost" onClick={() => setEditAtaque(null)}>Cancelar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {editFeitico && (
+        <div className="modal" onClick={() => setEditFeitico(null)}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 520 }}>
+            <div className="row">
+              <h2 style={{ margin: 0 }}>Editar feitiço</h2>
+              <div className="spacer" />
+              <button className="ghost mini" onClick={() => setEditFeitico(null)}>✕</button>
+            </div>
+            <label>Nome</label>
+            <input value={editFeitico.nome || ''} onChange={(e) => setEditFeitico((s) => ({ ...s, nome: e.target.value }))} />
+            <div className="row" style={{ gap: 8 }}>
+              <div style={{ width: 110 }}>
+                <label>Círculo</label>
+                <input type="number" min="1" max="5" value={editFeitico.circulo ?? ''}
+                  onChange={(e) => setEditFeitico((s) => ({ ...s, circulo: e.target.value }))} />
+              </div>
+              <div style={{ width: 110 }}>
+                <label>Custo PM</label>
+                <input type="number" min="0" value={editFeitico.custoPm ?? ''}
+                  onChange={(e) => setEditFeitico((s) => ({ ...s, custoPm: e.target.value }))} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label>Alcance</label>
+                <input value={editFeitico.alcance || ''}
+                  onChange={(e) => setEditFeitico((s) => ({ ...s, alcance: e.target.value }))} />
+              </div>
+            </div>
+            <label>Duração</label>
+            <input value={editFeitico.duracao || ''} onChange={(e) => setEditFeitico((s) => ({ ...s, duracao: e.target.value }))} />
+            <label>Efeito / Descrição</label>
+            <textarea value={editFeitico.efeito || ''} onChange={(e) => setEditFeitico((s) => ({ ...s, efeito: e.target.value }))} />
+            <div className="row" style={{ marginTop: 12, gap: 8 }}>
+              <button onClick={salvarEdicaoFeitico}>Salvar</button>
+              <button className="ghost" onClick={() => setEditFeitico(null)}>Cancelar</button>
             </div>
           </div>
         </div>

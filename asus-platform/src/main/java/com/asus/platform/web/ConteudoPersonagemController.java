@@ -38,6 +38,21 @@ public class ConteudoPersonagemController {
         return ataqueRepository.save(a);
     }
 
+    @PutMapping("/ataques/{id}")
+    public Ataque atualizarAtaque(@PathVariable Long id, @RequestBody Ataque dados) {
+        Ataque a = ataqueRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("ataque nao encontrado"));
+        if (dados.getNome() != null && !dados.getNome().isBlank()) {
+            a.setNome(dados.getNome());
+        }
+        a.setDano(dados.getDano());
+        a.setCritico(dados.getCritico());
+        a.setAlcance(dados.getAlcance());
+        a.setPericia(dados.getPericia());
+        a.setEfeito(dados.getEfeito());
+        return ataqueRepository.save(a);
+    }
+
     @DeleteMapping("/ataques/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void apagarAtaque(@PathVariable Long id) {
@@ -57,6 +72,21 @@ public class ConteudoPersonagemController {
         }
         f.setId(null);
         f.setPersonagemId(id);
+        return feiticoRepository.save(f);
+    }
+
+    @PutMapping("/feiticos/{id}")
+    public FeiticoPersonagem atualizarFeitico(@PathVariable Long id, @RequestBody FeiticoPersonagem dados) {
+        FeiticoPersonagem f = feiticoRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("feitico nao encontrado"));
+        if (dados.getNome() != null && !dados.getNome().isBlank()) {
+            f.setNome(dados.getNome());
+        }
+        f.setCirculo(dados.getCirculo());
+        f.setCustoPm(dados.getCustoPm());
+        f.setAlcance(dados.getAlcance());
+        f.setDuracao(dados.getDuracao());
+        f.setEfeito(dados.getEfeito());
         return feiticoRepository.save(f);
     }
 
