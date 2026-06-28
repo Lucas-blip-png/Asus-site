@@ -370,7 +370,7 @@ export default function Ficha() {
             <thead><tr><th>Perícia</th><th>Atr</th><th>Treino</th><th>Teto</th></tr></thead>
             <tbody>
               {p.pericias.filter((pe) => !pe.custom).map((pe) => (
-                <tr key={pe.codigo}>
+                <tr key={pe.codigo} className={(treino[pe.codigo] ?? 0) > 0 ? 'treinada' : undefined}>
                   <td>
                     <span className="per-nome">
                       <button className="d20-btn" title={`Rolar ${pe.nome}`}
@@ -392,7 +392,7 @@ export default function Ficha() {
               {outros.map((o, idx) => {
                 const cap = 2 * ((p.atributosFinais[o.atributo.toLowerCase()]) || 0)
                 return (
-                  <tr key={'outro-' + idx}>
+                  <tr key={'outro-' + idx} className={o.treino > 0 ? 'treinada' : undefined}>
                     <td>
                       <span className="per-nome">
                         <button className="d20-btn" title={`Rolar ${o.nome}`}
