@@ -16,6 +16,8 @@ import com.asus.platform.repository.CampanhaMembroRepository;
 import com.asus.platform.repository.CampanhaPersonagemRepository;
 import com.asus.platform.repository.CampanhaRepository;
 import com.asus.platform.repository.ClasseRepository;
+import com.asus.platform.repository.CombateParticipanteRepository;
+import com.asus.platform.repository.CombateRepository;
 import com.asus.platform.repository.ConviteRepository;
 import com.asus.platform.repository.GameSystemRepository;
 import com.asus.platform.repository.PersonagemRepository;
@@ -52,6 +54,8 @@ public class CampanhaService {
     private final PersonagemRepository personagemRepository;
     private final ClasseRepository classeRepository;
     private final UsuarioRepository usuarioRepository;
+    private final CombateRepository combateRepository;
+    private final CombateParticipanteRepository combateParticipanteRepository;
     private final AuditoriaService auditoriaService;
     private final PlanoService planoService;
 
@@ -64,6 +68,8 @@ public class CampanhaService {
                            PersonagemRepository personagemRepository,
                            ClasseRepository classeRepository,
                            UsuarioRepository usuarioRepository,
+                           CombateRepository combateRepository,
+                           CombateParticipanteRepository combateParticipanteRepository,
                            AuditoriaService auditoriaService,
                            PlanoService planoService) {
         this.campanhaRepository = campanhaRepository;
@@ -75,6 +81,8 @@ public class CampanhaService {
         this.personagemRepository = personagemRepository;
         this.classeRepository = classeRepository;
         this.usuarioRepository = usuarioRepository;
+        this.combateRepository = combateRepository;
+        this.combateParticipanteRepository = combateParticipanteRepository;
         this.auditoriaService = auditoriaService;
         this.planoService = planoService;
     }
@@ -161,12 +169,16 @@ public class CampanhaService {
         return CampanhaResponse.de(campanha, systemIdDe(campanha));
     }
 
-    /** Apaga a campanha e seus vinculos (membros e personagens). */
+    /** Apaga a campanha e seus vinculos (membros, personagens e combates). */
     @Transactional
     public void apagar(Long id) {
         Campanha campanha = carregar(id);
         campanhaMembroRepository.deleteAll(campanhaMembroRepository.findByCampanhaId(id));
         campanhaPersonagemRepository.deleteAll(campanhaPersonagemRepository.findByCampanhaId(id));
+        combateRepository.findByCampanhaIdOrderByCriadoEmDesc(id).forEach(combate ->
+                combateParticipanteRepository.deleteAll(
+                        combateParticipanteRepository.findByCombateIdOrderByIniciativaDescIdAsc(combate.getId())));
+        combateRepository.deleteAll(combateRepository.findByCampanhaIdOrderByCriadoEmDesc(id));
         campanhaRepository.delete(campanha);
         auditoriaService.registrar(campanha.getOrganizacaoId(), campanha.getMestreId(),
                 "CAMPANHA_APAGADA", "Campanha", id, null, campanha.getNome(), null);
