@@ -271,6 +271,8 @@ th, td { text-align: left; padding: 6px 6px; border-bottom: 1px solid var(--bord
 .cond-chip .x { background: none; border: 0; color: var(--muted); font-size: .62rem; padding: 2px 6px 2px 0; cursor: pointer; }
 .cond-chip .x:hover { color: #e3675e; }
 
+button.ghost.mini.ativo { background: var(--gold); color: #1a1206; border-color: var(--gold-2); opacity: 1; }
+
 /* ---------------- Barras de status ---------------- */
 .bar {
   background: var(--bg-3); border-radius: 8px; height: 26px; position: relative; overflow: hidden;

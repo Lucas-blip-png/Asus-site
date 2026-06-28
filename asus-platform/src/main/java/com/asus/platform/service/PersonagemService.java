@@ -593,6 +593,9 @@ public class PersonagemService {
             int qtd = it.getQuantidade() == null ? 1 : it.getQuantidade();
             cargaAtual += esp * qtd;
         }
+        // Sobrecarga: acima da carga maxima, o deslocamento cai pela metade.
+        boolean sobrecarregado = cargaAtual > r.cargaMaxima();
+        int deslocamentoFinal = sobrecarregado ? Math.max(1, r.deslocamento() / 2) : r.deslocamento();
 
         return new PersonagemResponse(
                 p.getId(),
@@ -614,7 +617,7 @@ public class PersonagemService {
                 AtributosDto.de(p.getAtributosBase()),
                 AtributosDto.de(p.getAtributosFinais()),
                 StatusDto.de(p.getStatus()),
-                r.deslocamento(),
+                deslocamentoFinal,
                 r.cargaMaxima(),
                 cargaAtual,
                 r.limiteHabilidades(),

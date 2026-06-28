@@ -863,17 +863,32 @@ export default function Ficha() {
                 ))}
               </div>
               {!feiticos.length && <div className="muted">Nenhum feitiço cadastrado.</div>}
-              <div className="add-form">
-                <input placeholder="Nome" value={novoFeitico.nome}
-                  onChange={(e) => setNovoFeitico((s) => ({ ...s, nome: e.target.value }))} />
-                <input type="number" min="1" max="5" placeholder="Círculo" style={{ maxWidth: 90 }} value={novoFeitico.circulo}
-                  onChange={(e) => setNovoFeitico((s) => ({ ...s, circulo: e.target.value }))} />
-                <input type="number" min="0" placeholder="PM" style={{ maxWidth: 80 }} value={novoFeitico.custoPm}
-                  onChange={(e) => setNovoFeitico((s) => ({ ...s, custoPm: e.target.value }))} />
-                <input placeholder="Alcance" value={novoFeitico.alcance}
-                  onChange={(e) => setNovoFeitico((s) => ({ ...s, alcance: e.target.value }))} />
-                <input placeholder="Efeito" value={novoFeitico.efeito}
-                  onChange={(e) => setNovoFeitico((s) => ({ ...s, efeito: e.target.value }))} />
+              <div className="add-form" style={{ alignItems: 'flex-end' }}>
+                <div style={{ flex: '1 1 130px' }}>
+                  <label>Nome</label>
+                  <input placeholder="Nome do feitiço" value={novoFeitico.nome}
+                    onChange={(e) => setNovoFeitico((s) => ({ ...s, nome: e.target.value }))} />
+                </div>
+                <div style={{ width: 80 }}>
+                  <label>Círculo</label>
+                  <input type="number" min="1" max="5" value={novoFeitico.circulo}
+                    onChange={(e) => setNovoFeitico((s) => ({ ...s, circulo: e.target.value }))} />
+                </div>
+                <div style={{ width: 80 }}>
+                  <label>Custo PM</label>
+                  <input type="number" min="0" value={novoFeitico.custoPm}
+                    onChange={(e) => setNovoFeitico((s) => ({ ...s, custoPm: e.target.value }))} />
+                </div>
+                <div style={{ flex: '1 1 90px' }}>
+                  <label>Alcance</label>
+                  <input value={novoFeitico.alcance}
+                    onChange={(e) => setNovoFeitico((s) => ({ ...s, alcance: e.target.value }))} />
+                </div>
+                <div style={{ flex: '1 1 120px' }}>
+                  <label>Efeito</label>
+                  <input value={novoFeitico.efeito}
+                    onChange={(e) => setNovoFeitico((s) => ({ ...s, efeito: e.target.value }))} />
+                </div>
                 <button className="mini" onClick={addFeitico}>+ Feitiço</button>
               </div>
             </div>
