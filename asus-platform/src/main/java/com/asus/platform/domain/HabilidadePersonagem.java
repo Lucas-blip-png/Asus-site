@@ -22,4 +22,13 @@ public class HabilidadePersonagem {
 
     @Column(nullable = false)
     private String habilidadeCodigo;
+
+    // Overrides por personagem (null = usa o valor do catalogo).
+    private String nomeCustom;
+    private String tipoCustom;
+    private Integer custoCustom;
+    private String custoTipoCustom;
+
+    @Column(columnDefinition = "TEXT")
+    private String efeitoCustom;
 }

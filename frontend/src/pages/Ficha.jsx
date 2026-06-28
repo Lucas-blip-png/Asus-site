@@ -120,6 +120,36 @@ function FeiticoRow({ f, onEdit, onDelete }) {
   )
 }
 
+function HabRow({ h, onEdit, onDelete }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div className={`cris-row${open ? ' open' : ''}`}>
+      <div className="cris-head" onClick={() => setOpen((o) => !o)}>
+        <span className="chev">▾</span>
+        <b className="nm">{h.nome}</b>
+        {h.tipo && <span className="sub">{h.tipo}</span>}
+        <div className="spacer" />
+        {h.custo > 0 && <span className="tag">{h.custo} {h.custoTipo}</span>}
+      </div>
+      {open && (
+        <div className="cris-body">
+          <div className="row" style={{ gap: 6, flexWrap: 'wrap' }}>
+            {h.tipo && <span className="tag">{h.tipo}</span>}
+            {h.custo > 0 && <span className="tag">Custo {h.custo} {h.custoTipo}</span>}
+            {h.classeCodigo && h.classeCodigo !== 'GERAL' && <span className="tag">{h.classeCodigo}</span>}
+          </div>
+          {h.efeito && <p className="muted" style={{ fontSize: '.82rem', marginTop: 7 }}>{h.efeito}</p>}
+          <div className="row" style={{ gap: 10, marginTop: 9, alignItems: 'center' }}>
+            <div className="spacer" />
+            <button className="ghost mini" onClick={() => onEdit(h)}>Editar</button>
+            <button className="ghost mini" onClick={() => onDelete(h.codigo)}>Remover</button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function Ficha() {
   const { id } = useParams()
   const nav = useNavigate()
@@ -148,6 +178,7 @@ export default function Ficha() {
   const [novoFeitico, setNovoFeitico] = useState({ nome: '', circulo: 1, custoPm: 0, alcance: '', efeito: '' })
   const [editAtaque, setEditAtaque] = useState(null)
   const [editFeitico, setEditFeitico] = useState(null)
+  const [editHab, setEditHab] = useState(null)
   const [inventario, setInventario] = useState([])
   const [itemCat, setItemCat] = useState('')
   const [novoItem, setNovoItem] = useState({ nome: '', categoria: 'GERAL', espacos: 1, quantidade: 1 })
@@ -452,6 +483,23 @@ export default function Ficha() {
   async function delHab(codigo) {
     try { await api(`/api/personagens/${id}/habilidades/${codigo}`, { method: 'DELETE' }); recarregarHab() } catch (e) { setErro(e.message) }
   }
+  async function salvarEdicaoHab() {
+    if (!editHab) return
+    try {
+      await api(`/api/personagens/${id}/habilidades/${editHab.codigo}`, {
+        method: 'PUT',
+        body: {
+          nome: editHab.nome,
+          tipo: editHab.tipo || '',
+          custo: editHab.custo === '' || editHab.custo == null ? null : Number(editHab.custo),
+          custoTipo: editHab.custoTipo || '',
+          efeito: editHab.efeito || '',
+        },
+      })
+      setEditHab(null)
+      recarregarHab()
+    } catch (e) { setErro(e.message) }
+  }
 
   if (erro) return <div><p className="error">{erro}</p></div>
   if (!p) return <div className="center">Carregando…</div>
@@ -738,15 +786,11 @@ export default function Ficha() {
           {aba === 'Habilidades' && (
             <div>
               <div className="muted" style={{ marginBottom: 6 }}>{habChosen.length}/{p.limiteHabilidades} habilidades (limite = Des/2)</div>
-              {habChosen.map((h) => (
-                <div key={h.codigo} className="item-card">
-                  <div className="t">
-                    {h.nome} <span className="tag">{h.tipo}</span>
-                    <button className="ghost mini" style={{ float: 'right' }} onClick={() => delHab(h.codigo)}>✕</button>
-                  </div>
-                  <div className="s">{h.custo > 0 ? `${h.custo} ${h.custoTipo} · ` : ''}{h.efeito}</div>
-                </div>
-              ))}
+              <div className="cris-list">
+                {habChosen.map((h) => (
+                  <HabRow key={h.codigo} h={h} onEdit={setEditHab} onDelete={delHab} />
+                ))}
+              </div>
               {!habChosen.length && <div className="muted">Nenhuma habilidade escolhida.</div>}
               <button className="mini" onClick={() => { setHabBusca(''); setModalHab(true) }}>+ Adicionar Habilidade</button>
               {!habDisp.length && (
@@ -963,6 +1007,52 @@ export default function Ficha() {
             <div className="row" style={{ marginTop: 12, gap: 8 }}>
               <button onClick={salvarEdicaoFeitico}>Salvar</button>
               <button className="ghost" onClick={() => setEditFeitico(null)}>Cancelar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {editHab && (
+        <div className="modal" onClick={() => setEditHab(null)}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 520 }}>
+            <div className="row">
+              <h2 style={{ margin: 0 }}>Editar habilidade</h2>
+              <div className="spacer" />
+              <button className="ghost mini" onClick={() => setEditHab(null)}>✕</button>
+            </div>
+            <label>Nome</label>
+            <input value={editHab.nome || ''} onChange={(e) => setEditHab((s) => ({ ...s, nome: e.target.value }))} />
+            <div className="row" style={{ gap: 8 }}>
+              <div style={{ flex: 1 }}>
+                <label>Tipo</label>
+                <select value={editHab.tipo || ''} onChange={(e) => setEditHab((s) => ({ ...s, tipo: e.target.value }))}>
+                  <option value="">—</option>
+                  <option value="ATIVA">ATIVA</option>
+                  <option value="PASSIVA">PASSIVA</option>
+                </select>
+              </div>
+              <div style={{ width: 90 }}>
+                <label>Custo</label>
+                <input type="number" min="0" value={editHab.custo ?? ''}
+                  onChange={(e) => setEditHab((s) => ({ ...s, custo: e.target.value }))} />
+              </div>
+              <div style={{ width: 100 }}>
+                <label>Tipo custo</label>
+                <select value={editHab.custoTipo || ''} onChange={(e) => setEditHab((s) => ({ ...s, custoTipo: e.target.value }))}>
+                  <option value="">—</option>
+                  <option value="PE">PE</option>
+                  <option value="PM">PM</option>
+                </select>
+              </div>
+            </div>
+            <label>Efeito / Descrição</label>
+            <textarea value={editHab.efeito || ''} onChange={(e) => setEditHab((s) => ({ ...s, efeito: e.target.value }))} />
+            <p className="muted" style={{ fontSize: '.78rem', marginTop: 2 }}>
+              A edição vale só para este personagem. Deixe um campo vazio para usar o valor padrão do catálogo.
+            </p>
+            <div className="row" style={{ marginTop: 10, gap: 8 }}>
+              <button onClick={salvarEdicaoHab}>Salvar</button>
+              <button className="ghost" onClick={() => setEditHab(null)}>Cancelar</button>
             </div>
           </div>
         </div>
