@@ -52,6 +52,13 @@ asus:
     # false (dev): API aberta, so /api/auth/me exige token. true (prod): exige token em /api/**
     enforce: ${ASUS_SECURITY_ENFORCE:false}
 
+  # Conta de dono/admin garantida no boot (dono da org padrao). A SENHA vem SEMPRE
+  # de variavel de ambiente — nunca fica hardcoded no repositorio.
+  admin:
+    email: ${ASUS_ADMIN_EMAIL:dev@asus.local}
+    senha: ${ASUS_ADMIN_SENHA:dev12345}
+    nome: ${ASUS_ADMIN_NOME:Dono}
+
   # --- Integracoes externas (plugar credenciais). Ver INTEGRACOES.md na raiz. ---
   # Storage de assets: 'local' (padrao) ou 's3' (S3/R2/GCS S3-compativel).
   storage:

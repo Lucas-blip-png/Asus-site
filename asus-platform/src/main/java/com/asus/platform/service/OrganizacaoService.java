@@ -35,6 +35,14 @@ public class OrganizacaoService {
         return repository.findAll();
     }
 
+    /** Organizacoes das quais o usuario e membro (para contas individuais). */
+    public List<Organizacao> listarDoUsuario(Long usuarioId) {
+        return membroRepository.findByUsuarioId(usuarioId).stream()
+                .map(m -> repository.findById(m.getOrganizacaoId()).orElse(null))
+                .filter(java.util.Objects::nonNull)
+                .toList();
+    }
+
     public Organizacao buscar(Long id) {
         return repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Organizacao " + id + " nao encontrada"));

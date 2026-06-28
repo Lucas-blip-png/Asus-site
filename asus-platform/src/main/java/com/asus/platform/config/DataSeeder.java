@@ -5,6 +5,7 @@ import com.asus.platform.engine.AsusV1Engine;
 import com.asus.platform.repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
@@ -35,6 +36,14 @@ public class DataSeeder implements CommandLineRunner {
     private final ProgressaoNivelRepository progressaoNivelRepository;
     private final CriaturaRepository criaturaRepository;
     private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+
+    /** Conta de dono/admin, configuravel por ambiente (NUNCA hardcode de senha no repo). */
+    @Value("${asus.admin.email:dev@asus.local}")
+    private String adminEmail;
+    @Value("${asus.admin.senha:dev12345}")
+    private String adminSenha;
+    @Value("${asus.admin.nome:Dono}")
+    private String adminNome;
 
     private Long sid;
 
@@ -74,6 +83,7 @@ public class DataSeeder implements CommandLineRunner {
     public void run(String... args) {
         if (gameSystemRepository.existsByCodigo(AsusV1Engine.SYSTEM_ID)) {
             log.info("Seed ja aplicado; pulando.");
+            ensureAdmin(); // garante a conta de dono mesmo em banco ja existente
             return;
         }
         log.info("Aplicando seed do sistema ASUS...");
@@ -96,6 +106,39 @@ public class DataSeeder implements CommandLineRunner {
                 racaRepository.count(), periciaRepository.count(), classeRepository.count(),
                 progressaoNivelRepository.count(), itemJogoRepository.count(), habilidadeRepository.count(),
                 criaturaRepository.count());
+
+        ensureAdmin();
+    }
+
+    /**
+     * Garante a conta de dono/admin (configurada por {@code asus.admin.*}). Roda em todo
+     * boot: cria a conta se ainda nao existir e a torna DONO da organizacao padrao.
+     * A senha vem de variavel de ambiente — nunca fica hardcoded no repositorio.
+     */
+    private void ensureAdmin() {
+        Usuario admin = usuarioRepository.findByEmail(adminEmail).orElse(null);
+        if (admin == null) {
+            admin = usuarioRepository.save(Usuario.builder()
+                    .nome(adminNome == null || adminNome.isBlank() ? adminEmail : adminNome)
+                    .email(adminEmail)
+                    .senhaHash(passwordEncoder.encode(adminSenha))
+                    .build());
+            log.info("Conta de dono '{}' criada.", adminEmail);
+        }
+        final Long adminId = admin.getId();
+        organizacaoRepository.findBySlug(SLUG_ORG_PADRAO).ifPresent(org -> {
+            boolean jaMembro = membroRepository.findByOrganizacaoId(org.getId()).stream()
+                    .anyMatch(m -> adminId.equals(m.getUsuarioId()));
+            if (!jaMembro) {
+                membroRepository.save(OrganizacaoMembro.builder()
+                        .organizacaoId(org.getId()).usuarioId(adminId)
+                        .papel(PapelOrganizacao.DONO).build());
+            }
+            if (!adminId.equals(org.getDonoId())) {
+                org.setDonoId(adminId);
+                organizacaoRepository.save(org);
+            }
+        });
     }
 
     // ---------------- Progressao de 50 niveis (planilha) ----------------

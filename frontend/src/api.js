@@ -37,7 +37,7 @@ export async function api(path, { method = 'GET', body, auth = true, headers = {
 let cachedOrgId = null
 export async function obterOrgId() {
   if (cachedOrgId) return cachedOrgId
-  const orgs = await api('/api/organizacoes')
+  const orgs = await api('/api/organizacoes/minhas')
   if (orgs && orgs.length > 0) {
     cachedOrgId = orgs[0].id
   } else {
