@@ -152,6 +152,9 @@ public class CampanhaService {
         if (req.descricao() != null) {
             campanha.setDescricao(com.asus.platform.util.Sanitizador.limpar(req.descricao()));
         }
+        if (req.anotacoes() != null) {
+            campanha.setAnotacoes(com.asus.platform.util.Sanitizador.limpar(req.anotacoes()));
+        }
         if (req.capaAssetId() != null) {
             campanha.setCapaAssetId(req.capaAssetId());
         }
