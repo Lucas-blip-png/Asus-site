@@ -6,5 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface CampanhaPersonagemRepository extends JpaRepository<CampanhaPersonagem, Long> {
     List<CampanhaPersonagem> findByCampanhaId(Long campanhaId);
+    List<CampanhaPersonagem> findByPersonagemId(Long personagemId);
     boolean existsByCampanhaIdAndPersonagemId(Long campanhaId, Long personagemId);
 }

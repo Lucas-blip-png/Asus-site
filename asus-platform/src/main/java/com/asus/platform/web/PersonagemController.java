@@ -1,5 +1,12 @@
 package com.asus.platform.web;
 
+import com.asus.platform.repository.AtaqueRepository;
+import com.asus.platform.repository.CampanhaPersonagemRepository;
+import com.asus.platform.repository.FeiticoPersonagemRepository;
+import com.asus.platform.repository.HabilidadePersonagemRepository;
+import com.asus.platform.repository.ItemPersonagemRepository;
+import com.asus.platform.repository.PersonagemRepository;
+import com.asus.platform.repository.PersonagemSnapshotRepository;
 import com.asus.platform.service.PersonagemService;
 import com.asus.platform.web.dto.AtualizarPersonagemRequest;
 import com.asus.platform.web.dto.AtualizarStatusRequest;
@@ -15,6 +22,7 @@ import com.asus.platform.web.dto.SnapshotResponse;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 /** Personagens (plano, secao 21.3). */
@@ -23,9 +31,30 @@ import org.springframework.web.bind.annotation.*;
 public class PersonagemController {
 
     private final PersonagemService service;
+    private final PersonagemRepository personagemRepository;
+    private final ItemPersonagemRepository itemRepository;
+    private final AtaqueRepository ataqueRepository;
+    private final FeiticoPersonagemRepository feiticoRepository;
+    private final HabilidadePersonagemRepository habilidadeRepository;
+    private final PersonagemSnapshotRepository snapshotRepository;
+    private final CampanhaPersonagemRepository campanhaPersonagemRepository;
 
-    public PersonagemController(PersonagemService service) {
+    public PersonagemController(PersonagemService service,
+                                PersonagemRepository personagemRepository,
+                                ItemPersonagemRepository itemRepository,
+                                AtaqueRepository ataqueRepository,
+                                FeiticoPersonagemRepository feiticoRepository,
+                                HabilidadePersonagemRepository habilidadeRepository,
+                                PersonagemSnapshotRepository snapshotRepository,
+                                CampanhaPersonagemRepository campanhaPersonagemRepository) {
         this.service = service;
+        this.personagemRepository = personagemRepository;
+        this.itemRepository = itemRepository;
+        this.ataqueRepository = ataqueRepository;
+        this.feiticoRepository = feiticoRepository;
+        this.habilidadeRepository = habilidadeRepository;
+        this.snapshotRepository = snapshotRepository;
+        this.campanhaPersonagemRepository = campanhaPersonagemRepository;
     }
 
     @GetMapping("/organizacoes/{orgId}/personagens")
@@ -68,6 +97,20 @@ public class PersonagemController {
     public ProgressoResponse atualizarProgresso(@PathVariable Long id,
                                                 @RequestBody ProgressoRequest req) {
         return service.atualizarProgresso(id, req.xpAtual(), req.nivel());
+    }
+
+    /** Apaga a ficha e todos os vinculos (inventario, ataques, magias, habilidades, snapshots, campanhas). */
+    @DeleteMapping("/personagens/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Transactional
+    public void apagar(@PathVariable Long id) {
+        itemRepository.deleteAll(itemRepository.findByPersonagemId(id));
+        ataqueRepository.deleteAll(ataqueRepository.findByPersonagemId(id));
+        feiticoRepository.deleteAll(feiticoRepository.findByPersonagemId(id));
+        habilidadeRepository.deleteAll(habilidadeRepository.findByPersonagemId(id));
+        snapshotRepository.deleteAll(snapshotRepository.findByPersonagemIdOrderByCriadoEmDesc(id));
+        campanhaPersonagemRepository.deleteAll(campanhaPersonagemRepository.findByPersonagemId(id));
+        personagemRepository.deleteById(id);
     }
 
     @GetMapping("/personagens/{id}/export")
