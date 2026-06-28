@@ -164,6 +164,8 @@ button:disabled { opacity: .5; cursor: default; filter: none; }
 
 table { width: 100%; border-collapse: collapse; }
 th, td { text-align: left; padding: 6px 6px; border-bottom: 1px solid var(--border); font-size: .9rem; }
+.card table tbody tr { transition: background .12s; }
+.card table tbody tr:hover td { background: rgba(255,255,255,.025); }
 
 /* ---------------- Card de entidade (avatar + corpo + ação) ---------------- */
 .entity-card {
@@ -477,3 +479,9 @@ th, td { text-align: left; padding: 6px 6px; border-bottom: 1px solid var(--bord
 .cris-head .nm { font-weight: 800; }
 .cris-head .sub { color: var(--muted); font-size: .8rem; }
 .cris-body { padding: 10px 14px 13px; border-top: 1px solid var(--border); }
+
+/* Item do modal de adicionar habilidade */
+.hab-opt { display: flex; align-items: center; gap: 10px;
+  background: var(--panel-2); border: 1px solid var(--border); border-left: 3px solid var(--gold);
+  border-radius: var(--radius-sm); padding: 9px 12px; }
+.hab-opt:hover { border-color: var(--border-2); }

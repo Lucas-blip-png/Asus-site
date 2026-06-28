@@ -30,6 +30,8 @@ export default function Ficha() {
   const [habChosen, setHabChosen] = useState([])
   const [habDisp, setHabDisp] = useState([])
   const [habSel, setHabSel] = useState('')
+  const [modalHab, setModalHab] = useState(false)
+  const [habBusca, setHabBusca] = useState('')
   const [itens, setItens] = useState([])
   const [ataques, setAtaques] = useState([])
   const [feiticos, setFeiticos] = useState([])
@@ -231,9 +233,10 @@ export default function Ficha() {
     api(`/api/personagens/${id}/habilidades`).then(setHabChosen).catch(() => {})
     api(`/api/personagens/${id}/habilidades/disponiveis`).then(setHabDisp).catch(() => {})
   }
-  async function addHab() {
-    if (!habSel) return
-    try { await api(`/api/personagens/${id}/habilidades`, { method: 'POST', body: { codigo: habSel } }); setHabSel(''); recarregarHab() }
+  async function addHab(codigo) {
+    const cod = codigo || habSel
+    if (!cod) return
+    try { await api(`/api/personagens/${id}/habilidades`, { method: 'POST', body: { codigo: cod } }); setHabSel(''); recarregarHab() }
     catch (e) { setErro(e.message) }
   }
   async function delHab(codigo) {
@@ -475,19 +478,9 @@ export default function Ficha() {
                 </div>
               ))}
               {!habChosen.length && <div className="muted">Nenhuma habilidade escolhida.</div>}
-              <div className="add-form">
-                <select value={habSel} onChange={(e) => setHabSel(e.target.value)} style={{ flex: '1 1 160px' }}>
-                  <option value="">— habilidade disponível —</option>
-                  {habDisp.map((h) => (
-                    <option key={h.codigo} value={h.codigo}>
-                      {h.nome}{h.classeCodigo !== 'GERAL' ? ` (${h.classeCodigo})` : ''}{h.nivelMinimo > 1 ? ` · Nv ${h.nivelMinimo}` : ''}
-                    </option>
-                  ))}
-                </select>
-                <button className="mini" onClick={addHab}>+ Habilidade</button>
-              </div>
+              <button className="mini" onClick={() => { setHabBusca(''); setModalHab(true) }}>+ Adicionar Habilidade</button>
               {!habDisp.length && (
-                <div className="muted" style={{ marginTop: 4 }}>
+                <div className="muted" style={{ marginTop: 6 }}>
                   Nada liberado no nível/atributo atuais (a trilha só conta a partir do nível 11).
                 </div>
               )}
@@ -593,6 +586,42 @@ export default function Ficha() {
           )}
         </div>
       </div>
+
+      {modalHab && (
+        <div className="modal" onClick={() => setModalHab(false)}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 560 }}>
+            <div className="row">
+              <h2 style={{ margin: 0 }}>Adicionar Habilidade</h2>
+              <div className="spacer" />
+              <button className="ghost mini" onClick={() => setModalHab(false)}>✕</button>
+            </div>
+            <div className="search-wrap" style={{ margin: '12px 0' }}>
+              <span className="ic">🔍</span>
+              <input placeholder="Filtrar habilidades" value={habBusca}
+                onChange={(e) => setHabBusca(e.target.value)} autoFocus />
+            </div>
+            <div className="lista-vert" style={{ maxHeight: '52vh', overflow: 'auto' }}>
+              {habDisp
+                .filter((h) => (h.nome + ' ' + (h.classeCodigo || '')).toLowerCase().includes(habBusca.toLowerCase()))
+                .map((h) => (
+                  <div key={h.codigo} className="hab-opt">
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <b>{h.nome}</b>
+                      <div className="row" style={{ gap: 6, marginTop: 3 }}>
+                        {h.classeCodigo && h.classeCodigo !== 'GERAL' && <span className="tag">{h.classeCodigo}</span>}
+                        {h.nivelMinimo > 1 && <span className="tag">Nv {h.nivelMinimo}</span>}
+                        {h.tipo && <span className="tag">{h.tipo}</span>}
+                      </div>
+                      {h.efeito && <div className="muted" style={{ fontSize: '.78rem', marginTop: 3 }}>{h.efeito}</div>}
+                    </div>
+                    <button className="mini" title="Adicionar" onClick={() => addHab(h.codigo)}>+</button>
+                  </div>
+                ))}
+              {!habDisp.length && <div className="muted">Nenhuma habilidade disponível no nível/atributo atuais.</div>}
+            </div>
+          </div>
+        </div>
+      )}
 
       {rolagem && (
         <div className={`roll-toast ${rolagem.crit ? 'crit' : rolagem.fumble ? 'fumble' : ''}`}>
