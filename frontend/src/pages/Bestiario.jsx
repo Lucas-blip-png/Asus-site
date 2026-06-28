@@ -3,6 +3,37 @@ import { api } from '../api.js'
 
 const VAZIA = { nome: '', especie: '', tipo: '', nivel: 1, pv: 0, pm: 0, pe: 0, defesa: 10, descricao: '' }
 
+function CriaturaRow({ c, onDelete }) {
+  const [open, setOpen] = useState(false)
+  const sub = [c.especie, c.tipo].filter(Boolean).join(' · ') || 'Criatura'
+  return (
+    <div className={`cris-row${open ? ' open' : ''}`}>
+      <div className="cris-head" onClick={() => setOpen((o) => !o)}>
+        <span className="chev">▾</span>
+        <b className="nm">{c.nome}</b>
+        <span className="sub">{sub}</span>
+        <div className="spacer" />
+        <span className="tag gold">Nv {c.nivel}</span>
+        {c.oficial
+          ? <span className="tag">Oficial</span>
+          : <button className="ghost mini" title="Remover"
+              onClick={(e) => { e.stopPropagation(); onDelete(c.id) }}>✕</button>}
+      </div>
+      {open && (
+        <div className="cris-body">
+          <div className="row" style={{ gap: 6, flexWrap: 'wrap' }}>
+            <span className="tag">PV {c.pv}</span>
+            {c.pm ? <span className="tag">PM {c.pm}</span> : null}
+            {c.pe ? <span className="tag">PE {c.pe}</span> : null}
+            <span className="tag">Defesa {c.defesa}</span>
+          </div>
+          {c.descricao && <p className="muted" style={{ marginTop: 8, fontSize: '.84rem' }}>{c.descricao}</p>}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function Bestiario() {
   const [busca, setBusca] = useState('')
   const [criaturas, setCriaturas] = useState([])
@@ -73,31 +104,8 @@ export default function Bestiario() {
       )}
 
       {!filtradas.length && <div className="card muted">Nenhuma criatura. Crie a primeira com “+ Nova criatura”.</div>}
-      <div className="grid">
-        {filtradas.map((c) => (
-          <div key={c.id} className="card">
-            <div className="row">
-              <b style={{ fontSize: '1.02rem' }}>{c.nome}</b>
-              <div className="spacer" />
-              <span className="tag gold">Nv {c.nivel}</span>
-            </div>
-            <div className="muted" style={{ margin: '4px 0' }}>
-              {[c.especie, c.tipo].filter(Boolean).join(' · ') || 'Criatura'}
-            </div>
-            <div className="row" style={{ gap: 6, flexWrap: 'wrap' }}>
-              <span className="tag">PV {c.pv}</span>
-              {c.pm ? <span className="tag">PM {c.pm}</span> : null}
-              {c.pe ? <span className="tag">PE {c.pe}</span> : null}
-              <span className="tag">Defesa {c.defesa}</span>
-            </div>
-            {c.descricao && <p className="muted" style={{ marginTop: 6, fontSize: '.82rem' }}>{c.descricao}</p>}
-            <div className="row" style={{ marginTop: 8 }}>
-              {c.oficial && <span className="tag">Oficial</span>}
-              <div className="spacer" />
-              {!c.oficial && <button className="ghost mini" onClick={() => apagar(c.id)}>Remover</button>}
-            </div>
-          </div>
-        ))}
+      <div className="cris-list">
+        {filtradas.map((c) => <CriaturaRow key={c.id} c={c} onDelete={apagar} />)}
       </div>
     </>
   )
