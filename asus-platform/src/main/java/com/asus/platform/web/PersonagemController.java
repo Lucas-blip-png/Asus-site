@@ -9,6 +9,7 @@ import com.asus.platform.repository.HabilidadePersonagemRepository;
 import com.asus.platform.repository.ItemPersonagemRepository;
 import com.asus.platform.repository.PersonagemRepository;
 import com.asus.platform.repository.PersonagemSnapshotRepository;
+import com.asus.platform.security.UsuarioPrincipal;
 import com.asus.platform.service.PersonagemService;
 import com.asus.platform.web.dto.AtualizarPersonagemRequest;
 import com.asus.platform.web.dto.AtualizarStatusRequest;
@@ -87,8 +88,9 @@ public class PersonagemController {
     @PostMapping("/organizacoes/{orgId}/personagens")
     @ResponseStatus(HttpStatus.CREATED)
     public PersonagemResponse criar(@PathVariable Long orgId,
+                                    @org.springframework.security.core.annotation.AuthenticationPrincipal UsuarioPrincipal principal,
                                     @Valid @RequestBody CriarPersonagemRequest req) {
-        return service.criar(orgId, req);
+        return service.criar(orgId, principal != null ? principal.id() : null, req);
     }
 
     @GetMapping("/personagens/{id}")

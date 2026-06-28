@@ -98,15 +98,14 @@ public class PersonagemService {
     }
 
     @Transactional
-    public PersonagemResponse criar(Long organizacaoId, CriarPersonagemRequest req) {
+    public PersonagemResponse criar(Long organizacaoId, Long usuarioId, CriarPersonagemRequest req) {
         organizacaoService.buscar(organizacaoId);
         planoService.validarNovoPersonagem(organizacaoId);
 
-        // Personagem nasce no nivel 1 (regra ASUS): fixos da classe + 5 pontos distribuiveis.
         int nivelInicial = req.nivel() == null ? 1 : Math.max(1, req.nivel());
         validarDistribuicaoCriacao(req.atributosBase(), req.pericias(), nivelInicial,
                 req.classeCodigo(), req.trilhaCodigo());
-        Personagem p = montarSalvar(organizacaoId, req.nome(), req.jogador(),
+        Personagem p = montarSalvar(organizacaoId, usuarioId, req.nome(), req.jogador(),
                 req.racaCodigo(), req.classeCodigo(), req.trilhaCodigo(), req.divindade(),
                 nivelInicial, 0, req.atributosBase(), req.pericias());
 
@@ -124,7 +123,7 @@ public class PersonagemService {
         organizacaoService.buscar(dados.organizacaoId());
         planoService.validarNovoPersonagem(dados.organizacaoId());
 
-        Personagem p = montarSalvar(dados.organizacaoId(), dados.nome(), dados.jogador(),
+        Personagem p = montarSalvar(dados.organizacaoId(), null, dados.nome(), dados.jogador(),
                 dados.racaCodigo(), dados.classeCodigo(), dados.trilhaCodigo(), dados.divindade(),
                 dados.nivelOuPadrao(), dados.xpOuZero(), dados.atributosBase(), null);
 
@@ -378,7 +377,7 @@ public class PersonagemService {
                 .orElseThrow(() -> new NotFoundException("Personagem " + id + " nao encontrado"));
     }
 
-    private Personagem montarSalvar(Long organizacaoId, String nome, String jogador,
+    private Personagem montarSalvar(Long organizacaoId, Long usuarioId, String nome, String jogador,
                                     String racaCodigo, String classeCodigo, String trilhaCodigo,
                                     String divindade, int nivel, int xpAtual,
                                     AtributosDto atributosBase, Map<String, Integer> pericias) {
@@ -399,6 +398,7 @@ public class PersonagemService {
 
         Personagem p = Personagem.builder()
                 .organizacaoId(organizacaoId)
+                .usuarioId(usuarioId)
                 .gameSystemId(asus.getId())
                 .rulesetVersion(AsusV1Engine.VERSION)
                 .nome(nome)
@@ -616,6 +616,11 @@ public class PersonagemService {
                 limiteAtributo,
                 xpProximoNivel,
                 pericias,
+                p.getAnotacoes(),
+                p.getAparencia(),
+                p.getPersonalidade(),
+                p.getHistorico(),
+                p.getObjetivo(),
                 p.isArquivado(),
                 p.getCriadoEm(),
                 p.getAtualizadoEm());

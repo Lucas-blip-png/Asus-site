@@ -33,6 +33,11 @@ public record PersonagemResponse(
         int limiteAtributo,
         Integer xpProximoNivel,
         List<PericiaCalculadaDto> pericias,
+        String anotacoes,
+        String aparencia,
+        String personalidade,
+        String historico,
+        String objetivo,
         boolean arquivado,
         LocalDateTime criadoEm,
         LocalDateTime atualizadoEm) {}

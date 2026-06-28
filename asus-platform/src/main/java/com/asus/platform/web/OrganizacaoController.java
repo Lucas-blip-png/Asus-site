@@ -38,10 +38,21 @@ public class OrganizacaoController {
         return service.listarDoUsuario(principal.id()).stream().map(OrganizacaoResponse::de).toList();
     }
 
+    /** Org pessoal do usuario (retorna-ou-cria). Estavel entre reloads: evita dados "sumirem". */
+    @GetMapping("/minha")
+    public OrganizacaoResponse minha(@AuthenticationPrincipal UsuarioPrincipal principal) {
+        if (principal == null) {
+            throw new IllegalArgumentException("Necessario estar logado");
+        }
+        return OrganizacaoResponse.de(service.minhaOuCriar(principal.id()));
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public OrganizacaoResponse criar(@Valid @RequestBody CriarOrganizacaoRequest req) {
-        return OrganizacaoResponse.de(service.criar(req.nome(), req.slug()));
+    public OrganizacaoResponse criar(@AuthenticationPrincipal UsuarioPrincipal principal,
+                                     @Valid @RequestBody CriarOrganizacaoRequest req) {
+        return OrganizacaoResponse.de(service.criar(req.nome(), req.slug(),
+                principal != null ? principal.id() : null));
     }
 
     @GetMapping("/{id}")

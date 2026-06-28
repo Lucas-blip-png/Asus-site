@@ -49,15 +49,32 @@ public class OrganizacaoService {
     }
 
     @Transactional
-    public Organizacao criar(String nome, String slug) {
+    public Organizacao criar(String nome, String slug, Long usuarioId) {
         if (repository.existsBySlug(slug)) {
             throw new IllegalArgumentException("Ja existe organizacao com o slug '" + slug + "'");
         }
         Organizacao org = repository.save(Organizacao.builder()
-                .nome(nome).slug(slug).plano(Plano.FREE).build());
-        auditoriaService.registrar(org.getId(), null, "ORGANIZACAO_CRIADA",
+                .nome(nome).slug(slug).donoId(usuarioId).plano(Plano.FREE).build());
+        // O criador vira membro (dono) — senao /minhas volta vazio e os dados "somem" no reload.
+        if (usuarioId != null) {
+            membroRepository.save(OrganizacaoMembro.builder()
+                    .organizacaoId(org.getId()).usuarioId(usuarioId)
+                    .papel(PapelOrganizacao.DONO).build());
+        }
+        auditoriaService.registrar(org.getId(), usuarioId, "ORGANIZACAO_CRIADA",
                 "Organizacao", org.getId(), null, null, nome);
         return org;
+    }
+
+    /** Org pessoal do usuario: a primeira de que ele e membro, ou cria uma nova (idempotente). */
+    @Transactional
+    public Organizacao minhaOuCriar(Long usuarioId) {
+        List<Organizacao> minhas = listarDoUsuario(usuarioId);
+        if (!minhas.isEmpty()) {
+            return minhas.get(0);
+        }
+        String slug = "mesa-" + usuarioId + "-" + Long.toHexString(System.nanoTime() & 0xffffffL);
+        return criar("Minha Mesa", slug, usuarioId);
     }
 
     @Transactional
