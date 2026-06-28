@@ -4,6 +4,7 @@ import { api } from '../api.js'
 import { inscrever } from '../ws.js'
 import { useAuth } from '../auth.jsx'
 import { dataHora } from '../format.js'
+import ResultadosPanel from '../components/ResultadosPanel.jsx'
 
 const fmtData = (iso) => {
   try {
@@ -13,7 +14,7 @@ const fmtData = (iso) => {
   }
 }
 
-const ABAS = ['Agentes', 'Jogadores', 'Sessões', 'Combates', 'Rolagens']
+const ABAS = ['Agentes', 'Jogadores', 'Sessões', 'Combates']
 
 const d20 = () => 1 + Math.floor(Math.random() * 20)
 
@@ -163,9 +164,6 @@ export default function Campanha() {
   const [rolagens, setRolagens] = useState([])
   const [membros, setMembros] = useState([])
   const [personagens, setPersonagens] = useState([])
-  const [expr, setExpr] = useState('1d20')
-  const [rotulo, setRotulo] = useState('')
-  const [oculta, setOculta] = useState(false)
   const [convite, setConvite] = useState(null)
   const [sessoes, setSessoes] = useState([])
   const [sessaoForm, setSessaoForm] = useState({ titulo: '', inicio: '' })
@@ -211,18 +209,14 @@ export default function Campanha() {
     [id],
   )
 
-  async function rolar(e) {
-    e.preventDefault()
-    setErro(null)
-    try {
-      await api(`/api/campanhas/${id}/rolagens`, {
-        method: 'POST',
-        body: { expressao: expr, rotulo, oculta, usuarioId: user?.id },
-      })
-    } catch (ex) {
-      setErro(ex.message)
-    }
+  // Rolagem vinda do painel de Resultados (chat). privada => oculta (só o mestre).
+  async function rolarPainel(expressao, rot, privada) {
+    await api(`/api/campanhas/${id}/rolagens`, {
+      method: 'POST',
+      body: { expressao, rotulo: rot, oculta: !!privada, usuarioId: user?.id },
+    })
   }
+  const ehMestre = !!user && campanha?.mestreId === user.id
 
   async function criarSessao(e) {
     e.preventDefault()
@@ -522,47 +516,6 @@ export default function Campanha() {
         </>
       )}
 
-      {aba === 'Rolagens' && (
-        <>
-          <div className="card">
-            <h2>Rolar dados</h2>
-            <form onSubmit={rolar} className="row">
-              <div>
-                <label>Expressão</label>
-                <input value={expr} onChange={(e) => setExpr(e.target.value)} style={{ width: 120 }} />
-              </div>
-              <div style={{ flex: 1 }}>
-                <label>Rótulo</label>
-                <input value={rotulo} onChange={(e) => setRotulo(e.target.value)} />
-              </div>
-              <label className="row" style={{ alignSelf: 'end', gap: 6 }}>
-                <input type="checkbox" style={{ width: 'auto' }} checked={oculta}
-                  onChange={(e) => setOculta(e.target.checked)} /> oculta
-              </label>
-              <button style={{ alignSelf: 'end' }}>Rolar</button>
-            </form>
-          </div>
-
-          <div className="card">
-            <h2>Histórico</h2>
-            <table>
-              <tbody>
-                {rolagens.map((r) => (
-                  <tr key={r.id}>
-                    <td>{r.rotulo || r.expressao}</td>
-                    <td className="muted">{r.detalhe || (r.oculta ? '🎲 oculta' : '')}</td>
-                    <td className="stat"
-                      style={{ color: r.critico ? 'var(--crit)' : r.falhaCritica ? 'var(--fumble)' : 'inherit' }}>
-                      {r.total ?? '—'}{r.critico ? ' ✦' : ''}{r.falhaCritica ? ' ✗' : ''}
-                    </td>
-                  </tr>
-                ))}
-                {!rolagens.length && <tr><td className="muted">Nenhuma rolagem ainda.</td></tr>}
-              </tbody>
-            </table>
-          </div>
-        </>
-      )}
 
       {addPersoOpen && (
         <div className="modal" onClick={() => setAddPersoOpen(false)}>
@@ -612,6 +565,8 @@ export default function Campanha() {
           </div>
         </div>
       )}
+
+      <ResultadosPanel rolagens={rolagens} onRolar={rolarPainel} ehMestre={ehMestre} />
 
       {toast && (
         <div className={`roll-toast ${toast.critico ? 'crit' : toast.falhaCritica ? 'fumble' : ''}`}>
