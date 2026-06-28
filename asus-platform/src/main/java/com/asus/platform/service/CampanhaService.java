@@ -11,9 +11,11 @@ import com.asus.platform.domain.Permissao;
 import com.asus.platform.domain.Permissoes;
 import com.asus.platform.domain.Personagem;
 import com.asus.platform.engine.AsusV1Engine;
+import com.asus.platform.domain.Classe;
 import com.asus.platform.repository.CampanhaMembroRepository;
 import com.asus.platform.repository.CampanhaPersonagemRepository;
 import com.asus.platform.repository.CampanhaRepository;
+import com.asus.platform.repository.ClasseRepository;
 import com.asus.platform.repository.ConviteRepository;
 import com.asus.platform.repository.GameSystemRepository;
 import com.asus.platform.repository.PersonagemRepository;
@@ -48,6 +50,7 @@ public class CampanhaService {
     private final OrganizacaoService organizacaoService;
     private final GameSystemRepository gameSystemRepository;
     private final PersonagemRepository personagemRepository;
+    private final ClasseRepository classeRepository;
     private final UsuarioRepository usuarioRepository;
     private final AuditoriaService auditoriaService;
     private final PlanoService planoService;
@@ -59,6 +62,7 @@ public class CampanhaService {
                            OrganizacaoService organizacaoService,
                            GameSystemRepository gameSystemRepository,
                            PersonagemRepository personagemRepository,
+                           ClasseRepository classeRepository,
                            UsuarioRepository usuarioRepository,
                            AuditoriaService auditoriaService,
                            PlanoService planoService) {
@@ -69,6 +73,7 @@ public class CampanhaService {
         this.organizacaoService = organizacaoService;
         this.gameSystemRepository = gameSystemRepository;
         this.personagemRepository = personagemRepository;
+        this.classeRepository = classeRepository;
         this.usuarioRepository = usuarioRepository;
         this.auditoriaService = auditoriaService;
         this.planoService = planoService;
@@ -170,7 +175,13 @@ public class CampanhaService {
     public List<CampanhaPersonagemResponse> listarPersonagens(Long campanhaId) {
         carregar(campanhaId); // valida existencia
         return campanhaPersonagemRepository.findByCampanhaId(campanhaId).stream()
-                .map(cp -> CampanhaPersonagemResponse.de(cp, nomePersonagem(cp.getPersonagemId())))
+                .map(cp -> {
+                    Personagem p = personagemRepository.findById(cp.getPersonagemId()).orElse(null);
+                    String classe = (p != null && p.getClasseId() != null)
+                            ? classeRepository.findById(p.getClasseId()).map(Classe::getNome).orElse(null)
+                            : null;
+                    return CampanhaPersonagemResponse.de(cp, p, classe);
+                })
                 .toList();
     }
 
@@ -197,7 +208,9 @@ public class CampanhaService {
                 "PERSONAGEM_ADICIONADO_CAMPANHA", "Campanha", campanhaId,
                 "personagemId", null, String.valueOf(personagemId));
 
-        return CampanhaPersonagemResponse.de(cp, personagem.getNome());
+        String classe = personagem.getClasseId() == null ? null
+                : classeRepository.findById(personagem.getClasseId()).map(Classe::getNome).orElse(null);
+        return CampanhaPersonagemResponse.de(cp, personagem, classe);
     }
 
     public List<CampanhaMembroResponse> listarMembros(Long campanhaId) {
@@ -311,11 +324,6 @@ public class CampanhaService {
     private String systemIdDe(Campanha c) {
         return gameSystemRepository.findById(c.getGameSystemId())
                 .map(GameSystem::getCodigo).orElse(AsusV1Engine.SYSTEM_ID);
-    }
-
-    private String nomePersonagem(Long personagemId) {
-        return personagemRepository.findById(personagemId)
-                .map(Personagem::getNome).orElse(null);
     }
 
     private String gerarCodigoUnico() {
