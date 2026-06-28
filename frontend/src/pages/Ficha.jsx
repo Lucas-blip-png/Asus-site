@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { api } from '../api.js'
+import { inscrever } from '../ws.js'
+import { useAuth } from '../auth.jsx'
 import Heptagono from '../components/Heptagono.jsx'
+import ResultadosPanel from '../components/ResultadosPanel.jsx'
 
 const ABAS = ['Combate', 'Habilidades', 'Magias', 'Inventário', 'Descrição']
 const BARRAS = [['Vida', 'vida', 'pv'], ['Mana', 'mana', 'pm'], ['Energia', 'energia', 'pe']]
@@ -153,6 +156,9 @@ function HabRow({ h, onEdit, onDelete }) {
 export default function Ficha() {
   const { id } = useParams()
   const nav = useNavigate()
+  const { user } = useAuth()
+  const [campanhaAtiva, setCampanhaAtiva] = useState(null)
+  const [rolagens, setRolagens] = useState([])
   const [p, setP] = useState(null)
   const [aba, setAba] = useState('Combate')
   const [erro, setErro] = useState(null)
@@ -188,15 +194,51 @@ export default function Ficha() {
   const [rolagem, setRolagem] = useState(null)
   const rolTimer = useRef(null)
 
-  // Rola 1d20 + modificador (treino da perícia) e mostra o resultado.
-  function rolar(rotulo, mod = 0) {
-    const d = 1 + Math.floor(Math.random() * 20)
-    const total = d + (Number(mod) || 0)
-    setRolagem({ rotulo, d, mod: Number(mod) || 0, total, crit: d === 20, fumble: d === 1 })
+  function toastRolagem(r) {
+    setRolagem(r)
     clearTimeout(rolTimer.current)
     rolTimer.current = setTimeout(() => setRolagem(null), 5000)
   }
+  // Rola 1d20 + modificador. Se o personagem está numa campanha, rola no servidor
+  // (aparece no chat de Resultados de todos); senão, rola localmente.
+  async function rolar(rotulo, mod = 0) {
+    const m = Number(mod) || 0
+    if (campanhaAtiva) {
+      const expressao = '1d20' + (m > 0 ? `+${m}` : m < 0 ? `${m}` : '')
+      try {
+        const r = await api(`/api/campanhas/${campanhaAtiva.id}/rolagens`, {
+          method: 'POST',
+          body: { expressao, rotulo, personagemId: Number(id), usuarioId: user?.id },
+        })
+        toastRolagem({ rotulo, d: r.naturalD20 ?? r.total, mod: m, total: r.total, crit: !!r.critico, fumble: !!r.falhaCritica })
+        return
+      } catch { /* cai pro local */ }
+    }
+    const d = 1 + Math.floor(Math.random() * 20)
+    toastRolagem({ rotulo, d, mod: m, total: d + m, crit: d === 20, fumble: d === 1 })
+  }
+  // Rolagem livre vinda do painel de Resultados (chat).
+  async function rolarPainel(expressao, rot) {
+    await api(`/api/campanhas/${campanhaAtiva.id}/rolagens`, {
+      method: 'POST',
+      body: { expressao, rotulo: rot, personagemId: Number(id), usuarioId: user?.id },
+    })
+  }
   useEffect(() => () => clearTimeout(rolTimer.current), [])
+
+  // Descobre a campanha do personagem (para o chat de Resultados na ficha).
+  useEffect(() => {
+    api(`/api/personagens/${id}/campanhas`)
+      .then((cs) => setCampanhaAtiva(cs && cs.length ? cs[0] : null))
+      .catch(() => setCampanhaAtiva(null))
+  }, [id])
+
+  // Histórico + tempo real das rolagens da campanha ativa.
+  useEffect(() => {
+    if (!campanhaAtiva) { setRolagens([]); return undefined }
+    api(`/api/campanhas/${campanhaAtiva.id}/rolagens`).then(setRolagens).catch(() => {})
+    return inscrever(`/topic/campanhas/${campanhaAtiva.id}/rolagens`, (r) => setRolagens((prev) => [r, ...prev]))
+  }, [campanhaAtiva])
 
   function aplicar(d) {
     setP(d)
@@ -585,6 +627,9 @@ export default function Ficha() {
         <span className="count-badge">
           {p.classeNome}{p.trilhaNome ? ` · ${p.trilhaNome}` : ''} · Nv {p.nivel}
         </span>
+        {campanhaAtiva && (
+          <Link to={`/campanhas/${campanhaAtiva.id}`} className="tag">💬 Campanha: {campanhaAtiva.nome}</Link>
+        )}
         <div className="spacer" />
         <button className="ghost mini" onClick={() => { setApagarTxt(''); setApagarOpen(true) }}>
           🗑 Apagar ficha
@@ -1105,6 +1150,14 @@ export default function Ficha() {
             {rolagem.crit ? ' · CRÍTICO!' : ''}{rolagem.fumble ? ' · FALHA!' : ''}
           </div>
         </div>
+      )}
+
+      {campanhaAtiva && (
+        <ResultadosPanel
+          rolagens={rolagens}
+          onRolar={rolarPainel}
+          ehMestre={!!user && campanhaAtiva.mestreId === user.id}
+        />
       )}
     </>
   )

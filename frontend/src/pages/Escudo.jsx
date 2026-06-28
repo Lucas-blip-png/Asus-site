@@ -1,16 +1,28 @@
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { api } from '../api.js'
+import { inscrever } from '../ws.js'
 import { useAuth } from '../auth.jsx'
+import ResultadosPanel from '../components/ResultadosPanel.jsx'
 
-function Recurso({ label, cls, atual, max }) {
+const ATRIBS = [
+  ['forca', 'FOR'], ['constituicao', 'CON'], ['destreza', 'DES'], ['agilidade', 'AGI'],
+  ['inteligencia', 'INT'], ['sabedoria', 'SAB'], ['carisma', 'CAR'],
+]
+const BARRAS = [['Vida', 'vida', 'pv'], ['Mana', 'mana', 'pm'], ['Energia', 'energia', 'pe']]
+
+function Recurso({ label, cls, atual, max, onMinus, onPlus }) {
   const a = atual ?? 0
   const m = max ?? 0
   const pct = m > 0 ? Math.max(0, Math.min(100, (a / m) * 100)) : 0
   return (
     <div className="res">
       <div className="lbl"><span>{label}</span><span>{a}/{m}</span></div>
-      <div className={`bar sm ${cls}`}><span style={{ width: `${pct}%` }} /></div>
+      <div className={`bar sm ${cls}`} style={{ position: 'relative' }}>
+        <span style={{ width: `${pct}%` }} />
+        <button className="rec-step" style={{ position: 'absolute', left: 0, top: 0, bottom: 0 }} onClick={onMinus}>‹</button>
+        <button className="rec-step" style={{ position: 'absolute', right: 0, top: 0, bottom: 0 }} onClick={onPlus}>›</button>
+      </div>
     </div>
   )
 }
@@ -19,12 +31,26 @@ export default function Escudo() {
   const { id } = useParams()
   const { user } = useAuth()
   const [data, setData] = useState(null)
+  const [rolagens, setRolagens] = useState([])
   const [erro, setErro] = useState(null)
 
+  const carregarRolagens = () =>
+    api(`/api/campanhas/${id}/escudo/rolagens?usuarioId=${user?.id}`).then(setRolagens).catch(() => {})
+
   const carregar = () =>
-    api(`/api/campanhas/${id}/escudo?usuarioId=${user?.id}`).then(setData).catch((e) => setErro(e.message))
+    api(`/api/campanhas/${id}/escudo?usuarioId=${user?.id}`)
+      .then((d) => { setData(d); setRolagens(d.rolagens || []) })
+      .catch((e) => setErro(e.message))
+
   useEffect(() => {
     if (user) carregar()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, user])
+
+  // Tempo real: ao chegar uma rolagem nova, recarrega o histórico completo (mestre vê tudo).
+  useEffect(() => {
+    if (!user) return undefined
+    return inscrever(`/topic/campanhas/${id}/rolagens`, () => carregarRolagens())
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, user])
 
@@ -35,74 +61,78 @@ export default function Escudo() {
         body: { [campo]: Math.max(0, (atual ?? 0) + delta) },
       })
       carregar()
-    } catch (e) {
-      setErro(e.message)
-    }
+    } catch (e) { setErro(e.message) }
   }
-
   async function revelar(rid) {
     try {
       await api(`/api/campanhas/${id}/rolagens/${rid}/revelar?usuarioId=${user?.id}`, { method: 'POST' })
-      carregar()
-    } catch (e) {
-      setErro(e.message)
-    }
+      carregarRolagens()
+    } catch (e) { setErro(e.message) }
+  }
+  async function rolar(expressao, rotulo, privada) {
+    await api(`/api/campanhas/${id}/rolagens`, {
+      method: 'POST',
+      body: { expressao, rotulo, oculta: !!privada, usuarioId: user?.id },
+    })
+    carregarRolagens()
   }
 
-  if (erro)
-    return (
-      <div>
-        <p className="error">{erro}</p>
-      </div>
-    )
+  if (erro) return <div><p className="error">{erro}</p></div>
   if (!data) return <div className="center">Carregando…</div>
+
   return (
     <>
       <div className="page-head">
-        <h1>Escudo do Mestre</h1>
-        <span className="count-badge">{data.campanha.nome}</span>
+        <h1>{data.campanha.nome}</h1>
+        <span className="count-badge">Escudo do Mestre</span>
       </div>
 
-      <h2>Personagens</h2>
+      <div className="abas" style={{ marginBottom: 16 }}>
+        <button className="ativo">Agentes ({data.personagens.length})</button>
+        <Link to={`/campanhas/${id}`} className="tag" style={{ marginLeft: 'auto', alignSelf: 'center' }}>
+          ← Voltar à campanha
+        </Link>
+      </div>
+
       <div className="vtt-grid">
         {data.personagens.map((p) => {
           const s = p.status || {}
+          const at = p.atributosFinais || {}
           return (
             <div key={p.id} className="vtt-card">
               <div className="head">
-                <div
-                  className="av"
-                  style={p.avatarAssetId ? { backgroundImage: `url(/api/assets/${p.avatarAssetId}/conteudo)` } : undefined}
-                >
+                <div className="av"
+                  style={p.avatarAssetId ? { backgroundImage: `url(/api/assets/${p.avatarAssetId}/conteudo)` } : undefined}>
                   {!p.avatarAssetId && (p.nome || '?').charAt(0).toUpperCase()}
                 </div>
-                <div>
+                <div style={{ minWidth: 0 }}>
                   <div className="nm">{p.nome}</div>
-                  {p.classeNome && (
-                    <div className="muted" style={{ fontSize: '.78rem' }}>
-                      {p.classeNome}{p.nivel ? ` · Nv ${p.nivel}` : ''}
-                    </div>
-                  )}
+                  <div className="muted" style={{ fontSize: '.76rem' }}>
+                    {[p.classeNome, p.racaNome, p.nivel ? `Nv ${p.nivel}` : null].filter(Boolean).join(' · ')}
+                  </div>
+                  {p.jogador && <div className="muted" style={{ fontSize: '.72rem' }}>Jogador: {p.jogador}</div>}
                 </div>
               </div>
-              <Recurso label="PV" cls="vida" atual={s.pvAtual} max={s.pvMax} />
-              {s.pmMax != null && <Recurso label="PM" cls="mana" atual={s.pmAtual} max={s.pmMax} />}
-              {s.peMax != null && <Recurso label="PE" cls="energia" atual={s.peAtual} max={s.peMax} />}
-              <div className="ctrls">
-                <button className="ghost mini" onClick={() => ajustar(p.id, 'pvAtual', -1, s.pvAtual)}>−PV</button>
-                <button className="ghost mini" onClick={() => ajustar(p.id, 'pvAtual', +1, s.pvAtual)}>+PV</button>
-                {s.pmMax != null && (
-                  <>
-                    <button className="ghost mini" onClick={() => ajustar(p.id, 'pmAtual', -1, s.pmAtual)}>−PM</button>
-                    <button className="ghost mini" onClick={() => ajustar(p.id, 'pmAtual', +1, s.pmAtual)}>+PM</button>
-                  </>
-                )}
-                {s.peMax != null && (
-                  <>
-                    <button className="ghost mini" onClick={() => ajustar(p.id, 'peAtual', -1, s.peAtual)}>−PE</button>
-                    <button className="ghost mini" onClick={() => ajustar(p.id, 'peAtual', +1, s.peAtual)}>+PE</button>
-                  </>
-                )}
+
+              <div className="atribs">
+                {ATRIBS.map(([k, sig]) => (
+                  <div key={k} className="at"><span className="k">{sig}</span><span className="v">{at[k] ?? 0}</span></div>
+                ))}
+              </div>
+
+              {BARRAS.map(([rot, cls, k]) => (
+                s[k + 'Max'] != null && (
+                  <Recurso key={k} label={rot} cls={cls} atual={s[k + 'Atual']} max={s[k + 'Max']}
+                    onMinus={() => ajustar(p.id, k + 'Atual', -1, s[k + 'Atual'])}
+                    onPlus={() => ajustar(p.id, k + 'Atual', +1, s[k + 'Atual'])} />
+                )
+              ))}
+
+              <div className="deriv">
+                <span>DESL <b>{p.deslocamento}m</b></span>
+                <span>Carga <b>{p.cargaAtual}/{p.cargaMaxima}</b></span>
+                <div className="spacer" />
+                <Link to={`/personagens/${p.id}`} className="tag">Ficha</Link>
               </div>
             </div>
           )
@@ -110,31 +140,7 @@ export default function Escudo() {
         {data.personagens.length === 0 && <p className="muted">Nenhum personagem na campanha.</p>}
       </div>
 
-      <div className="card" style={{ marginTop: 18 }}>
-        <h2>Rolagens (todas)</h2>
-        <table>
-          <tbody>
-            {data.rolagens.map((r) => (
-              <tr key={r.id}>
-                <td>{r.rotulo || r.expressao}</td>
-                <td className="muted">{r.detalhe}</td>
-                <td className="stat">{r.total}</td>
-                <td>
-                  {r.oculta && !r.revelada ? (
-                    <button className="ghost mini" onClick={() => revelar(r.id)}>
-                      Revelar
-                    </button>
-                  ) : r.oculta ? (
-                    <span className="tag">revelada</span>
-                  ) : (
-                    ''
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <ResultadosPanel rolagens={rolagens} onRolar={rolar} ehMestre onRevelar={revelar} />
     </>
   )
 }

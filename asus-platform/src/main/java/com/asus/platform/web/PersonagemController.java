@@ -1,7 +1,9 @@
 package com.asus.platform.web;
 
+import com.asus.platform.domain.Campanha;
 import com.asus.platform.repository.AtaqueRepository;
 import com.asus.platform.repository.CampanhaPersonagemRepository;
+import com.asus.platform.repository.CampanhaRepository;
 import com.asus.platform.repository.FeiticoPersonagemRepository;
 import com.asus.platform.repository.HabilidadePersonagemRepository;
 import com.asus.platform.repository.ItemPersonagemRepository;
@@ -21,6 +23,7 @@ import com.asus.platform.web.dto.ProgressoResponse;
 import com.asus.platform.web.dto.SnapshotResponse;
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -38,6 +41,7 @@ public class PersonagemController {
     private final HabilidadePersonagemRepository habilidadeRepository;
     private final PersonagemSnapshotRepository snapshotRepository;
     private final CampanhaPersonagemRepository campanhaPersonagemRepository;
+    private final CampanhaRepository campanhaRepository;
 
     public PersonagemController(PersonagemService service,
                                 PersonagemRepository personagemRepository,
@@ -46,7 +50,8 @@ public class PersonagemController {
                                 FeiticoPersonagemRepository feiticoRepository,
                                 HabilidadePersonagemRepository habilidadeRepository,
                                 PersonagemSnapshotRepository snapshotRepository,
-                                CampanhaPersonagemRepository campanhaPersonagemRepository) {
+                                CampanhaPersonagemRepository campanhaPersonagemRepository,
+                                CampanhaRepository campanhaRepository) {
         this.service = service;
         this.personagemRepository = personagemRepository;
         this.itemRepository = itemRepository;
@@ -55,6 +60,23 @@ public class PersonagemController {
         this.habilidadeRepository = habilidadeRepository;
         this.snapshotRepository = snapshotRepository;
         this.campanhaPersonagemRepository = campanhaPersonagemRepository;
+        this.campanhaRepository = campanhaRepository;
+    }
+
+    /** Campanhas em que este personagem está vinculado (para o chat de resultados na ficha). */
+    @GetMapping("/personagens/{id}/campanhas")
+    public List<Map<String, Object>> campanhasDoPersonagem(@PathVariable Long id) {
+        return campanhaPersonagemRepository.findByPersonagemId(id).stream()
+                .map(cp -> campanhaRepository.findById(cp.getCampanhaId()).orElse(null))
+                .filter(c -> c != null)
+                .map(c -> {
+                    Map<String, Object> m = new java.util.HashMap<>();
+                    m.put("id", c.getId());
+                    m.put("nome", c.getNome());
+                    m.put("mestreId", c.getMestreId());
+                    return m;
+                })
+                .toList();
     }
 
     @GetMapping("/organizacoes/{orgId}/personagens")

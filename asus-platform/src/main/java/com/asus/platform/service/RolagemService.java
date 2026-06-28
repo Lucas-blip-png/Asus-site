@@ -56,10 +56,8 @@ public class RolagemService {
     public RolagemResponse rolar(Long campanhaId, RolarRequest req) {
         Campanha campanha = campanhaService.carregar(campanhaId);
 
+        // Rolagem privada (oculta) liberada: o mestre rola escondido e os jogadores veem mascarado.
         boolean oculta = req.oculta();
-        if (oculta && (campanha.getConfig() == null || !campanha.getConfig().isRolagemOcultaPermitida())) {
-            throw new IllegalArgumentException("Rolagem oculta nao permitida nesta campanha");
-        }
 
         ExpressaoDado expressao = ExpressaoDado.parse(req.expressao());
         ResultadoDado resultado = expressao.rolar(dado);

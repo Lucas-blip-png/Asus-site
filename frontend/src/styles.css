@@ -293,6 +293,45 @@ th, td { text-align: left; padding: 6px 6px; border-bottom: 1px solid var(--bord
 .vtt-card .res .lbl { display: flex; justify-content: space-between; font-size: .64rem; letter-spacing: 1px;
   text-transform: uppercase; color: var(--muted); margin-bottom: 3px; }
 .vtt-card .ctrls { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 4px; }
+.vtt-card .atribs { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin: 4px 0 10px; }
+.vtt-card .atribs .at { text-align: center; background: var(--bg-3); border: 1px solid var(--border); border-radius: 8px; padding: 5px 0; }
+.vtt-card .atribs .at .k { display: block; font-size: .56rem; letter-spacing: .5px; color: var(--muted); text-transform: uppercase; }
+.vtt-card .atribs .at .v { display: block; font-size: 1.05rem; font-weight: 900; color: var(--gold-3); }
+.vtt-card .deriv { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; font-size: .74rem; color: var(--muted); align-items: center; }
+.vtt-card .deriv b { color: var(--text); }
+
+/* ---------------- Chat de resultados (dados) ---------------- */
+.chat-fab {
+  position: fixed; right: 22px; bottom: 22px; z-index: 60; width: 54px; height: 54px; border-radius: 50%;
+  background: linear-gradient(180deg, var(--gold-3), var(--gold)); color: #1a1206; font-size: 1.5rem;
+  border: 0; box-shadow: var(--shadow-lg); cursor: pointer; display: grid; place-items: center;
+}
+.chat-fab:hover { filter: brightness(1.06); transform: translateY(-2px); }
+.chat-badge {
+  position: absolute; top: -3px; right: -3px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px;
+  background: #c4453c; color: #fff; font-size: .68rem; font-weight: 800; display: grid; place-items: center;
+}
+.resultados-panel {
+  position: fixed; right: 18px; bottom: 86px; z-index: 60; width: 340px; max-width: calc(100vw - 36px);
+  max-height: 72vh; display: flex; flex-direction: column; overflow: hidden;
+  background: var(--panel); border: 1px solid var(--border-2); border-radius: 14px; box-shadow: var(--shadow-lg);
+}
+.rp-head { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--border); }
+.rp-roll { display: flex; gap: 6px; padding: 10px 12px 4px; }
+.rp-roll input { margin: 0; }
+.rp-vis { display: flex; gap: 6px; padding: 4px 12px 8px; }
+.rp-vis .vis { flex: 1; background: var(--bg-3); color: var(--muted); border: 1px solid var(--border); border-radius: 8px;
+  padding: 5px 0; font-size: .76rem; font-weight: 700; cursor: pointer; }
+.rp-vis .vis.on { background: var(--gold); color: #1a1206; border-color: var(--gold-2); }
+.rp-vis .vis.on.priv { background: #8a5cf6; color: #fff; border-color: #7a4ce0; }
+.rp-lista { overflow-y: auto; padding: 6px; display: flex; flex-direction: column; gap: 5px; }
+.res-item { display: flex; gap: 9px; align-items: center; padding: 7px 8px; border-radius: 10px;
+  background: var(--bg-3); border: 1px solid var(--border); }
+.res-item.privada { border-left: 3px solid #8a5cf6; }
+.res-item .hex { flex: 0 0 42px; height: 42px; display: grid; place-items: center; font-size: 1.15rem; font-weight: 900;
+  background: var(--panel-2); border: 1px solid var(--border-2);
+  clip-path: polygon(25% 5%, 75% 5%, 100% 50%, 75% 95%, 25% 95%, 0% 50%); }
+.res-item .rt { font-weight: 700; font-size: .86rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* ---------------- Ficha (VTT) ---------------- */
 .ficha { display: grid; grid-template-columns: 280px 1fr 330px; gap: 18px; align-items: start; }
