@@ -33,6 +33,10 @@ public class Campanha {
     @Column(columnDefinition = "TEXT")
     private String descricao;
 
+    /** Anotações do mestre sobre a campanha. */
+    @Column(columnDefinition = "TEXT")
+    private String anotacoes;
+
     /** Asset de capa (id). Os assets em si chegam na Fase 11. */
     private String capaAssetId;
 

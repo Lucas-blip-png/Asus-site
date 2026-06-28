@@ -178,6 +178,8 @@ export default function Campanha() {
   const [editForm, setEditForm] = useState({ nome: '', descricao: '' })
   const [combates, setCombates] = useState([])
   const [combateAtivo, setCombateAtivo] = useState(null)
+  const [anotacoesTxt, setAnotacoesTxt] = useState('')
+  const [anotacoesSalvo, setAnotacoesSalvo] = useState(false)
 
   function carregar() {
     api(`/api/campanhas/${id}`).then(setCampanha).catch((e) => setErro(e.message))
@@ -198,6 +200,11 @@ export default function Campanha() {
     carregar()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id])
+  // Sincroniza o texto das anotações quando a campanha carrega.
+  useEffect(() => {
+    if (campanha) setAnotacoesTxt(campanha.anotacoes || '')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [campanha?.id])
 
   // Tempo real (Fase 6): novas rolagens entram no topo + toast
   useEffect(
@@ -309,6 +316,17 @@ export default function Campanha() {
     } catch (e) { setErro(e.message) }
   }
 
+  // ----- anotações (mestre) -----
+  async function salvarAnotacoes() {
+    setErro(null)
+    try {
+      await api(`/api/campanhas/${id}`, { method: 'PUT', body: { anotacoes: anotacoesTxt } })
+      api(`/api/campanhas/${id}`).then(setCampanha)
+      setAnotacoesSalvo(true)
+      setTimeout(() => setAnotacoesSalvo(false), 2000)
+    } catch (e) { setErro(e.message) }
+  }
+
   // ----- combates -----
   const recarregarCombates = () => api(`/api/campanhas/${id}/combates`).then(setCombates).catch(() => {})
   async function criarCombate() {
@@ -387,7 +405,7 @@ export default function Campanha() {
 
       {/* Abas */}
       <div className="abas" style={{ marginTop: 18 }}>
-        {ABAS.map((x) => (
+        {[...ABAS, ...(ehMestre ? ['Anotações'] : [])].map((x) => (
           <button key={x} className={aba === x ? 'ativo' : undefined} onClick={() => setAba(x)}>
             {x}
             {x === 'Agentes' && personagens.length > 0 ? ` (${personagens.length})` : ''}
@@ -563,6 +581,24 @@ export default function Campanha() {
               <button className="ghost" onClick={() => setEditOpen(false)}>Cancelar</button>
             </div>
           </div>
+        </div>
+      )}
+
+      {aba === 'Anotações' && ehMestre && (
+        <div className="card">
+          <div className="row" style={{ alignItems: 'center' }}>
+            <h2 style={{ margin: 0 }}>Anotações do mestre</h2>
+            <span className="muted" style={{ fontSize: '.78rem' }}>· aba visível só para o mestre</span>
+            <div className="spacer" />
+            {anotacoesSalvo && <span className="tag">salvo ✓</span>}
+            <button className="mini" onClick={salvarAnotacoes}>Salvar</button>
+          </div>
+          <textarea
+            value={anotacoesTxt}
+            onChange={(e) => setAnotacoesTxt(e.target.value)}
+            placeholder="Tramas, NPCs, segredos, pistas, ganchos de sessão…"
+            style={{ minHeight: 320, marginTop: 10 }}
+          />
         </div>
       )}
 
