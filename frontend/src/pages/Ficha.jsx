@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { api } from '../api.js'
 import Heptagono from '../components/Heptagono.jsx'
 
@@ -58,9 +58,12 @@ function ItemInvRow({ it, onQtd, onEquip, onDelete, onEdit }) {
 
 export default function Ficha() {
   const { id } = useParams()
+  const nav = useNavigate()
   const [p, setP] = useState(null)
   const [aba, setAba] = useState('Combate')
   const [erro, setErro] = useState(null)
+  const [apagarOpen, setApagarOpen] = useState(false)
+  const [apagarTxt, setApagarTxt] = useState('')
   const [treino, setTreino] = useState({})
   const [desc, setDesc] = useState({})
   const [base, setBase] = useState(vazioBase)
@@ -175,6 +178,19 @@ export default function Ficha() {
       aplicar(resp.personagem)
       if (resp.niveisGanhos && resp.niveisGanhos.length) setLevelUp(resp.niveisGanhos)
     } catch (e) { setErro(e.message) }
+  }
+
+  // ----- apagar a ficha (com confirmação por digitação) -----
+  const palavraConfere = ['apagar', 'remover'].includes(apagarTxt.trim().toLowerCase())
+  async function apagarFicha() {
+    if (!palavraConfere) return
+    try {
+      await api(`/api/personagens/${id}`, { method: 'DELETE' })
+      nav('/personagens')
+    } catch (e) {
+      setErro(e.message)
+      setApagarOpen(false)
+    }
   }
 
   // ----- foto -----
@@ -327,11 +343,41 @@ export default function Ficha() {
         </div>
       )}
 
+      {apagarOpen && (
+        <div className="modal" onClick={() => setApagarOpen(false)}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 460 }}>
+            <h2>Apagar ficha?</h2>
+            <p className="muted">
+              A ficha de <b>{p.nome}</b> e tudo nela (inventário, ataques, magias, habilidades,
+              snapshots e vínculos de campanha) serão apagados. Não dá pra desfazer.
+            </p>
+            <label>Digite <b>Apagar</b> ou <b>remover</b> para confirmar</label>
+            <input
+              autoFocus
+              value={apagarTxt}
+              onChange={(e) => setApagarTxt(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter' && palavraConfere) apagarFicha() }}
+              placeholder="Apagar"
+            />
+            <div className="row" style={{ marginTop: 12, gap: 8 }}>
+              <button className="danger" disabled={!palavraConfere} onClick={apagarFicha}>
+                Sim, apagar
+              </button>
+              <button className="ghost" onClick={() => setApagarOpen(false)}>Cancelar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="page-head">
         <h1>{p.nome}</h1>
         <span className="count-badge">
           {p.classeNome}{p.trilhaNome ? ` · ${p.trilhaNome}` : ''} · Nv {p.nivel}
         </span>
+        <div className="spacer" />
+        <button className="ghost mini" onClick={() => { setApagarTxt(''); setApagarOpen(true) }}>
+          🗑 Apagar ficha
+        </button>
       </div>
       <div className="ficha">
         {/* Coluna esquerda: identidade, atributos e status */}
