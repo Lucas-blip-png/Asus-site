@@ -1,6 +1,7 @@
 package com.asus.platform.web;
 
 import com.asus.platform.domain.OrganizacaoMembro;
+import com.asus.platform.security.UsuarioPrincipal;
 import com.asus.platform.service.OrganizacaoService;
 import com.asus.platform.web.dto.AdicionarMembroRequest;
 import com.asus.platform.web.dto.AtualizarOrganizacaoRequest;
@@ -9,6 +10,7 @@ import com.asus.platform.web.dto.OrganizacaoResponse;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 /** Organizacoes e membros (plano, secao 21.1). */
@@ -25,6 +27,15 @@ public class OrganizacaoController {
     @GetMapping
     public List<OrganizacaoResponse> listar() {
         return service.listar().stream().map(OrganizacaoResponse::de).toList();
+    }
+
+    /** Organizacoes do usuario logado (contas individuais). Sem login, lista vazia. */
+    @GetMapping("/minhas")
+    public List<OrganizacaoResponse> minhas(@AuthenticationPrincipal UsuarioPrincipal principal) {
+        if (principal == null) {
+            return List.of();
+        }
+        return service.listarDoUsuario(principal.id()).stream().map(OrganizacaoResponse::de).toList();
     }
 
     @PostMapping
