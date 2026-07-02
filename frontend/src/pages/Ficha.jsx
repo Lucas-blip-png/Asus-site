@@ -180,6 +180,7 @@ export default function Ficha() {
   const [modalHab, setModalHab] = useState(false)
   const [habBusca, setHabBusca] = useState('')
   const [itens, setItens] = useState([])
+  const [classesCat, setClassesCat] = useState([])
   const [ataques, setAtaques] = useState([])
   const [feiticos, setFeiticos] = useState([])
   const [novoAtaque, setNovoAtaque] = useState({ nome: '', dano: '', critico: '', alcance: '' })
@@ -274,6 +275,7 @@ export default function Ficha() {
         api(`/api/personagens/${id}/habilidades`).then(setHabChosen).catch(() => {})
         api(`/api/personagens/${id}/habilidades/disponiveis`).then(setHabDisp).catch(() => {})
         api('/api/sistemas/asus/itens').then(setItens).catch(() => {})
+        api('/api/sistemas/asus/classes').then(setClassesCat).catch(() => {})
         api(`/api/personagens/${id}/ataques`).then(setAtaques).catch(() => {})
         api(`/api/personagens/${id}/feiticos`).then(setFeiticos).catch(() => {})
         api(`/api/personagens/${id}/inventario`).then(setInventario).catch(() => {})
@@ -657,7 +659,21 @@ export default function Ficha() {
             <div style={{ flex: 1 }}>
               <div className="kv"><b>Raça</b><span>{p.racaNome}</span></div>
               <div className="kv"><b>Classe</b><span>{p.classeNome}</span></div>
-              {p.trilhaNome && <div className="kv"><b>Trilha</b><span>{p.trilhaNome}</span></div>}
+              {(() => {
+                const trilhas = classesCat.filter((c) => c.classePaiCodigo === p.classeCodigo)
+                if (!trilhas.length) {
+                  return p.trilhaNome ? <div className="kv"><b>Trilha</b><span>{p.trilhaNome}</span></div> : null
+                }
+                return (
+                  <div className="kv"><b>Trilha</b>
+                    <select value={p.trilhaCodigo || ''} style={{ maxWidth: 160 }}
+                      onChange={(e) => salvar({ trilhaCodigo: e.target.value })}>
+                      <option value="">— nenhuma —</option>
+                      {trilhas.map((t) => <option key={t.codigo} value={t.codigo}>{t.nome}</option>)}
+                    </select>
+                  </div>
+                )
+              })()}
             </div>
           </div>
 
