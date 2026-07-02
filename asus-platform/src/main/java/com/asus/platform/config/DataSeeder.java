@@ -87,6 +87,7 @@ public class DataSeeder implements CommandLineRunner {
             refreshBestiario(); // reaplica o bestiario autoral (categorias + ranks)
             refreshClasses(); // reaplica passivas/descricoes das classes (sem trocar ids)
             refreshPericias(); // reaplica pericias (descricao + exemplos) e adiciona novas
+            refreshItens(); // reaplica o catalogo de itens do ASUS (categorias, precos, tipo de dano)
             return;
         }
         log.info("Aplicando seed do sistema ASUS...");
@@ -180,105 +181,138 @@ public class DataSeeder implements CommandLineRunner {
     // ---------------- Itens (catalogo representativo, moeda T$) ----------------
 
     private void seedItens() {
-        // ===== Armas (Tormenta 20, Tabela 3-3) — preco em T$, ultimo numero = espacos =====
-        // Simples
-        arma("ADAGA", "Adaga", "ARMA_SIMPLES", "2", "1d4", "19", "Curto", "Perfuracao", 1);
-        arma("ESPADA_CURTA", "Espada curta", "ARMA_SIMPLES", "10", "1d6", "19", "Corpo a corpo", "Perfuracao", 1);
-        arma("FOICE", "Foice", "ARMA_SIMPLES", "4", "1d6", "x3", "Corpo a corpo", "Corte", 1);
-        arma("CLAVA", "Clava", "ARMA_SIMPLES", "0", "1d6", "x2", "Corpo a corpo", "Impacto", 1);
-        arma("LANCA", "Lanca", "ARMA_SIMPLES", "2", "1d6", "x2", "Curto", "Perfuracao", 1);
-        arma("MACA", "Maca", "ARMA_SIMPLES", "12", "1d8", "x2", "Corpo a corpo", "Impacto", 1);
-        arma("BORDAO", "Bordao", "ARMA_SIMPLES", "0", "1d6/1d6", "x2", "Corpo a corpo", "Impacto", 2);
-        arma("PIQUE", "Pique", "ARMA_SIMPLES", "2", "1d8", "x2", "Corpo a corpo", "Perfuracao", 2);
-        arma("TACAPE", "Tacape", "ARMA_SIMPLES", "0", "1d10", "x2", "Corpo a corpo", "Impacto", 2);
-        arma("AZAGAIA", "Azagaia", "ARMA_SIMPLES", "1", "1d6", "x2", "Medio", "Perfuracao", 1);
-        arma("BESTA_LEVE", "Besta leve", "ARMA_SIMPLES", "35", "1d8", "19", "Medio", "Perfuracao", 1);
-        arma("FUNDA", "Funda", "ARMA_SIMPLES", "0", "1d4", "x2", "Medio", "Impacto", 1);
-        arma("ARCO_CURTO", "Arco curto", "ARMA_SIMPLES", "30", "1d6", "x3", "Medio", "Perfuracao", 2);
-        // Marciais
-        arma("MACHADINHA", "Machadinha", "ARMA_MARCIAL", "6", "1d6", "x3", "Curto", "Corte", 1);
-        arma("CIMITARRA", "Cimitarra", "ARMA_MARCIAL", "15", "1d6", "18", "Corpo a corpo", "Corte", 1);
-        arma("ESPADA_LONGA", "Espada longa", "ARMA_MARCIAL", "15", "1d8", "19", "Corpo a corpo", "Corte", 1);
-        arma("FLORETE", "Florete", "ARMA_MARCIAL", "20", "1d6", "18", "Corpo a corpo", "Perfuracao", 1);
-        arma("ALABARDA", "Alabarda", "ARMA_MARCIAL", "10", "1d10", "x3", "Corpo a corpo", "Corte-perf", 2);
-        arma("ALFANGE", "Alfange", "ARMA_MARCIAL", "75", "2d4", "18", "Corpo a corpo", "Corte", 2);
-        arma("MACHADO_GUERRA", "Machado de guerra", "ARMA_MARCIAL", "20", "1d12", "x3", "Corpo a corpo", "Corte", 2);
-        arma("MARRETA", "Marreta", "ARMA_MARCIAL", "20", "3d4", "x2", "Corpo a corpo", "Impacto", 2);
-        arma("MONTANTE", "Montante", "ARMA_MARCIAL", "50", "2d6", "19", "Corpo a corpo", "Corte", 2);
-        arma("ARCO_LONGO", "Arco longo", "ARMA_MARCIAL", "100", "1d8", "x3", "Medio", "Perfuracao", 2);
-        arma("BESTA_PESADA", "Besta pesada", "ARMA_MARCIAL", "50", "1d12", "19", "Medio", "Perfuracao", 2);
-        // Exoticas
-        arma("ESPADA_BASTARDA", "Espada bastarda", "ARMA_EXOTICA", "35", "1d10/1d12", "19", "Corpo a corpo", "Corte", 1);
-        arma("KATANA", "Katana", "ARMA_EXOTICA", "100", "1d8/1d10", "19", "Corpo a corpo", "Corte", 1);
-        arma("MACHADO_ANAO", "Machado anao", "ARMA_EXOTICA", "30", "1d10", "x3", "Corpo a corpo", "Corte", 1);
-        arma("CHICOTE", "Chicote", "ARMA_EXOTICA", "2", "1d3", "x2", "Corpo a corpo", "Corte", 1);
-        arma("CORRENTE_ESPINHOS", "Corrente de espinhos", "ARMA_EXOTICA", "25", "2d4/2d4", "19", "Corpo a corpo", "Corte", 2);
-        // Fogo
-        arma("PISTOLA", "Pistola", "ARMA_FOGO", "250", "2d6", "19/x3", "Curto", "Perfuracao", 1);
-        arma("MOSQUETE", "Mosquete", "ARMA_FOGO", "500", "2d8", "19/x3", "Medio", "Perfuracao", 2);
-        // Municoes (Tabela 3-4)
-        municao("FLECHAS", "Flechas (20)", "1");
-        municao("VIROTES", "Virotes (20)", "2");
-        municao("BALAS", "Balas (20)", "20");
-        municao("PEDRAS", "Pedras (20)", "0.5");
+        // ===== ARMAS SIMPLES ===== (codigo, nome, grupo, preco, dano, critico, alcance, tipoDano, espacos)
+        String simples = "ARMA_SIMPLES", marcial = "ARMA_MARCIAL";
+        arma("ADAGA", "Adaga", simples, "Corpo a Corpo - Leves", "2", "1d4", "19", "Curto", "Perfuração", 1);
+        arma("ESPADA_CURTA", "Espada curta", simples, "Corpo a Corpo - Leves", "10", "1d6", "19", "", "Perfuração", 1);
+        arma("FOICE", "Foice", simples, "Corpo a Corpo - Leves", "4", "1d6", "x3", "", "Corte", 1);
+        arma("CLAVA", "Clava", simples, "Corpo a Corpo - Uma Mão", "0", "1d6", "x2", "", "Impacto", 1);
+        arma("LANCA", "Lança", simples, "Corpo a Corpo - Uma Mão", "2", "1d6", "x2", "Curto", "Perfuração", 1);
+        arma("MACA", "Maça", simples, "Corpo a Corpo - Uma Mão", "12", "1d8", "x2", "", "Impacto", 1);
+        arma("BORDAO", "Bordão", simples, "Corpo a Corpo - Duas Mãos", "0", "1d6/1d6", "x2", "", "Impacto", 2);
+        arma("PIQUE", "Pique", simples, "Corpo a Corpo - Duas Mãos", "2", "1d8", "x2", "", "Perfuração", 2);
+        arma("TACAPE", "Tacape", simples, "Corpo a Corpo - Duas Mãos", "0", "1d10", "x2", "", "Impacto", 2);
+        arma("AZAGAIA", "Azagaia", simples, "Ataque à Distância", "1", "1d6", "x2", "Médio", "Perfuração", 1);
+        arma("BESTA_LEVE", "Besta leve", simples, "Ataque à Distância", "35", "1d8", "19", "Médio", "Perfuração", 1);
+        arma("FUNDA", "Funda", simples, "Ataque à Distância", "0", "1d4", "x2", "Médio", "Impacto", 1);
+        arma("ARCO_CURTO", "Arco curto", simples, "Ataque à Distância", "30", "1d6", "x3", "Médio", "Perfuração", 2);
 
-        // ===== Armaduras e Escudos (Tabela 3-5) — bonus de Defesa, penalidade, espacos =====
-        armadura("ARMADURA_ACOLCHOADA", "Armadura acolchoada", "ARMADURA", "5", 1, 0, 2);
-        armadura("ARMADURA_COURO", "Armadura de couro", "ARMADURA", "20", 2, 0, 2);
-        armadura("COURO_BATIDO", "Couro batido", "ARMADURA", "35", 3, -1, 2);
-        armadura("GIBAO_PELES", "Gibao de peles", "ARMADURA", "25", 4, -3, 2);
-        armadura("COURACA", "Couraca", "ARMADURA", "500", 5, -4, 2);
-        armadura("BRUNEA", "Brunea", "ARMADURA", "50", 5, -2, 5);
-        armadura("COTA_MALHA", "Cota de malha", "ARMADURA", "150", 6, -2, 5);
-        armadura("LORIGA", "Loriga segmentada", "ARMADURA", "250", 7, -3, 5);
-        armadura("MEIA_ARMADURA", "Meia armadura", "ARMADURA", "600", 8, -4, 5);
-        armadura("ARMADURA_COMPLETA", "Armadura completa", "ARMADURA", "3000", 10, -5, 5);
-        armadura("ESCUDO_LEVE", "Escudo leve", "ESCUDO", "5", 1, -1, 1);
-        armadura("ESCUDO_PESADO", "Escudo pesado", "ESCUDO", "15", 2, -2, 2);
+        // ===== ARMAS MARCIAIS =====
+        arma("CIMITARRA", "Cimitarra", marcial, "Corpo a Corpo - Uma Mão", "15", "1d6", "18", "", "Corte", 1);
+        arma("ESPADA_LONGA", "Espada longa", marcial, "Corpo a Corpo - Uma Mão", "15", "1d8", "19", "", "Corte", 1);
+        arma("FLORETE", "Florete", marcial, "Corpo a Corpo - Uma Mão", "20", "1d6", "18", "", "Perfuração", 1);
+        arma("MACHADO_BATALHA", "Machado de batalha", marcial, "Corpo a Corpo - Uma Mão", "10", "1d8", "x3", "", "Corte", 1);
+        arma("MANGUAL", "Mangual", marcial, "Corpo a Corpo - Uma Mão", "8", "1d8", "x2", "", "Impacto", 1);
+        arma("MARTELO_GUERRA", "Martelo de guerra", marcial, "Corpo a Corpo - Uma Mão", "12", "1d8", "x3", "", "Impacto", 1);
+        arma("PICARETA", "Picareta", marcial, "Corpo a Corpo - Uma Mão", "8", "1d6", "x4", "", "Perfuração", 1);
+        arma("TRIDENTE", "Tridente", marcial, "Corpo a Corpo - Uma Mão", "15", "1d8", "x2", "", "Perfuração", 1);
+        arma("ALABARDA", "Alabarda", marcial, "Corpo a Corpo - Duas Mãos", "10", "1d10", "x3", "", "Corte/Perfuração", 2);
+        arma("ALFANGE", "Alfange", marcial, "Corpo a Corpo - Duas Mãos", "75", "2d4", "18", "", "Corte", 2);
+        arma("GADANHO", "Gadanho", marcial, "Corpo a Corpo - Duas Mãos", "18", "2d4", "x4", "", "Corte", 2);
+        arma("LANCA_MONTADA", "Lança montada", marcial, "Corpo a Corpo - Duas Mãos", "10", "1d8", "x3", "", "Perfuração", 2);
+        arma("MACHADO_GUERRA", "Machado de guerra", marcial, "Corpo a Corpo - Duas Mãos", "20", "1d12", "x3", "", "Corte", 2);
+        arma("MARRETA", "Marreta", marcial, "Corpo a Corpo - Duas Mãos", "20", "3d4", "x2", "", "Impacto", 2);
+        arma("MONTANTE", "Montante", marcial, "Corpo a Corpo - Duas Mãos", "50", "2d6", "19", "", "Corte", 2);
+        arma("ARCO_LONGO", "Arco longo", marcial, "Distância - Duas Mãos", "100", "1d8", "x3", "Médio", "Perfuração", 2);
+        arma("BESTA_PESADA", "Besta pesada", marcial, "Distância - Duas Mãos", "50", "1d12", "19", "Médio", "Perfuração", 2);
 
-        // ===== Equipamento de aventura =====
-        geral("MOCHILA", "Mochila", "2", 1, "Carrega ate 10 espacos de itens.");
-        geral("SACO_DORMIR", "Saco de dormir", "1", 1, "Para descansar ao relento.");
-        geral("CORDA", "Corda de canhamo (15m)", "1", 1, "Para escaladas e amarras.");
-        geral("TOCHA", "Tocha", "0.1", 0, "Ilumina o ambiente por 1 hora.");
-        geral("RACAO", "Racao de viagem (1 dia)", "0.5", 1, "Alimento de viagem.");
-        geral("KIT_MEDICO", "Maleta de medicamentos", "10", 1, "Bonus em testes de Cura/Medicina.");
-        geral("POCAO_CURA", "Pocao de cura menor", "30", 0, "Recupera 2d8+2 PV ao consumir.");
-        geral("BARRACA", "Barraca", "5", 2, "Abrigo para descanso.");
-        geral("PE_CABRA", "Pe de cabra", "2", 1, "Bonus para forcar portas/tampas.");
-        geral("ALGEMAS", "Algemas", "15", 0, "Prendem um alvo capturado.");
+        // ===== ARMADURAS E ESCUDOS ===== (codigo, nome, cat, grupo, preco, defesa, penalidade, espacos)
+        protecao("ARM_ACOLCHOADA", "Acolchoada", "ARMADURA", "Leves", "5", 1, 0, 2);
+        protecao("ARM_COURO", "Couro", "ARMADURA", "Leves", "20", 2, 0, 2);
+        protecao("ARM_COURO_BATIDO", "Couro batido", "ARMADURA", "Leves", "35", 3, -2, 2);
+        protecao("ARM_GIBAO_PELES", "Gibão de peles", "ARMADURA", "Leves", "25", 4, -3, 2);
+        protecao("ARM_COURACA", "Couraça", "ARMADURA", "Leves", "500", 5, -4, 2);
+        protecao("ARM_BRUNEA", "Brunea", "ARMADURA", "Pesadas", "50", 5, -2, 5);
+        protecao("ARM_COTA_MALHA", "Cota de malha", "ARMADURA", "Pesadas", "150", 6, -2, 5);
+        protecao("ARM_LORIGA", "Loriga segmentada", "ARMADURA", "Pesadas", "250", 7, -3, 5);
+        protecao("ARM_MEIA", "Meia armadura", "ARMADURA", "Pesadas", "600", 8, -4, 5);
+        protecao("ARM_COMPLETA", "Armadura completa", "ARMADURA", "Pesadas", "3000", 10, -5, 5);
+        protecao("ESCUDO_LEVE", "Escudo leve", "ESCUDO", "Escudos", "5", 1, null, 1);
+        protecao("ESCUDO_PESADO", "Escudo pesado", "ESCUDO", "Escudos", "15", 2, null, 2);
+
+        // ===== ITENS GERAIS =====
+        item("MOCHILA", "Mochila", "ITEM_GERAL", "Equipamentos", "10", 1);
+        item("CORDA", "Corda", "ITEM_GERAL", "Equipamentos", "10", 1);
+        item("LAMPIAO", "Lampião", "ITEM_GERAL", "Equipamentos", "10", 1);
+        item("ESPELHO", "Espelho", "ITEM_GERAL", "Equipamentos", "10", 1);
+        item("PE_CABRA", "Pé de cabra", "ITEM_GERAL", "Equipamentos", "5", 1);
+        item("SACO_DORMIR", "Saco de dormir", "ITEM_GERAL", "Equipamentos", "10", 1);
+        item("GAZUA", "Gazua", "FERRAMENTA", "Ferramentas", "5", 1);
+        item("INSTR_OFICIO", "Instrumentos de ofício", "FERRAMENTA", "Ferramentas", "30", 1);
+        item("MALETA_MEDICA", "Maleta médica", "FERRAMENTA", "Ferramentas", "50", 1);
+
+        // ===== ALQUÍMICOS ===== (espaços 0,5 no livro; armazenado como 1 pois a carga usa inteiros)
+        item("ACIDO", "Ácido", "ALQUIMICO", "Preparados", "10", 1);
+        item("BOMBA", "Bomba", "ALQUIMICO", "Preparados", "50", 1);
+        item("FOGO_ALQUIMICO", "Fogo alquímico", "ALQUIMICO", "Preparados", "10", 1);
+        item("ESSENCIA_MANA", "Essência de mana", "ALQUIMICO", "Preparados", "50", 1);
+        item("ELIXIR_AMOR", "Elixir do amor", "ALQUIMICO", "Preparados", "100", 1);
+        itemPreco("BELADONA", "Beladona", "VENENO", "Venenos", "1500");
+        itemPreco("CICUTA", "Cicuta", "VENENO", "Venenos", "60");
+        itemPreco("PECONHA_COMUM", "Peçonha comum", "VENENO", "Venenos", "15");
+        itemPreco("PECONHA_CONCENTRADA", "Peçonha concentrada", "VENENO", "Venenos", "90");
+        itemPreco("PECONHA_POTENTE", "Peçonha potente", "VENENO", "Venenos", "600");
+
+        // ===== ALIMENTAÇÃO & MAIS =====
+        itemPreco("RACAO_VIAGEM", "Ração de viagem (dia)", "ALIMENTACAO", "Alimentação", "0.5");
+        itemPreco("REFEICAO_COMUM", "Refeição comum", "ALIMENTACAO", "Alimentação", "0.3");
+        itemPreco("PRATO_AVENTUREIRO", "Prato do aventureiro", "ALIMENTACAO", "Alimentação", "1");
+        itemPreco("SOPA_PEIXE", "Sopa de peixe", "ALIMENTACAO", "Alimentação", "1");
+        itemPreco("CAVALO", "Cavalo", "ANIMAL", "Animais", "75");
+        itemPreco("CAVALO_GUERRA", "Cavalo de guerra", "ANIMAL", "Animais", "400");
+        itemPreco("PONEI", "Pônei", "ANIMAL", "Animais", "55");
+        itemPreco("CAO_CACA", "Cão de caça", "ANIMAL", "Animais", "150");
+        itemPreco("CARROCA", "Carroça", "VEICULO", "Veículos", "150");
+        itemPreco("CARRUAGEM", "Carruagem", "VEICULO", "Veículos", "500");
+        itemPreco("CANOA", "Canoa", "VEICULO", "Veículos", "70");
+        itemPreco("VELEIRO", "Veleiro", "VEICULO", "Veículos", "10000");
+        itemPreco("ESTADIA_COMUM", "Estadia comum", "SERVICO", "Serviços", "0.5");
+        itemPreco("ESTADIA_LUXO", "Estadia luxo", "SERVICO", "Serviços", "20");
+        itemPreco("CURANDEIRO", "Curandeiro", "SERVICO", "Serviços", "5");
+        itemPreco("MAGIA_1", "Magia 1º círculo", "SERVICO", "Serviços", "10");
+        itemPreco("MAGIA_2", "Magia 2º círculo", "SERVICO", "Serviços", "90");
+        itemPreco("MAGIA_3", "Magia 3º círculo", "SERVICO", "Serviços", "360");
     }
 
-    private void arma(String codigo, String nome, String cat, String preco, String dano,
+    /** Reaplica o catalogo de itens do ASUS em banco ja existente (substitui os oficiais). */
+    void refreshItens() {
+        gameSystemRepository.findByCodigo(AsusV1Engine.SYSTEM_ID).ifPresent(gs -> {
+            sid = gs.getId();
+            itemJogoRepository.deleteAll(itemJogoRepository.findByGameSystemIdAndOficialTrue(sid));
+            seedItens();
+        });
+    }
+
+    private void arma(String codigo, String nome, String cat, String grupo, String preco, String dano,
                       String critico, String alcance, String tipoDano, int espacos) {
         itemJogoRepository.save(ItemJogo.builder()
-                .gameSystemId(sid).codigo(codigo).nome(nome).categoria(cat)
+                .gameSystemId(sid).codigo(codigo).nome(nome).categoria(cat).grupo(grupo)
                 .preco(new java.math.BigDecimal(preco)).moeda("T$")
-                .dano(dano).critico(critico).alcance(alcance).tipoDano(tipoDano)
-                .espacos(espacos).oficial(true).build());
+                .dano(dano).critico(critico).alcance(alcance == null || alcance.isBlank() ? null : alcance)
+                .tipoDano(tipoDano).espacos(espacos).oficial(true).build());
     }
 
-    private void armadura(String codigo, String nome, String cat, String preco,
-                          int bonusDefesa, int penalidade, int espacos) {
+    private void protecao(String codigo, String nome, String cat, String grupo, String preco,
+                          int bonusDefesa, Integer penalidade, int espacos) {
         itemJogoRepository.save(ItemJogo.builder()
-                .gameSystemId(sid).codigo(codigo).nome(nome).categoria(cat)
+                .gameSystemId(sid).codigo(codigo).nome(nome).categoria(cat).grupo(grupo)
                 .preco(new java.math.BigDecimal(preco)).moeda("T$")
                 .bonusDefesa(bonusDefesa).penalidade(penalidade).espacos(espacos)
                 .oficial(true).build());
     }
 
-    private void geral(String codigo, String nome, String preco, int espacos, String efeito) {
+    private void item(String codigo, String nome, String cat, String grupo, String preco, Integer espacos) {
         itemJogoRepository.save(ItemJogo.builder()
-                .gameSystemId(sid).codigo(codigo).nome(nome).categoria("GERAL")
+                .gameSystemId(sid).codigo(codigo).nome(nome).categoria(cat).grupo(grupo)
                 .preco(new java.math.BigDecimal(preco)).moeda("T$")
-                .espacos(espacos).efeito(efeito).oficial(true).build());
+                .espacos(espacos).oficial(true).build());
     }
 
-    private void municao(String codigo, String nome, String preco) {
+    private void itemPreco(String codigo, String nome, String cat, String grupo, String preco) {
         itemJogoRepository.save(ItemJogo.builder()
-                .gameSystemId(sid).codigo(codigo).nome(nome).categoria("MUNICAO")
+                .gameSystemId(sid).codigo(codigo).nome(nome).categoria(cat).grupo(grupo)
                 .preco(new java.math.BigDecimal(preco)).moeda("T$")
-                .espacos(1).oficial(true).build());
+                .oficial(true).build());
     }
 
     // ---------------- Bestiario (conjunto inicial de criaturas oficiais) ----------------
