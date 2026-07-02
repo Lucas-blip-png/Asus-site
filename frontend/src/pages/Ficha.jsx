@@ -17,6 +17,8 @@ const CAMPOS_DESC = [
   ['historico', 'Histórico'], ['objetivo', 'Objetivo'],
 ]
 const vazioBase = { forca: 0, constituicao: 0, destreza: 0, agilidade: 0, inteligencia: 0, sabedoria: 0, carisma: 0 }
+// Formata espaços/carga aceitando meio-espaço (0,5) no padrão pt-BR.
+const fmtEsp = (n) => String(Math.round((Number(n) || 0) * 100) / 100).replace('.', ',')
 
 function ItemInvRow({ it, onQtd, onEquip, onDelete, onEdit }) {
   const [open, setOpen] = useState(false)
@@ -28,7 +30,7 @@ function ItemInvRow({ it, onQtd, onEquip, onDelete, onEdit }) {
         <b className="nm">{it.equipado ? '🛡️ ' : ''}{it.nome}</b>
         {resumo && <span className="sub">{resumo}</span>}
         <div className="spacer" />
-        <span className="tag">{(it.espacos || 0)}×{it.quantidade || 1} esp</span>
+        <span className="tag">{fmtEsp(it.espacos)}×{it.quantidade || 1} esp</span>
       </div>
       {open && (
         <div className="cris-body">
@@ -37,7 +39,7 @@ function ItemInvRow({ it, onQtd, onEquip, onDelete, onEdit }) {
             {it.dano && <span className="tag">Dano {it.dano}{it.critico ? ` (${it.critico})` : ''}</span>}
             {it.bonusDefesa != null && <span className="tag">Defesa +{it.bonusDefesa}</span>}
             {it.alcance && <span className="tag">{it.alcance}</span>}
-            <span className="tag">Espaços {it.espacos || 0}</span>
+            <span className="tag">Espaços {fmtEsp(it.espacos)}</span>
           </div>
           {it.efeito && <p className="muted" style={{ fontSize: '.82rem', marginTop: 7 }}>{it.efeito}</p>}
           <div className="row" style={{ gap: 10, marginTop: 9, alignItems: 'center' }}>
@@ -896,14 +898,16 @@ export default function Ficha() {
 
           {aba === 'Inventário' && (
             <div>
-              <div className="bar-label">Carga {p.cargaAtual}/{p.cargaMaxima} espaços</div>
+              <div className="bar-label">Carga {fmtEsp(p.cargaAtual)}/{p.cargaMaxima} espaços</div>
               <div className={`bar ${p.cargaAtual > p.cargaMaxima ? 'energia' : 'vida'}`} style={{ marginBottom: 6 }}>
                 <span style={{ width: Math.min(100, p.cargaMaxima ? Math.round((p.cargaAtual / p.cargaMaxima) * 100) : 0) + '%' }} />
-                <b>{p.cargaAtual}/{p.cargaMaxima}</b>
+                <b>{fmtEsp(p.cargaAtual)}/{p.cargaMaxima}</b>
               </div>
               {p.cargaAtual > p.cargaMaxima && (
                 <div className="error" style={{ marginBottom: 8 }}>
-                  Sobrecarregado! −{p.cargaAtual - p.cargaMaxima} de Agilidade (1 por ponto acima da carga máxima).
+                  Sobrecarregado!{Math.floor(p.cargaAtual - p.cargaMaxima) >= 1
+                    ? ` −${Math.floor(p.cargaAtual - p.cargaMaxima)} de Agilidade (1 por ponto inteiro acima da carga máxima).`
+                    : ' (a partir de 1 ponto inteiro acima, perde Agilidade).'}
                 </div>
               )}
 
@@ -927,7 +931,7 @@ export default function Ficha() {
               <div className="add-form">
                 <input placeholder="Item próprio" value={novoItem.nome}
                   onChange={(e) => setNovoItem((s) => ({ ...s, nome: e.target.value }))} />
-                <input type="number" min="0" placeholder="Espaços" style={{ maxWidth: 90 }} value={novoItem.espacos}
+                <input type="number" min="0" step="0.5" placeholder="Espaços" style={{ maxWidth: 90 }} value={novoItem.espacos}
                   onChange={(e) => setNovoItem((s) => ({ ...s, espacos: e.target.value }))} />
                 <button className="mini" onClick={addItemProprio}>+ Próprio</button>
               </div>
@@ -966,7 +970,7 @@ export default function Ficha() {
               </div>
               <div style={{ width: 90 }}>
                 <label>Espaços</label>
-                <input type="number" min="0" value={editItem.espacos ?? 0}
+                <input type="number" min="0" step="0.5" value={editItem.espacos ?? 0}
                   onChange={(e) => setEditItem((s) => ({ ...s, espacos: e.target.value }))} />
               </div>
             </div>

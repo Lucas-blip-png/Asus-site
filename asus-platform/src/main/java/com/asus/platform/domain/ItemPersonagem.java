@@ -28,8 +28,8 @@ public class ItemPersonagem {
 
     private String categoria;
 
-    /** Espaços ocupados por unidade (peso/carga ASUS = Força x 2). */
-    private Integer espacos;
+    /** Espaços ocupados por unidade (aceita meio-espaço, ex.: 0.5). */
+    private Double espacos;
     private Integer quantidade;
     private boolean equipado;
 

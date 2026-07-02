@@ -46,7 +46,7 @@ public class InventarioController {
             item.setQuantidade(1);
         }
         if (item.getEspacos() == null) {
-            item.setEspacos(0);
+            item.setEspacos(0.0);
         }
         return inventarioRepository.save(item);
     }
@@ -59,7 +59,7 @@ public class InventarioController {
                 .orElseThrow(() -> new NotFoundException("Item '" + codigo + "' nao encontrado no catalogo"));
         ItemPersonagem item = ItemPersonagem.builder()
                 .personagemId(id).nome(c.getNome()).categoria(c.getCategoria())
-                .espacos(c.getEspacos() == null ? 0 : c.getEspacos()).quantidade(1).equipado(false)
+                .espacos(c.getEspacos() == null ? 0.0 : c.getEspacos()).quantidade(1).equipado(false)
                 .dano(c.getDano()).critico(c.getCritico()).alcance(c.getAlcance()).tipoDano(c.getTipoDano())
                 .bonusDefesa(c.getBonusDefesa()).penalidade(c.getPenalidade())
                 .preco(c.getPreco()).moeda(c.getMoeda()).efeito(c.getEfeito()).itemJogoCodigo(c.getCodigo())
@@ -75,7 +75,7 @@ public class InventarioController {
             item.setQuantidade(Math.max(0, patch.getQuantidade()));
         }
         if (patch.getEspacos() != null) {
-            item.setEspacos(Math.max(0, patch.getEspacos()));
+            item.setEspacos(Math.max(0.0, patch.getEspacos()));
         }
         item.setEquipado(patch.isEquipado());
         if (patch.getNome() != null && !patch.getNome().isBlank()) {

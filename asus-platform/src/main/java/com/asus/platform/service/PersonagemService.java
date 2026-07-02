@@ -547,15 +547,15 @@ public class PersonagemService {
 
         ResultadoCalculo r = calculoService.calcular(p);
 
-        // Carga atual = soma de espacos x quantidade do inventario (max = Forca x 2).
-        int cargaAtual = 0;
+        // Carga atual = soma de espacos x quantidade do inventario (max = Forca x 2). Aceita meio-espaco.
+        double cargaAtual = 0;
         for (ItemPersonagem it : itemPersonagemRepository.findByPersonagemId(p.getId())) {
-            int esp = it.getEspacos() == null ? 0 : it.getEspacos();
+            double esp = it.getEspacos() == null ? 0 : it.getEspacos();
             int qtd = it.getQuantidade() == null ? 1 : it.getQuantidade();
             cargaAtual += esp * qtd;
         }
-        // Sobrecarga: cada ponto acima da carga maxima tira 1 de Agilidade (recalcula tudo).
-        int excessoCarga = Math.max(0, cargaAtual - r.cargaMaxima());
+        // Sobrecarga: cada PONTO INTEIRO acima da carga maxima tira 1 de Agilidade (recalcula tudo).
+        int excessoCarga = (int) Math.floor(Math.max(0, cargaAtual - r.cargaMaxima()));
         ResultadoCalculo rEf = excessoCarga > 0 ? calculoService.calcular(p, excessoCarga) : r;
         var finaisEf = rEf.atributosFinais();
 
