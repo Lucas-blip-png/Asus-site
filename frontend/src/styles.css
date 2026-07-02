@@ -273,6 +273,24 @@ th, td { text-align: left; padding: 6px 6px; border-bottom: 1px solid var(--bord
 
 button.ghost.mini.ativo { background: var(--gold); color: #1a1206; border-color: var(--gold-2); opacity: 1; }
 
+/* Bestiário: avatar da criatura + etiqueta de rank */
+.bestia-av {
+  flex: 0 0 34px; width: 34px; height: 34px; border-radius: 8px; margin-right: 4px;
+  background: var(--bg-2) center/cover no-repeat; display: grid; place-items: center;
+  color: var(--muted); font-weight: 800; border: 1px solid var(--border);
+}
+.rank-badge {
+  font-weight: 900; font-size: .74rem; letter-spacing: .5px; padding: 2px 9px; border-radius: 999px;
+  border: 1px solid var(--border-2); color: #fff; white-space: nowrap;
+}
+.rank-badge.r-sss { background: linear-gradient(180deg, #ff5d5d, #b3261e); border-color: #ff8a8a; }
+.rank-badge.r-ss { background: linear-gradient(180deg, #f0803a, #c4531f); border-color: #ffab6b; }
+.rank-badge.r-s { background: linear-gradient(180deg, var(--gold-3), var(--gold-2)); color: #1a1206; border-color: var(--gold-3); }
+.rank-badge.r-a { background: linear-gradient(180deg, #8a5cf6, #6a3ce0); border-color: #a888fb; }
+.rank-badge.r-b { background: linear-gradient(180deg, #4f81e6, #2f5fc4); border-color: #7aa2f0; }
+.rank-badge.r-c { background: var(--panel-2); color: var(--muted); }
+.rank-badge.r-x { background: var(--panel-2); color: var(--text); }
+
 /* ---------------- Barras de status ---------------- */
 .bar {
   background: var(--bg-3); border-radius: 8px; height: 26px; position: relative; overflow: hidden;

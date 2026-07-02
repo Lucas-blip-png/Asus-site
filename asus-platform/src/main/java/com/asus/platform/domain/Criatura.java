@@ -28,6 +28,14 @@ public class Criatura {
     private String especie;
     private String tipo;
 
+    /** Categoria autoral do ASUS (ex.: Humanoide, Bestial). */
+    private String categoria;
+    /** Rank de poder (ex.: B, A, S+, SS, SSS?). */
+    private String rank;
+    /** URL de imagem (ilustracao). */
+    @Column(columnDefinition = "TEXT")
+    private String imagemUrl;
+
     private int pv;
     private int pm;
     private int pe;

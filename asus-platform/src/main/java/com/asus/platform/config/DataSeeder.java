@@ -84,6 +84,7 @@ public class DataSeeder implements CommandLineRunner {
         if (gameSystemRepository.existsByCodigo(AsusV1Engine.SYSTEM_ID)) {
             log.info("Seed ja aplicado; pulando.");
             ensureAdmin(); // garante a conta de dono mesmo em banco ja existente
+            refreshBestiario(); // reaplica o bestiario autoral (categorias + ranks)
             return;
         }
         log.info("Aplicando seed do sistema ASUS...");
@@ -281,53 +282,91 @@ public class DataSeeder implements CommandLineRunner {
     // ---------------- Bestiario (conjunto inicial de criaturas oficiais) ----------------
 
     private void seedBestiario() {
-        // nome, nivel, especie, tipo, pv, pm, pe, defesa, descricao
-        criatura("Kobold", 1, "Kobold", "Humanoide", 8, 0, 4, 13,
-                "Reptiliano pequeno e covarde que ataca em bandos e adora armadilhas.");
-        criatura("Goblin Batedor", 1, "Goblin", "Humanoide", 10, 0, 6, 13,
-                "Saqueador agil e oportunista; prefere emboscadas a combate aberto.");
-        criatura("Rato Gigante", 1, "Besta", "Animal", 6, 0, 3, 12,
-                "Roedor do tamanho de um cao; sua mordida pode transmitir doencas.");
-        criatura("Lobo", 1, "Besta", "Animal", 12, 0, 6, 14,
-                "Cacador de matilha; derruba presas com investidas coordenadas.");
-        criatura("Esqueleto", 1, "Morto-vivo", "Morto-vivo", 12, 0, 0, 13,
-                "Ossada reanimada por necromancia; obediente e incansavel.");
-        criatura("Bandido", 2, "Humano", "Humanoide", 16, 0, 8, 13,
-                "Salteador de estrada armado com espada e besta leve.");
-        criatura("Zumbi", 2, "Morto-vivo", "Morto-vivo", 22, 0, 0, 11,
-                "Cadaver lento e resistente; avanca sem medo nem dor.");
-        criatura("Aranha Gigante", 3, "Verme", "Monstro", 20, 0, 10, 14,
-                "Predadora que prende as vitimas em teias e injeta veneno paralisante.");
-        criatura("Orc Guerreiro", 3, "Orc", "Humanoide", 28, 0, 12, 15,
-                "Brutamontes de pele esverdeada; brutal e sedento por batalha.");
-        criatura("Harpia", 4, "Harpia", "Monstro", 26, 8, 12, 15,
-                "Hibrido de mulher e ave cujo canto enfeitica os incautos.");
-        criatura("Ogro", 5, "Gigante", "Gigante", 55, 0, 18, 15,
-                "Bruto enorme e estupido que esmaga inimigos com um porrete.");
-        criatura("Lobo Atroz", 5, "Besta", "Animal", 45, 0, 16, 15,
-                "Versao monstruosa do lobo, do tamanho de um cavalo.");
-        criatura("Elemental do Fogo", 6, "Elemental", "Elemental", 50, 20, 0, 16,
-                "Vortice de chamas vivas; incendeia tudo o que toca.");
-        criatura("Basilisco", 7, "Monstro", "Monstro", 60, 0, 20, 16,
-                "Lagarto de oito patas cujo olhar pode petrificar suas vitimas.");
-        criatura("Troll", 8, "Gigante", "Gigante", 85, 0, 24, 16,
-                "Predador regenerativo; so o fogo ou o acido detem sua cura.");
-        criatura("Golem de Pedra", 10, "Construto", "Construto", 110, 0, 0, 18,
-                "Guardiao de pedra animado por magia; lento, mas quase incansavel.");
-        criatura("Vampiro", 12, "Morto-vivo", "Morto-vivo", 95, 40, 30, 19,
-                "Nobre amaldicoado que drena o sangue dos vivos e comanda a noite.");
-        criatura("Quimera", 13, "Monstro", "Monstro", 120, 18, 30, 18,
-                "Aberracao de tres cabecas - leao, cabra e dragao - que cospe fogo.");
-        criatura("Dragao Vermelho Jovem", 15, "Dragao", "Dragao", 180, 60, 40, 21,
-                "Dragao arrogante e ganancioso cujo bafo incinera tudo em seu cone.");
+        seedCriaturasAsus();
     }
 
-    private void criatura(String nome, int nivel, String especie, String tipo,
-                          int pv, int pm, int pe, int defesa, String descricao) {
+    /** Reaplica o bestiario autoral em bancos ja existentes (roda em todo boot). */
+    void refreshBestiario() {
+        gameSystemRepository.findByCodigo(AsusV1Engine.SYSTEM_ID).ifPresent(gs -> {
+            sid = gs.getId();
+            criaturaRepository.deleteAll(criaturaRepository.findByGameSystemIdAndOficialTrue(sid));
+            seedCriaturasAsus();
+        });
+    }
+
+    /** Bestiario autoral do ASUS (categorias + ranks; stats detalhados entram depois). */
+    private void seedCriaturasAsus() {
+        // ---- Criaturas humanoides ----
+        criaturaAsus("Grande Lobo Nevado", "Humanoide", "S+",
+                "Lobo das Neves, Lobisomem sem Cor, Fenrir ou Fera Branca. Uma criatura de origem "
+                + "desconhecida que assombra a noite ao norte; principal motivo dos anoes se abrigarem "
+                + "nas grandes montanhas. Em sua ultima aparicao dizimou um grupo de aventureiros.");
+        criaturaAsus("Demogorgon", "Humanoide", "SSS?",
+                "Uma das criaturas mais grotescas que ja existiu; devastou o antigo inferno. Sua "
+                + "aparencia e como a uniao bestial de varios animais. Dizem que poderia dizimar um "
+                + "reino inteiro sozinho.");
+        criaturaAsus("Os 4 Shoguns do Apocalypse", "Humanoide", "A, A+, S",
+                "Grupo formado apos a grande Guerra Tormenta. Dizem que ja foram Onis que cederam ao "
+                + "poder e entregaram suas almas por forca. Agem como assassinos de figuras poderosas, "
+                + "com trabalho em equipe impecavel e imbativel.");
+        criaturaAsus("Centorium", "Humanoide", "A",
+                "O unico sobrevivente da raca dos centauros, extinta durante a grande Guerra Tormenta. "
+                + "Abracou seu lado frio, tornando-se um monstro sem piedade contra qualquer raca que "
+                + "passe em sua frente.");
+        criaturaAsus("Anubis", "Humanoide", "S+",
+                "Uma das criaturas mais antigas destas terras. Extremamente inteligente, possui o poder "
+                + "unico de 5 elementos diferentes sem se prender aos Deuses; por isso, em algumas "
+                + "culturas antigas, foi considerado um Deus.");
+        criaturaAsus("Wendigo", "Humanoide", "B+",
+                "Misteriosa criatura das florestas do norte. Usa o frio como principal aliado na caca, "
+                + "esperando as presas ficarem debilitadas o suficiente para mata-las.");
+        criaturaAsus("Jack, a Lanterna", "Humanoide", "A",
+                "Em vida, um assassino maniaco que dilacerava a quem quisesse. Executado publicamente, "
+                + "queimou em uma fogueira coberto de palha como um espantalho; logo apos, usando os "
+                + "poderes de Tenebris, lancou sua alma vingativa no mundo.");
+        criaturaAsus("Medusa", "Humanoide", "B",
+                "Humana seguidora do Deus Drakko que ajudou a besta Hydra debilitada em troca de "
+                + "protecao. Aprendeu a lingua unica da Hydra (variacao da linguagem Draconica) e, no "
+                + "leito de morte, abencoou seu embriao em nome de Hydra - assim nasceu Medusa.");
+
+        // ---- Criaturas bestiais ----
+        criaturaAsus("Dragao Ancestral Carmesim", "Bestial", "SS",
+                "Faz parte dos dragoes ancestrais, os primeiros criados por Drakko. Seu poder se "
+                + "sobressai entre todos os dragoes, so se igualando aos irmaos que mantem o poder "
+                + "original. Vive onde as montanhas tocam o ceu.");
+        criaturaAsus("Dragao Ancestral Corrupcao", "Bestial", "SS",
+                "Um dos tres ancestrais e o mais cruel de todos. Capaz de invadir a mente das pessoas e "
+                + "prometer poderes inimaginaveis, corrompendo os de coracao mais puro. Odeia todos os "
+                + "outros dragoes, julgando-se superior.");
+        criaturaAsus("Dragao Primordial Consagracao", "Bestial", "SS",
+                "Poderoso e brilhante, o mais forte entre os tres, responsavel por cuidar dos dragoes "
+                + "inferiores que regem o mundo. Gracas a ele a raca dos Dragoes possui inumeros vivos.");
+        criaturaAsus("Hydra", "Bestial", "S+",
+                "Dragao que sofreu mutacoes impossiveis e sobreviveu, ganhando a habilidade de restaurar "
+                + "e dobrar as cabecas quando decepadas. Ninguem sabe quantas cabecas ela ja possui.");
+        criaturaAsus("Fenix", "Bestial", "A",
+                "O lendario passaro imortal. Inumeros herois tentaram mata-la, mas cederam a sua "
+                + "habilidade de voltar dos mortos - a unica criatura que retorna sem virar um zumbi.");
+        criaturaAsus("Planterra", "Bestial", "?",
+                "As lendas contam que, na floresta mais profunda, existe um bulbo de flor rosa sagrado "
+                + "para a existencia da floresta. Se alguem retira-lo, a floresta reage como um conjunto, "
+                + "criando sua morte certa.");
+        criaturaAsus("Cerberus", "Bestial", "S+",
+                "O infernal cao demoniaco e principal protetor de Hades, formado pela ira dos vulcoes do "
+                + "Inferno. Serve os reis demonios desde os primordios de Asus, leal apenas ao Rei do "
+                + "Inferno que possui o sangue da familia real.");
+        criaturaAsus("Leviathan", "Bestial", "SSS+?",
+                "Forca da natureza que existe antes dos proprios Deuses do Baixo Escalao. Coromuel, deus "
+                + "dos mares, a fez adormecer por seculos; durante a Guerra Tormenta despertou e inundou "
+                + "grande parte do continente, voltando a repousar em seguida.");
+    }
+
+    private void criaturaAsus(String nome, String categoria, String rank, String descricao) {
         criaturaRepository.save(Criatura.builder()
-                .gameSystemId(sid).nome(nome).nivel(nivel).especie(especie).tipo(tipo)
-                .pv(pv).pm(pm).pe(pe).defesa(defesa).descricao(descricao)
-                .oficial(true).build());
+                .gameSystemId(sid).nome(nome).categoria(categoria).rank(rank)
+                .especie(categoria).tipo(categoria)
+                .nivel(0).pv(0).pm(0).pe(0).defesa(0)
+                .descricao(descricao).oficial(true).build());
     }
 
     // ---------------- Habilidades (representativas, gerais + por classe) ----------------
