@@ -45,7 +45,8 @@ public class ItemJogo {
     private String alcance;
     private String tipoDano; // corte/perfuracao/impacto
 
-    private Integer espacos;
+    /** Espacos de carga (aceita meio-espaco, ex.: 0.5). */
+    private Double espacos;
 
     // Armaduras/escudos
     private Integer bonusDefesa;

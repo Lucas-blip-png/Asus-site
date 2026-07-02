@@ -19,6 +19,7 @@ const ITEM_TABS = [
 
 const precoFmt = (i) =>
   i.preco == null ? '—' : `${i.moeda || 'T$'}${Number(i.preco).toLocaleString('pt-BR', { maximumFractionDigits: 2 })}`
+const espFmt = (n) => (n == null ? '—' : String(n).replace('.', ','))
 const tipoClasse = (t) => {
   const s = (t || '').toLowerCase()
   if (s.includes('perfura') && s.includes('corte')) return 'td-mix'
@@ -81,13 +82,13 @@ function ItensView({ itens }) {
                     {lay === 'armadura' && <>
                       <td className="stat">+{i.bonusDefesa}</td>
                       <td className="muted">{i.penalidade ? i.penalidade : (i.penalidade === 0 ? '0' : '—')}</td>
-                      <td className="muted">{i.espacos ?? '—'}</td>
+                      <td className="muted">{espFmt(i.espacos)}</td>
                     </>}
                     {lay === 'escudo' && <>
                       <td className="stat">+{i.bonusDefesa}</td>
-                      <td className="muted">{i.espacos ?? '—'}</td>
+                      <td className="muted">{espFmt(i.espacos)}</td>
                     </>}
-                    {lay === 'espacos' && <td className="muted">{i.espacos ?? '—'}</td>}
+                    {lay === 'espacos' && <td className="muted">{espFmt(i.espacos)}</td>}
                   </tr>
                 ))}
               </tbody>

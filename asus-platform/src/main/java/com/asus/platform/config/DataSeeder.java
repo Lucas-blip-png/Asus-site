@@ -241,12 +241,12 @@ public class DataSeeder implements CommandLineRunner {
         item("INSTR_OFICIO", "Instrumentos de ofício", "FERRAMENTA", "Ferramentas", "30", 1);
         item("MALETA_MEDICA", "Maleta médica", "FERRAMENTA", "Ferramentas", "50", 1);
 
-        // ===== ALQUÍMICOS ===== (espaços 0,5 no livro; armazenado como 1 pois a carga usa inteiros)
-        item("ACIDO", "Ácido", "ALQUIMICO", "Preparados", "10", 1);
-        item("BOMBA", "Bomba", "ALQUIMICO", "Preparados", "50", 1);
-        item("FOGO_ALQUIMICO", "Fogo alquímico", "ALQUIMICO", "Preparados", "10", 1);
-        item("ESSENCIA_MANA", "Essência de mana", "ALQUIMICO", "Preparados", "50", 1);
-        item("ELIXIR_AMOR", "Elixir do amor", "ALQUIMICO", "Preparados", "100", 1);
+        // ===== ALQUÍMICOS ===== (ocupam 0,5 espaço)
+        item("ACIDO", "Ácido", "ALQUIMICO", "Preparados", "10", 0.5);
+        item("BOMBA", "Bomba", "ALQUIMICO", "Preparados", "50", 0.5);
+        item("FOGO_ALQUIMICO", "Fogo alquímico", "ALQUIMICO", "Preparados", "10", 0.5);
+        item("ESSENCIA_MANA", "Essência de mana", "ALQUIMICO", "Preparados", "50", 0.5);
+        item("ELIXIR_AMOR", "Elixir do amor", "ALQUIMICO", "Preparados", "100", 0.5);
         itemPreco("BELADONA", "Beladona", "VENENO", "Venenos", "1500");
         itemPreco("CICUTA", "Cicuta", "VENENO", "Venenos", "60");
         itemPreco("PECONHA_COMUM", "Peçonha comum", "VENENO", "Venenos", "15");
@@ -284,7 +284,7 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private void arma(String codigo, String nome, String cat, String grupo, String preco, String dano,
-                      String critico, String alcance, String tipoDano, int espacos) {
+                      String critico, String alcance, String tipoDano, double espacos) {
         itemJogoRepository.save(ItemJogo.builder()
                 .gameSystemId(sid).codigo(codigo).nome(nome).categoria(cat).grupo(grupo)
                 .preco(new java.math.BigDecimal(preco)).moeda("T$")
@@ -293,7 +293,7 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private void protecao(String codigo, String nome, String cat, String grupo, String preco,
-                          int bonusDefesa, Integer penalidade, int espacos) {
+                          int bonusDefesa, Integer penalidade, double espacos) {
         itemJogoRepository.save(ItemJogo.builder()
                 .gameSystemId(sid).codigo(codigo).nome(nome).categoria(cat).grupo(grupo)
                 .preco(new java.math.BigDecimal(preco)).moeda("T$")
@@ -301,7 +301,7 @@ public class DataSeeder implements CommandLineRunner {
                 .oficial(true).build());
     }
 
-    private void item(String codigo, String nome, String cat, String grupo, String preco, Integer espacos) {
+    private void item(String codigo, String nome, String cat, String grupo, String preco, double espacos) {
         itemJogoRepository.save(ItemJogo.builder()
                 .gameSystemId(sid).codigo(codigo).nome(nome).categoria(cat).grupo(grupo)
                 .preco(new java.math.BigDecimal(preco)).moeda("T$")
