@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { api, obterOrgId } from '../api.js'
 import { useAuth } from '../auth.jsx'
 
-const TIPOS = ['FICHA', 'CAMPANHA', 'NPC', 'ITEM', 'OUTRO']
+const TIPOS = ['FICHA', 'ATAQUE', 'MAGIA', 'HABILIDADE', 'ITEM', 'NPC', 'MONSTRO', 'CAMPANHA', 'OUTRO']
 const VAZIO = { tipo: 'FICHA', nome: '', descricao: '', jsonConteudo: '', publico: false }
 
 function TemplateRow({ t, onDelete }) {

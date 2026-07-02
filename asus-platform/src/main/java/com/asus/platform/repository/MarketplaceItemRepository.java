@@ -6,4 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface MarketplaceItemRepository extends JpaRepository<MarketplaceItem, Long> {
     List<MarketplaceItem> findByPublicadoTrueOrderByCriadoEmDesc();
+    List<MarketplaceItem> findByOficialTrue();
 }

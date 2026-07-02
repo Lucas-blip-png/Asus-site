@@ -39,6 +39,9 @@ public class MarketplaceItem {
 
     private boolean publicado;
 
+    /** Item de vitrine semeado pelo sistema (para o refresh gerenciar). */
+    private boolean oficial;
+
     @Column(nullable = false)
     private LocalDateTime criadoEm;
 
