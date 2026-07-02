@@ -27,8 +27,12 @@ public class ItemJogo {
     @Column(nullable = false)
     private String nome;
 
-    /** ARMA_SIMPLES, ARMA_MARCIAL, ARMA_EXOTICA, ARMA_FOGO, ARMADURA, ESCUDO, GERAL, CONSUMIVEL... */
+    /** ARMA_SIMPLES, ARMA_MARCIAL, ARMADURA, ESCUDO, ITEM_GERAL, FERRAMENTA, ALQUIMICO, VENENO,
+     *  ALIMENTACAO, ANIMAL, VEICULO, SERVICO... */
     private String categoria;
+
+    /** Subgrupo da tabela (ex.: "Corpo a Corpo - Leves", "Uma Mao", "Leves", "Venenos"). */
+    private String grupo;
 
     @Column(precision = 12, scale = 2)
     private BigDecimal preco;

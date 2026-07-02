@@ -313,6 +313,13 @@ button.ghost.mini.ativo { background: var(--gold); color: #1a1206; border-color:
 .atr-badge.a-sab { background: #2fa98b; }
 .atr-badge.a-car { background: #d05a9e; }
 
+/* Tipo de dano (tabela de armas) */
+.td-badge { font-weight: 700; font-size: .78rem; }
+.td-badge.td-perf { color: #6ea8ff; }
+.td-badge.td-corte { color: #e3675e; }
+.td-badge.td-impacto { color: var(--gold-3); }
+.td-badge.td-mix { color: #b98cf0; }
+
 /* ---------------- Barras de status ---------------- */
 .bar {
   background: var(--bg-3); border-radius: 8px; height: 26px; position: relative; overflow: hidden;

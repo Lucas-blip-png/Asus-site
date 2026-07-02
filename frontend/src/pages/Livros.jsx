@@ -8,6 +8,97 @@ const ATR_SIGLA = {
   INTELIGENCIA: 'INT', SABEDORIA: 'SAB', CARISMA: 'CAR',
 }
 
+const ITEM_TABS = [
+  ['Armas Simples', ['ARMA_SIMPLES']],
+  ['Armas Marciais', ['ARMA_MARCIAL']],
+  ['Armaduras & Escudos', ['ARMADURA', 'ESCUDO']],
+  ['Itens Gerais', ['ITEM_GERAL', 'FERRAMENTA']],
+  ['Alquímicos', ['ALQUIMICO', 'VENENO']],
+  ['Alimentação & Mais', ['ALIMENTACAO', 'ANIMAL', 'VEICULO', 'SERVICO']],
+]
+
+const precoFmt = (i) =>
+  i.preco == null ? '—' : `${i.moeda || 'T$'}${Number(i.preco).toLocaleString('pt-BR', { maximumFractionDigits: 2 })}`
+const tipoClasse = (t) => {
+  const s = (t || '').toLowerCase()
+  if (s.includes('perfura') && s.includes('corte')) return 'td-mix'
+  if (s.includes('perfura')) return 'td-perf'
+  if (s.includes('corte')) return 'td-corte'
+  if (s.includes('impacto')) return 'td-impacto'
+  return ''
+}
+function layoutDe(items) {
+  if (items.some((i) => i.dano)) return 'arma'
+  if (items.some((i) => i.bonusDefesa != null)) return items.some((i) => i.penalidade != null) ? 'armadura' : 'escudo'
+  if (items.some((i) => i.espacos != null)) return 'espacos'
+  return 'preco'
+}
+
+function ItensView({ itens }) {
+  const [tab, setTab] = useState(0)
+  const cats = ITEM_TABS[tab][1]
+  const doTab = itens.filter((i) => cats.includes(i.categoria))
+  // Agrupa por 'grupo' preservando a ordem de chegada (ordem do seed).
+  const grupos = []
+  const idx = {}
+  doTab.forEach((i) => {
+    const g = i.grupo || 'Itens'
+    if (idx[g] == null) { idx[g] = grupos.length; grupos.push([g, []]) }
+    grupos[idx[g]][1].push(i)
+  })
+
+  return (
+    <div>
+      <div className="abas" style={{ marginBottom: 14 }}>
+        {ITEM_TABS.map(([nome], i) => (
+          <button key={nome} className={tab === i ? 'ativo' : undefined} onClick={() => setTab(i)}>{nome}</button>
+        ))}
+      </div>
+      {grupos.map(([g, items]) => {
+        const lay = layoutDe(items)
+        return (
+          <div key={g} className="card" style={{ marginBottom: 14 }}>
+            <h2 style={{ marginTop: 0 }}>{g}</h2>
+            <table>
+              <thead>
+                {lay === 'arma' && <tr><th>Item</th><th>Preço</th><th>Dano</th><th>Crítico</th><th>Alcance</th><th>Tipo</th></tr>}
+                {lay === 'armadura' && <tr><th>Item</th><th>Preço</th><th>Defesa</th><th>Penalidade</th><th>Espaços</th></tr>}
+                {lay === 'escudo' && <tr><th>Item</th><th>Preço</th><th>Defesa</th><th>Espaços</th></tr>}
+                {lay === 'espacos' && <tr><th>Item</th><th>Preço</th><th>Espaços</th></tr>}
+                {lay === 'preco' && <tr><th>Item</th><th>Preço</th></tr>}
+              </thead>
+              <tbody>
+                {items.map((i) => (
+                  <tr key={i.codigo}>
+                    <td>{i.nome}</td>
+                    <td className="stat">{precoFmt(i)}</td>
+                    {lay === 'arma' && <>
+                      <td>{i.dano || '—'}</td>
+                      <td className="muted">{i.critico || '—'}</td>
+                      <td className="muted">{i.alcance || '—'}</td>
+                      <td><span className={`td-badge ${tipoClasse(i.tipoDano)}`}>{i.tipoDano || '—'}</span></td>
+                    </>}
+                    {lay === 'armadura' && <>
+                      <td className="stat">+{i.bonusDefesa}</td>
+                      <td className="muted">{i.penalidade ? i.penalidade : (i.penalidade === 0 ? '0' : '—')}</td>
+                      <td className="muted">{i.espacos ?? '—'}</td>
+                    </>}
+                    {lay === 'escudo' && <>
+                      <td className="stat">+{i.bonusDefesa}</td>
+                      <td className="muted">{i.espacos ?? '—'}</td>
+                    </>}
+                    {lay === 'espacos' && <td className="muted">{i.espacos ?? '—'}</td>}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
 function PericiaCard({ p }) {
   const [open, setOpen] = useState(true)
   const sig = ATR_SIGLA[p.atributoBase] || p.atributoBase || '—'
@@ -125,23 +216,7 @@ export default function Livros() {
         </div>
       )}
 
-      {aba === 'Itens' && (
-        <div className="card">
-          <table>
-            <thead><tr><th>Item</th><th>Categoria</th><th>Preço</th><th>Dano</th><th>Defesa</th></tr></thead>
-            <tbody>
-              {(d.itens || []).map((i) => (
-                <tr key={i.codigo}>
-                  <td>{i.nome}</td><td className="muted">{i.categoria}</td>
-                  <td className="stat">{i.moeda} {i.preco}</td>
-                  <td>{i.dano || '—'}{i.critico ? ` (${i.critico})` : ''}</td>
-                  <td>{i.bonusDefesa != null ? `+${i.bonusDefesa}` : '—'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      {aba === 'Itens' && <ItensView itens={d.itens || []} />}
 
       {aba === 'Progressão' && (
         <div className="card">
