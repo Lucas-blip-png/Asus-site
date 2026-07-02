@@ -454,19 +454,23 @@ public class PersonagemService {
      *  cada atributo limitado ao teto do nivel. */
     private void validarDistribuicaoCriacao(AtributosDto a, Map<String, Integer> pericias, int nivel,
                                             String classeCodigo, String trilhaCodigo) {
+        // Base 5 + 2 por nivel acima do 1 (personagem de nivel mais alto nasce mais forte).
+        int max = 5 + 2 * Math.max(0, nivel - 1);
         if (a != null) {
             int soma = somaAtributos(a);
-            if (soma > 5) {
+            if (soma > max) {
                 throw new IllegalArgumentException(
-                        "Na criacao voce distribui no maximo 5 pontos de atributo (usou " + soma + ").");
+                        "No nivel " + nivel + " voce distribui no maximo " + max
+                        + " pontos de atributo (usou " + soma + ").");
             }
             validarTetoAtributo(a, nivel, classeCodigo, trilhaCodigo);
         }
         if (pericias != null) {
             int sp = pericias.values().stream().mapToInt(v -> v == null ? 0 : v).sum();
-            if (sp > 5) {
+            if (sp > max) {
                 throw new IllegalArgumentException(
-                        "Na criacao voce distribui no maximo 5 pontos de pericia (usou " + sp + ").");
+                        "No nivel " + nivel + " voce distribui no maximo " + max
+                        + " pontos de pericia (usou " + sp + ").");
             }
         }
     }
