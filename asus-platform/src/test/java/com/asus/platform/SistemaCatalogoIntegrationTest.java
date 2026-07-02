@@ -37,10 +37,10 @@ class SistemaCatalogoIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(16));
 
-        // 26 pericias
+        // 28 pericias (inclui Oficio e Sanidade)
         mockMvc.perform(get("/api/sistemas/asus/pericias"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(26));
+                .andExpect(jsonPath("$.length()").value(28));
 
         // Habilidades e itens (catalogo representativo)
         mockMvc.perform(get("/api/sistemas/asus/habilidades"))

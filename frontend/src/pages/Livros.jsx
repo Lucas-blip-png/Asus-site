@@ -3,6 +3,38 @@ import { api } from '../api.js'
 
 const ABAS = ['Atributos', 'Classes', 'Perícias', 'Itens', 'Progressão', 'Feitiços']
 
+const ATR_SIGLA = {
+  FORCA: 'FOR', CONSTITUICAO: 'CON', DESTREZA: 'DES', AGILIDADE: 'AGI',
+  INTELIGENCIA: 'INT', SABEDORIA: 'SAB', CARISMA: 'CAR',
+}
+
+function PericiaCard({ p }) {
+  const [open, setOpen] = useState(true)
+  const sig = ATR_SIGLA[p.atributoBase] || p.atributoBase || '—'
+  const exemplos = (p.exemplos || '').split('|').filter(Boolean)
+  return (
+    <div className="pericia-card">
+      <div className="pc-head" onClick={() => setOpen((o) => !o)}>
+        <span className={`atr-badge a-${sig.toLowerCase()}`}>{sig}</span>
+        <b className="pc-nome">{p.nome}</b>
+        <span className="muted pc-max">Máx: Dobro do {sig}</span>
+        <span className="chev">{open ? '▴' : '▾'}</span>
+      </div>
+      {open && (
+        <div className="pc-body">
+          {p.descricao && <p className="pc-desc">{p.descricao}</p>}
+          {exemplos.length > 0 && (
+            <div className="pc-ex">
+              {exemplos.map((e, i) => <span key={i} className="pc-chip">{e}</span>)}
+            </div>
+          )}
+          <div className="pc-foot">LIMITE MÁXIMO: DOBRO DO {sig}</div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 function ClasseCard({ c, trilhas }) {
   const [open, setOpen] = useState(false)
   return (
@@ -88,18 +120,8 @@ export default function Livros() {
       )}
 
       {aba === 'Perícias' && (
-        <div className="card">
-          <table>
-            <thead><tr><th>Perícia</th><th>Atributo</th></tr></thead>
-            <tbody>
-              {(d.pericias || []).map((p) => (
-                <tr key={p.codigo}><td>{p.nome}</td><td className="muted">{p.atributoBase}</td></tr>
-              ))}
-            </tbody>
-          </table>
-          <p className="muted" style={{ fontSize: '.8rem', marginTop: 8 }}>
-            Descrições detalhadas de cada perícia entram em breve.
-          </p>
+        <div className="pericia-grid">
+          {(d.pericias || []).map((p) => <PericiaCard key={p.codigo} p={p} />)}
         </div>
       )}
 
