@@ -35,6 +35,8 @@ public class DataSeeder implements CommandLineRunner {
     private final ItemJogoRepository itemJogoRepository;
     private final ProgressaoNivelRepository progressaoNivelRepository;
     private final CriaturaRepository criaturaRepository;
+    private final MarketplaceItemRepository marketplaceItemRepository;
+    private final TemplateRepository templateRepository;
     private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
 
     /** Conta de dono/admin, configuravel por ambiente (NUNCA hardcode de senha no repo). */
@@ -61,6 +63,8 @@ public class DataSeeder implements CommandLineRunner {
                       ItemJogoRepository itemJogoRepository,
                       ProgressaoNivelRepository progressaoNivelRepository,
                       CriaturaRepository criaturaRepository,
+                      MarketplaceItemRepository marketplaceItemRepository,
+                      TemplateRepository templateRepository,
                       org.springframework.security.crypto.password.PasswordEncoder passwordEncoder) {
         this.gameSystemRepository = gameSystemRepository;
         this.racaRepository = racaRepository;
@@ -76,6 +80,8 @@ public class DataSeeder implements CommandLineRunner {
         this.itemJogoRepository = itemJogoRepository;
         this.progressaoNivelRepository = progressaoNivelRepository;
         this.criaturaRepository = criaturaRepository;
+        this.marketplaceItemRepository = marketplaceItemRepository;
+        this.templateRepository = templateRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -88,6 +94,7 @@ public class DataSeeder implements CommandLineRunner {
             refreshClasses(); // reaplica passivas/descricoes das classes (sem trocar ids)
             refreshPericias(); // reaplica pericias (descricao + exemplos) e adiciona novas
             refreshItens(); // reaplica o catalogo de itens do ASUS (categorias, precos, tipo de dano)
+            refreshVitrine(); // semeia/atualiza marketplace + templates oficiais
             return;
         }
         log.info("Aplicando seed do sistema ASUS...");
@@ -105,6 +112,7 @@ public class DataSeeder implements CommandLineRunner {
         seedHabilidades();
         seedBestiario();
         seedComunidade(asus);
+        seedVitrine();
 
         log.info("Seed ASUS concluido: {} racas, {} pericias, {} classes, {} niveis, {} itens, {} habilidades, {} criaturas.",
                 racaRepository.count(), periciaRepository.count(), classeRepository.count(),
@@ -869,6 +877,51 @@ public class DataSeeder implements CommandLineRunner {
                 .organizacaoId(org.getId()).usuarioId(dev.getId())
                 .papel(PapelOrganizacao.DONO).build());
         // (sem campanha inicial — cada um cria a sua)
+    }
+
+    // ---------------- Vitrine: Marketplace + Templates oficiais (conteudo inicial) ----------------
+
+    /** Reaplica a vitrine (marketplace + templates oficiais) em banco ja existente. */
+    void refreshVitrine() {
+        gameSystemRepository.findByCodigo(AsusV1Engine.SYSTEM_ID).ifPresent(gs -> {
+            sid = gs.getId();
+            marketplaceItemRepository.deleteAll(marketplaceItemRepository.findByOficialTrue());
+            templateRepository.deleteAll(templateRepository.findByOficialTrue());
+            seedVitrine();
+        });
+    }
+
+    private void seedVitrine() {
+        // Marketplace (itens de vitrine, gratuitos e publicados)
+        mkt("Ficha pronta: Cavaleiro Iniciante", "Um Cavaleiro nível 1 pronto pra jogar, "
+                + "com atributos e perícias sugeridas.", "FICHA");
+        mkt("Pacote de NPCs de Taverna", "Cinco NPCs de taverna com ganchos de história.", "NPC");
+        mkt("Mapa: Masmorra do Norte", "Mapa de masmorra em 3 andares para usar no Overlay/OBS.", "MAPA");
+        mkt("Aventura: Relíquias do Apocalipse", "Módulo introdutório para grupos de nível 1 a 3.", "CAMPANHA");
+
+        // Templates oficiais e públicos (pontos de partida)
+        tmpl("FICHA", "Ficha em branco (ASUS)", "Estrutura base de ficha para começar rápido.",
+                "{\"nivel\":1,\"observacao\":\"Preencha atributos e perícias.\"}");
+        tmpl("ATAQUE", "Ataque padrão", "Modelo de ataque corpo a corpo.",
+                "{\"nome\":\"Ataque\",\"dano\":\"1d6\",\"critico\":\"x2\",\"alcance\":\"Corpo a corpo\"}");
+        tmpl("MAGIA", "Feitiço básico", "Modelo de feitiço de 1º círculo.",
+                "{\"nome\":\"Feitiço\",\"circulo\":1,\"custoPm\":1,\"alcance\":\"Curto\"}");
+        tmpl("NPC", "NPC genérico", "Ficha simplificada de NPC.",
+                "{\"nome\":\"NPC\",\"pv\":10,\"defesa\":12}");
+        tmpl("ITEM", "Item comum", "Modelo de item de inventário.",
+                "{\"nome\":\"Item\",\"espacos\":1}");
+    }
+
+    private void mkt(String titulo, String descricao, String tipo) {
+        marketplaceItemRepository.save(MarketplaceItem.builder()
+                .titulo(titulo).descricao(descricao).tipo(tipo)
+                .gratuito(true).publicado(true).oficial(true).build());
+    }
+
+    private void tmpl(String tipo, String nome, String descricao, String json) {
+        templateRepository.save(Template.builder()
+                .gameSystemId(sid).nome(nome).tipo(tipo).descricao(descricao)
+                .jsonConteudo(json).oficial(true).publico(true).build());
     }
 
     // ---------------- helpers ----------------

@@ -4,6 +4,7 @@ import java.util.Locale;
 
 /** Tipos de template (plano, Seção 15.1). */
 public enum TipoTemplate {
+    FICHA,
     ATAQUE,
     MAGIA,
     HABILIDADE,
