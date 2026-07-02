@@ -69,13 +69,16 @@ export default function Personagens() {
     return cap
   })()
 
+  // Pontos distribuíveis: base 5 + 2 por nível acima do 1.
+  const maxPontos = 5 + 2 * Math.max(0, (Number(form.nivel) || 1) - 1)
+
   const setAtr = (a, delta) =>
     setForm((f) => {
       const cap = capNivel - (bonusMap[a] || 0) // teto do nível escolhido menos o fixo da classe
       const atual = Number(f.atributos[a]) || 0
       const novo = Math.max(0, Math.min(cap, atual + delta))
       const soma = pontos - atual + novo
-      if (delta > 0 && soma > 5) return f
+      if (delta > 0 && soma > maxPontos) return f
       return { ...f, atributos: { ...f.atributos, [a]: novo } }
     })
 
@@ -178,7 +181,7 @@ export default function Personagens() {
             </div>
           </div>
           <label style={{ marginTop: 10 }}>
-            Atributos — {pontos}/5 pontos distribuíveis · teto {capNivel}/atributo (os fixos da classe entram automaticamente)
+            Atributos — {pontos}/{maxPontos} pontos distribuíveis (nível {Number(form.nivel) || 1}) · teto {capNivel}/atributo (os fixos da classe entram automaticamente)
           </label>
           {form.trilhaCodigo && capNivel <= 4 && (
             <p className="muted" style={{ fontSize: '.8rem', marginTop: 2 }}>
