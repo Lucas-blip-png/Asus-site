@@ -3,6 +3,39 @@ import { api } from '../api.js'
 
 const ABAS = ['Atributos', 'Classes', 'Perícias', 'Itens', 'Progressão', 'Feitiços']
 
+function ClasseCard({ c, trilhas }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div className={`cris-row${open ? ' open' : ''}`}>
+      <div className="cris-head" onClick={() => setOpen((o) => !o)}>
+        <span className="chev">▾</span>
+        <b className="nm">{c.nome}</b>
+        <span className="sub">PV {c.multiplicadorPv} · PM {c.multiplicadorPm} · PE {c.multiplicadorPe}</span>
+        <div className="spacer" />
+        {trilhas.length > 0 && <span className="tag">{trilhas.length} trilha{trilhas.length > 1 ? 's' : ''}</span>}
+      </div>
+      {open && (
+        <div className="cris-body">
+          {c.jsonPassiva && (
+            <p style={{ margin: '2px 0 8px' }}><b>Passiva.</b> <span className="muted">{c.jsonPassiva}</span></p>
+          )}
+          {trilhas.length > 0 && (
+            <div>
+              <div className="muted" style={{ textTransform: 'uppercase', fontSize: '.7rem', letterSpacing: 1, marginBottom: 4 }}>Trilhas</div>
+              {trilhas.map((t) => (
+                <div key={t.codigo} className="item-card">
+                  <div className="t">{t.nome}</div>
+                  {t.jsonPassiva && <div className="s"><b>Passiva:</b> {t.jsonPassiva}</div>}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function Livros() {
   const [aba, setAba] = useState('Atributos')
   const [d, setD] = useState({})
@@ -12,7 +45,7 @@ export default function Livros() {
     (async () => {
       setD({
         atributos: await api('/api/sistemas/asus/atributos'),
-        classes: await api('/api/sistemas/asus/classes?base=true'),
+        classes: await api('/api/sistemas/asus/classes'),
         pericias: await api('/api/sistemas/asus/pericias'),
         itens: await api('/api/sistemas/asus/itens'),
         progressao: await api('/api/sistemas/asus/progressao'),
@@ -46,24 +79,27 @@ export default function Livros() {
       )}
 
       {aba === 'Classes' && (
-        <div className="grid">
-          {(d.classes || []).map((c) => (
-            <div key={c.codigo} className="card">
-              <b>{c.nome}</b>
-              <div className="muted">PV {c.multiplicadorPv} · PM {c.multiplicadorPm} · PE {c.multiplicadorPe}</div>
-              <div className="muted" style={{ marginTop: 6 }}>{c.jsonPassiva}</div>
-            </div>
+        <div className="cris-list">
+          {(d.classes || []).filter((c) => !c.classePaiCodigo).map((c) => (
+            <ClasseCard key={c.codigo} c={c}
+              trilhas={(d.classes || []).filter((t) => t.classePaiCodigo === c.codigo)} />
           ))}
         </div>
       )}
 
       {aba === 'Perícias' && (
         <div className="card">
-          <table><tbody>
-            {(d.pericias || []).map((p) => (
-              <tr key={p.codigo}><td>{p.nome}</td><td className="muted">{p.atributoBase}</td></tr>
-            ))}
-          </tbody></table>
+          <table>
+            <thead><tr><th>Perícia</th><th>Atributo</th></tr></thead>
+            <tbody>
+              {(d.pericias || []).map((p) => (
+                <tr key={p.codigo}><td>{p.nome}</td><td className="muted">{p.atributoBase}</td></tr>
+              ))}
+            </tbody>
+          </table>
+          <p className="muted" style={{ fontSize: '.8rem', marginTop: 8 }}>
+            Descrições detalhadas de cada perícia entram em breve.
+          </p>
         </div>
       )}
 

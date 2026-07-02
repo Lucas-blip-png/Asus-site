@@ -85,6 +85,7 @@ public class DataSeeder implements CommandLineRunner {
             log.info("Seed ja aplicado; pulando.");
             ensureAdmin(); // garante a conta de dono mesmo em banco ja existente
             refreshBestiario(); // reaplica o bestiario autoral (categorias + ranks)
+            refreshClasses(); // reaplica passivas/descricoes das classes (sem trocar ids)
             return;
         }
         log.info("Aplicando seed do sistema ASUS...");
@@ -566,7 +567,8 @@ public class DataSeeder implements CommandLineRunner {
 
         classe("CLERIGO", "Clerigo", null,
                 bonus("{\"sabedoria\":4,\"constituicao\":1}", "{\"fe\":4,\"conhecimento\":1}", 3),
-                "Julgamento Divino: +2/5 de Fe contra divindade semelhante.");
+                "Julgamento Divino: em confronto com inimigo de divindade semelhante a sua, ganha "
+                + "+2 a cada 5 pontos de Fe, somado ao ataque e as defesas referentes a bencaos.");
         classe("PALADINO", "Paladino", "CLERIGO",
                 bonus("{\"constituicao\":6,\"sabedoria\":3,\"forca\":1}", "{\"vigor\":5,\"fe\":5}", 1),
                 "Escudo da Fe: defende aliados com a pericia Fe.");
@@ -606,7 +608,8 @@ public class DataSeeder implements CommandLineRunner {
 
         classe("MAGO", "Mago", null,
                 bonus("{\"inteligencia\":4,\"sabedoria\":1}", "{\"magia\":3,\"conhecimento\":2}", 5),
-                "Mente Arcana: vantagem em Magia; Foco Arcano 1x/dia.");
+                "Mente Arcana: Vantagem em testes de Feiticaria para reagir e/ou identificar feiticos. "
+                + "1x/dia usa o Foco Arcano: +1 feitico em uma acao padrao (+1 a cada 10 niveis).");
         classe("ARQUIMAGO", "Arquimago", "MAGO",
                 bonus("{\"inteligencia\":8,\"sabedoria\":2}", "{\"magia\":8,\"conhecimento\":2}", 4),
                 "Maestria Arcana: lanca 2 feiticos ao mesmo tempo.");
@@ -756,13 +759,30 @@ public class DataSeeder implements CommandLineRunner {
             java.util.Map.entry("LUTADOR", new int[]{6, 2, 7}),
             java.util.Map.entry("VIAJANTE", new int[]{4, 6, 6}));
 
+    // Upsert por codigo: atualiza a classe existente (preservando o id, e portanto os
+    // personagens que a referenciam) ou cria uma nova. Permite refresh em banco ja existente.
     private void classe(String codigo, String nome, String pai, String jsonBonus, String passiva) {
         int[] pvpmpe = pai == null ? PVPMPE.getOrDefault(codigo, new int[]{5, 5, 5}) : new int[]{0, 0, 0};
-        classeRepository.save(Classe.builder()
-                .gameSystemId(sid).codigo(codigo).nome(nome)
-                .classePaiCodigo(pai).jsonBonus(jsonBonus).jsonPassiva(passiva)
-                .multiplicadorPv(pvpmpe[0]).multiplicadorPm(pvpmpe[1]).multiplicadorPe(pvpmpe[2])
-                .oficial(true).build());
+        Classe c = classeRepository.findByGameSystemIdAndCodigo(sid, codigo).orElseGet(Classe::new);
+        c.setGameSystemId(sid);
+        c.setCodigo(codigo);
+        c.setNome(nome);
+        c.setClassePaiCodigo(pai);
+        c.setJsonBonus(jsonBonus);
+        c.setJsonPassiva(passiva);
+        c.setMultiplicadorPv(pvpmpe[0]);
+        c.setMultiplicadorPm(pvpmpe[1]);
+        c.setMultiplicadorPe(pvpmpe[2]);
+        c.setOficial(true);
+        classeRepository.save(c);
+    }
+
+    /** Reaplica as classes (descricao, passiva, bonus) em banco ja existente, sem trocar ids. */
+    void refreshClasses() {
+        gameSystemRepository.findByCodigo(AsusV1Engine.SYSTEM_ID).ifPresent(gs -> {
+            sid = gs.getId();
+            seedClasses();
+        });
     }
 
     private String bonus(String atributos, String pericias, int slots) {
