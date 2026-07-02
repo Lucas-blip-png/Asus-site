@@ -291,6 +291,28 @@ button.ghost.mini.ativo { background: var(--gold); color: #1a1206; border-color:
 .rank-badge.r-c { background: var(--panel-2); color: var(--muted); }
 .rank-badge.r-x { background: var(--panel-2); color: var(--text); }
 
+/* Livros → Perícias (cards expansíveis) */
+.pericia-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); }
+.pericia-card { background: linear-gradient(180deg, var(--panel), var(--panel-2)); border: 1px solid var(--border);
+  border-radius: 12px; padding: 12px 14px; box-shadow: var(--shadow); }
+.pc-head { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.pc-nome { font-size: 1rem; letter-spacing: .3px; }
+.pc-max { margin-left: auto; font-size: .72rem; white-space: nowrap; }
+.pc-head .chev { color: var(--muted); font-size: .8rem; }
+.pc-desc { color: var(--muted); font-size: .84rem; line-height: 1.45; margin: 10px 0 10px; }
+.pc-ex { display: flex; flex-wrap: wrap; gap: 6px; }
+.pc-chip { font-size: .74rem; color: var(--text); background: var(--bg-3); border: 1px solid var(--border-2);
+  border-radius: 8px; padding: 3px 9px; }
+.pc-foot { margin-top: 10px; font-size: .64rem; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+.atr-badge { font-weight: 800; font-size: .64rem; letter-spacing: .5px; padding: 3px 8px; border-radius: 6px; color: #fff; }
+.atr-badge.a-for { background: #c4453c; }
+.atr-badge.a-con { background: #b5397e; }
+.atr-badge.a-des { background: var(--gold-2); color: #1a1206; }
+.atr-badge.a-agi { background: #2f9fd6; }
+.atr-badge.a-int { background: #4f6fe6; }
+.atr-badge.a-sab { background: #2fa98b; }
+.atr-badge.a-car { background: #d05a9e; }
+
 /* ---------------- Barras de status ---------------- */
 .bar {
   background: var(--bg-3); border-radius: 8px; height: 26px; position: relative; overflow: hidden;

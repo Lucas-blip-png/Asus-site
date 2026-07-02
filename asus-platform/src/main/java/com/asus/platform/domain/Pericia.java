@@ -30,5 +30,12 @@ public class Pericia {
     @Column(nullable = false)
     private String atributoBase;
 
+    @Column(columnDefinition = "TEXT")
+    private String descricao;
+
+    /** Exemplos de uso, separados por "|". */
+    @Column(columnDefinition = "TEXT")
+    private String exemplos;
+
     private boolean oficial;
 }

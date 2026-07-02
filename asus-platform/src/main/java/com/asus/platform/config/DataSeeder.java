@@ -86,6 +86,7 @@ public class DataSeeder implements CommandLineRunner {
             ensureAdmin(); // garante a conta de dono mesmo em banco ja existente
             refreshBestiario(); // reaplica o bestiario autoral (categorias + ranks)
             refreshClasses(); // reaplica passivas/descricoes das classes (sem trocar ids)
+            refreshPericias(); // reaplica pericias (descricao + exemplos) e adiciona novas
             return;
         }
         log.info("Aplicando seed do sistema ASUS...");
@@ -504,32 +505,144 @@ public class DataSeeder implements CommandLineRunner {
     // ---------------- Pericias (26) com atributo governante ----------------
 
     private void seedPericias() {
-        pericia("VIGOR", "Vigor", Atributo.CONSTITUICAO);
-        pericia("ATLETISMO", "Atletismo", Atributo.FORCA);
-        pericia("ESQUIVA", "Esquiva", Atributo.AGILIDADE);
-        pericia("FURTIVIDADE", "Furtividade", Atributo.AGILIDADE);
-        pericia("ARREMESSO", "Arremesso", Atributo.DESTREZA);
-        pericia("PONTARIA", "Pontaria", Atributo.DESTREZA);
-        pericia("FE", "Fe", Atributo.SABEDORIA);
-        pericia("PERCEPCAO", "Percepcao", Atributo.SABEDORIA);
-        pericia("CRIME", "Crime", Atributo.DESTREZA);
-        pericia("MAGIA", "Magia", Atributo.INTELIGENCIA);
-        pericia("ALQUIMIA", "Alquimia", Atributo.INTELIGENCIA);
-        pericia("DIPLOMACIA", "Diplomacia", Atributo.CARISMA);
-        pericia("ENGANACAO", "Enganacao", Atributo.CARISMA);
-        pericia("SOBREVIVENCIA", "Sobrevivencia", Atributo.SABEDORIA);
-        pericia("BLOQUEIO", "Bloqueio", Atributo.CONSTITUICAO);
-        pericia("CONHECIMENTO", "Conhecimento", Atributo.INTELIGENCIA);
-        pericia("ACROBACIA", "Acrobacia", Atributo.AGILIDADE);
-        pericia("COMBATE", "Combate", Atributo.FORCA);
-        pericia("ENGENHARIA", "Engenharia", Atributo.INTELIGENCIA);
-        pericia("INICIATIVA", "Iniciativa", Atributo.AGILIDADE);
-        pericia("ADESTRAR", "Adestrar", Atributo.CARISMA);
-        pericia("MEDICINA", "Medicina", Atributo.INTELIGENCIA);
-        pericia("JOGATINA", "Jogatina", Atributo.DESTREZA);
-        pericia("APARENCIA", "Aparencia", Atributo.CARISMA);
-        pericia("VIRTUDE", "Virtude", Atributo.SABEDORIA);
-        pericia("ARTES", "Artes", Atributo.SABEDORIA);
+        pericia("VIGOR", "Vigor", Atributo.CONSTITUICAO,
+                "Representa a resistência física e capacidade de suportar esforços prolongados, doenças, "
+                + "venenos e privações. Usado em corridas longas, trabalho pesado sem parar, resistir a "
+                + "ambientes hostis, suportar dor extrema e não desmaiar em situações críticas.",
+                "Resistir a venenos e doenças|Suportar esforço prolongado|Resistir a ambientes extremos|Não desmaiar após dano massivo");
+        pericia("ATLETISMO", "Atletismo", Atributo.FORCA,
+                "Habilidade física bruta aplicada em movimento — correr, saltar, escalar, nadar e empurrar "
+                + "objetos ou criaturas. Fundamental para Guerreiros e Bárbaros que precisam de mobilidade em combate.",
+                "Escalar superfícies difíceis|Nadar em correntes fortes|Saltar obstáculos|Empurrar ou derrubar criaturas");
+        pericia("ESQUIVA", "Esquiva", Atributo.AGILIDADE,
+                "Capacidade de desviar de ataques físicos, projéteis, armadilhas e áreas de efeito. Quanto maior "
+                + "a Esquiva, mais difícil é acertar o personagem em combate ativo. Fundamental para classes leves.",
+                "Desviar de ataques físicos|Escapar de explosões e áreas|Evitar armadilhas ativadas|Mover em combate denso");
+        pericia("FURTIVIDADE", "Furtividade", Atributo.AGILIDADE,
+                "Arte de se mover sem ser percebido, ocultar-se nas sombras e realizar ações sem chamar atenção. "
+                + "Essencial para Assassinos, Ladrões e Sombras. Oposto direto de Percepção dos inimigos.",
+                "Mover-se sem ser ouvido|Esconder-se em sombras|Seguir alguém sem ser visto|Preparar emboscada oculta");
+        pericia("ARREMESSO", "Arremesso", Atributo.DESTREZA,
+                "Precisão ao lançar objetos, armas e projéteis com a mão. Desde facas e estrelas ninja até pedras "
+                + "e granadas alquímicas. A Destreza define tanto a precisão quanto o alcance efetivo do arremesso.",
+                "Lançar armas arremessáveis|Atirar objetos improvisados|Alcançar alvos específicos|Lançar poções e granadas");
+        pericia("PONTARIA", "Pontaria", Atributo.DESTREZA,
+                "Precisão com armas de alcance: arcos, bestas, zarabatanas e armas de fogo. Determina a acurácia "
+                + "de ataques a distância e capacidade de atingir pontos específicos em alvos móveis.",
+                "Ataques com arco e besta|Acertar partes específicas|Atirar em movimento|Distância efetiva máxima");
+        pericia("FE", "Fé", Atributo.SABEDORIA,
+                "Conexão espiritual com divindades, forças sagradas e o plano divino. Determina a potência de "
+                + "magias divinas, capacidade de expulsar mortos-vivos e resistência a influências malignas. "
+                + "Clérigos e Paladinos dependem dela.",
+                "Conjuração de magia divina|Expulsar mortos-vivos|Resistir a possessão|Rituais e orações sagradas");
+        pericia("PERCEPCAO", "Percepção", Atributo.SABEDORIA,
+                "Capacidade de notar detalhes sutis no ambiente, detectar criaturas ocultas, encontrar armadilhas "
+                + "e ler situações ambíguas. O oposto direto de Furtividade de inimigos. Um personagem perceptivo "
+                + "nunca é pego de surpresa.",
+                "Detectar criaturas ocultas|Encontrar armadilhas|Notar detalhes sutis|Nunca ser surpreendido");
+        pericia("CRIME", "Crime", Atributo.DESTREZA,
+                "Arte de realizar atividades ilícitas: arrombamento de fechaduras, pickpocketing, sabotagem e "
+                + "falsificação. Requer tanto conhecimento técnico quanto mão firme. Indispensável para Ladrões e Piratas.",
+                "Arrombar fechaduras|Roubar sem ser notado|Falsificar documentos|Sabotar mecanismos");
+        pericia("MAGIA", "Feitiços", Atributo.INTELIGENCIA,
+                "Domínio técnico sobre a teoria e prática da magia arcana. Usada para conjurar e resistir a "
+                + "feitiços. O valor de Inteligência define o limite de feitiços diferentes que o personagem pode "
+                + "ter (½ INT). Fundamental para Magos e Bruxos.",
+                "Conjuração de magia arcana|Limite de feitiços = ½ INT|Identificar e reagir a magias|Pesquisa mágica avançada");
+        pericia("ALQUIMIA", "Alquimia", Atributo.INTELIGENCIA,
+                "Conhecimento sobre transformação de substâncias, criação de poções, venenos, ácidos e materiais "
+                + "especiais. O Alquimista usa essa perícia para criar itens que outros comprariam por fortunas em "
+                + "lojas especializadas.",
+                "Criar poções e elixires|Sintetizar venenos|Identificar substâncias|Experimentos arcanos");
+        pericia("DIPLOMACIA", "Diplomacia", Atributo.CARISMA,
+                "Arte de negociar, persuadir e chegar a acordos mutuamente satisfatórios. Diferente de Enganação "
+                + "(que engana), Diplomacia é honesta. NPCs persuadidos com sucesso se tornam aliados mais "
+                + "confiáveis a longo prazo.",
+                "Negociar acordos e tréguas|Persuadir líderes e nobres|Acalmar situações tensas|Conseguir favores legítimos");
+        pericia("ENGANACAO", "Enganação", Atributo.CARISMA,
+                "Capacidade de mentir com convicção, disfarçar-se e manipular pessoas para acreditar em "
+                + "falsidades. Perigosa se descoberta, mas incrivelmente poderosa quando bem executada. Oposto de "
+                + "Percepção dos alvos.",
+                "Mentir sob pressão|Criar identidades falsas|Disfarçar-se de outro|Manipular emoções alheias");
+        pericia("SOBREVIVENCIA", "Sobrevivência", Atributo.SABEDORIA,
+                "Habilidade de sobreviver na natureza selvagem: rastrear presas, encontrar água e alimento, prever "
+                + "o clima, construir abrigos e navegar sem instrumentos. Rangers e Druidas são os mestres dessa perícia.",
+                "Rastrear criaturas e pessoas|Encontrar alimento na natureza|Navegar sem bússola|Prever condições climáticas");
+        pericia("BLOQUEIO", "Bloqueio", Atributo.CONSTITUICAO,
+                "Capacidade de bloquear ataques físicos com escudo, arma ou mesmo com o próprio corpo. Um Bloqueio "
+                + "bem-sucedido pode negar completamente o dano de um ataque. Fundamental para tanques e defensores.",
+                "Bloquear ataques físicos|Proteger aliados adjacentes|Resistir a golpes poderosos|Bloquear projéteis");
+        pericia("CONHECIMENTO", "Conhecimento", Atributo.INTELIGENCIA,
+                "Conjunto de saberes acumulados sobre história, criaturas, magia, política, religião e ciências do "
+                + "mundo. Um personagem com alto Conhecimento sabe exatamente que criatura enfrenta e quais são suas fraquezas.",
+                "Identificar criaturas e fraquezas|Conhecer história e lendas|Entender artefatos antigos|Mapear territórios e rotas");
+        pericia("ACROBACIA", "Acrobacia", Atributo.AGILIDADE,
+                "Agilidade em movimentos complexos: cambalhota, equilíbrio em superfícies instáveis, quedas "
+                + "controladas e malabarismo. Fundamental para Ninjas, Artistas Marciais e qualquer classe que "
+                + "dependa de mobilidade extrema.",
+                "Equilíbrio em superfícies difíceis|Quedas controladas sem dano|Movimentos acrobáticos em combate|Escapar de espaços apertados");
+        pericia("COMBATE", "Combate", Atributo.FORCA,
+                "Maestria técnica no combate corpo a corpo. Não é apenas força bruta — é conhecimento de "
+                + "posicionamento, timing de ataque, identificação de aberturas e domínio de técnicas marciais. "
+                + "Fundamental para todos os guerreiros.",
+                "Bônus em ataques corpo a corpo|Reconhecer técnicas inimigas|Manobras táticas especiais|Desarmar e derrubar");
+        pericia("OFICIO", "Ofício", Atributo.INTELIGENCIA,
+                "Habilidade artesanal para criar e reparar objetos físicos: ferraria, carpintaria, costura, "
+                + "joalheria. Alquimistas e Inventores dependem muito dessa perícia para criar seus dispositivos especiais.",
+                "Criar armas e armaduras|Reparar equipamentos danificados|Construir dispositivos especiais|Avaliar qualidade de itens");
+        pericia("INICIATIVA", "Iniciativa", Atributo.AGILIDADE,
+                "Velocidade de reação e capacidade de agir primeiro em situações de conflito. Um personagem com "
+                + "alta Iniciativa nunca é surpreendido e quase sempre age antes dos inimigos. Crítico para classes "
+                + "de assassinato.",
+                "Agir primeiro no combate|Nunca ser surpreendido|Reações instantâneas|Interromper ações inimigas");
+        pericia("ADESTRAR", "Adestrar", Atributo.CARISMA,
+                "Capacidade de criar vínculos com animais, treinar criaturas e ganhar a confiança de bestas "
+                + "selvagens. Druidas e Rangers usam essa perícia para manter seus companheiros animais e para "
+                + "passar por territórios hostis.",
+                "Treinar animais domésticos|Acalmar criaturas selvagens|Montar criaturas exóticas|Manter companheiro animal");
+        pericia("MEDICINA", "Medicina", Atributo.INTELIGENCIA,
+                "Conhecimento médico para estabilizar feridos, tratar envenenamentos, realizar cirurgias e "
+                + "diagnosticar doenças. Diferente de Cura Divina, Medicina é ciência pura — sem magia, mas "
+                + "igualmente vital.",
+                "Estabilizar personagens inconscientes|Tratar envenenamentos|Remover estados negativos|Diagnóstico de doenças");
+        pericia("JOGATINA", "Jogatina", Atributo.DESTREZA,
+                "Arte dos jogos de azar, trapaça em apostas, manipulação de dados e cartas marcadas. Ciganos e "
+                + "Piratas são mestres nessa perícia. Pode ser usada para ganhar dinheiro ou para enganar "
+                + "informações de NPCs.",
+                "Trapacear em jogos|Ganhar dinheiro em tavernas|Manipular resultados de sorte|Ler padrões de apostas");
+        pericia("APARENCIA", "Aparência", Atributo.CARISMA,
+                "Capacidade de usar a aparência física, vestimenta e linguagem corporal para causar impressões "
+                + "específicas. Um personagem com alta Aparência consegue acesso a locais restritos apenas por "
+                + "parecer pertencer ali.",
+                "Primeira impressão positiva|Convencer porteiros e guardas|Ser recebido em alta sociedade|Disfarçar status social");
+        pericia("VIRTUDE", "Virtude", Atributo.SABEDORIA,
+                "Firmeza moral e resistência a tentações, corrupções e influências malignas. Fundamental para "
+                + "Paladinos e Santos. Um personagem com alta Virtude nunca pode ser corrompido por artefatos "
+                + "malignos ou promessas demoníacas.",
+                "Resistir à corrupção mágica|Manter código moral sob pressão|Interagir com artefatos sagrados|Detectar maldade oculta");
+        pericia("ARTES", "Artes", Atributo.SABEDORIA,
+                "Talento criativo e expressivo: música, pintura, escultura, dança e teatro. Bardos usam Artes como "
+                + "arma, Pintores como magia e Ciganos para entretenimento. Fora do combate, é a perícia mais "
+                + "versátil para interações sociais.",
+                "Performance musical e teatral|Pintura e escultura mágica|Disfarce via atuação|Ganhar aprovação de multidões");
+        pericia("SANIDADE", "Sanidade", Atributo.SABEDORIA,
+                "Equilíbrio mental e resistência psicológica diante de horrores, traumas e manipulações. Um "
+                + "personagem com alta Sanidade mantém a lucidez mesmo diante do caos e da corrupção. Fundamental "
+                + "para evitar estados de Confusão e Insanidade.",
+                "Resistir a trauma e horror|Manter lucidez sob pressão|Resistir a manipulação mental|Recuperar-se de estados de confusão");
+        pericia("ENGENHARIA", "Engenharia", Atributo.INTELIGENCIA,
+                "Conhecimento técnico para construir, reparar e operar dispositivos mecânicos e tecnológicos. "
+                + "Inventores e Alquimistas dependem dessa perícia para criar e aprimorar seus gadgets, armadilhas "
+                + "e máquinas de guerra.",
+                "Construir dispositivos mecânicos|Desarmar mecanismos e armadilhas|Criar versões aprimoradas de dispositivos|Operar engenhocas tecnológicas");
+    }
+
+    /** Reaplica as perícias (descrição, exemplos) em banco já existente, sem trocar ids. */
+    void refreshPericias() {
+        gameSystemRepository.findByCodigo(AsusV1Engine.SYSTEM_ID).ifPresent(gs -> {
+            sid = gs.getId();
+            seedPericias();
+        });
     }
 
     // ---------------- Classes (16) + trilhas, com bonus reais ----------------
@@ -734,10 +847,17 @@ public class DataSeeder implements CommandLineRunner {
                 .oficial(true).build());
     }
 
-    private void pericia(String codigo, String nome, Atributo atributo) {
-        periciaRepository.save(Pericia.builder()
-                .gameSystemId(sid).codigo(codigo).nome(nome)
-                .atributoBase(atributo.name()).oficial(true).build());
+    // Upsert por codigo: atualiza a pericia existente ou cria uma nova (permite refresh).
+    private void pericia(String codigo, String nome, Atributo atributo, String descricao, String exemplos) {
+        Pericia p = periciaRepository.findByGameSystemIdAndCodigo(sid, codigo).orElseGet(Pericia::new);
+        p.setGameSystemId(sid);
+        p.setCodigo(codigo);
+        p.setNome(nome);
+        p.setAtributoBase(atributo.name());
+        p.setDescricao(descricao);
+        p.setExemplos(exemplos);
+        p.setOficial(true);
+        periciaRepository.save(p);
     }
 
     /** PV/PM/PE das classes-base (tabela da pag. 20 do livro). Trilhas ficam em 0. */
