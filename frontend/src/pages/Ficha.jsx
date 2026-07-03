@@ -383,8 +383,17 @@ export default function Ficha() {
     } catch (e) { setErro(e.message) }
   }
 
+  // Orçamento de perícias: base 5 + 4 por nível "com pontos" (a cada 5 níveis vira bônus de classe+raça).
+  const budgetPericias = p ? 5 + 4 * Math.max(0, (p.nivel - 1) - Math.floor(p.nivel / 5)) : 999
+  const usadoPericias = Object.values(treino).reduce((s, v) => s + (Number(v) || 0), 0)
   const setTr = (cod, delta, cap) =>
-    setTreino((t) => ({ ...t, [cod]: Math.max(0, Math.min(cap, (t[cod] || 0) + delta)) }))
+    setTreino((t) => {
+      const atual = t[cod] || 0
+      const novo = Math.max(0, Math.min(cap, atual + delta))
+      const total = Object.values(t).reduce((s, v) => s + (Number(v) || 0), 0) - atual + novo
+      if (delta > 0 && total > budgetPericias) return t
+      return { ...t, [cod]: novo }
+    })
   const setTrCustom = (idx, delta, cap) =>
     setOutros((arr) => arr.map((o, i) => (i === idx ? { ...o, treino: Math.max(0, Math.min(cap, o.treino + delta)) } : o)))
   const addOutro = () => {
@@ -759,6 +768,10 @@ export default function Ficha() {
         <div className="ficha-col">
           <div className="row">
             <h2>Perícias</h2>
+            <span className="tag" title="Pontos de perícia distribuídos / orçamento do nível"
+              style={usadoPericias > budgetPericias ? { color: 'var(--fumble)', borderColor: 'var(--fumble)' } : undefined}>
+              {usadoPericias}/{budgetPericias} pts
+            </span>
             <div className="spacer" />
             <button className="mini ghost" title="Rolar um d20" onClick={() => rolar('d20', 0)}>🎲 d20</button>
             <button className="mini" onClick={() => salvar({ pericias: treino, periciasCustom: outros })}>Salvar</button>
