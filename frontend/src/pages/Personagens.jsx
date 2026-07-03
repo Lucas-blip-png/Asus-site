@@ -69,8 +69,10 @@ export default function Personagens() {
     return cap
   })()
 
-  // Pontos distribuíveis: base 5 + 2 por nível acima do 1.
-  const maxPontos = 5 + 2 * Math.max(0, (Number(form.nivel) || 1) - 1)
+  // Pontos de atributo: base 5 + 2 por nível "com pontos" (a cada 5 níveis vira bônus de classe+raça).
+  const nivelSel = Number(form.nivel) || 1
+  const niveisComPontos = Math.max(0, (nivelSel - 1) - Math.floor(nivelSel / 5))
+  const maxPontos = 5 + 2 * niveisComPontos
 
   const setAtr = (a, delta) =>
     setForm((f) => {

@@ -207,6 +207,12 @@ public class PersonagemService {
             p.setDivindade(req.divindade());
         }
         if (req.pericias() != null) {
+            int usado = req.pericias().values().stream().mapToInt(v -> v == null ? 0 : v).sum();
+            int orcamento = maxPericias(p.getNivel());
+            if (usado > orcamento) {
+                throw new IllegalArgumentException("Pontos de pericia excedidos: usou " + usado
+                        + " de " + orcamento + " (nivel " + p.getNivel() + ").");
+            }
             p.setJsonPericias(serializar(req.pericias()));
         }
         if (req.periciasCustom() != null) {
@@ -454,18 +460,18 @@ public class PersonagemService {
      *  cada atributo limitado ao teto do nivel. */
     private void validarDistribuicaoCriacao(AtributosDto a, Map<String, Integer> pericias, int nivel,
                                             String classeCodigo, String trilhaCodigo) {
-        // Base 5 + 2 por nivel acima do 1 (personagem de nivel mais alto nasce mais forte).
-        int max = 5 + 2 * Math.max(0, nivel - 1);
+        int maxAtr = 5 + 2 * niveisComPontos(nivel);
         if (a != null) {
             int soma = somaAtributos(a);
-            if (soma > max) {
+            if (soma > maxAtr) {
                 throw new IllegalArgumentException(
-                        "No nivel " + nivel + " voce distribui no maximo " + max
+                        "No nivel " + nivel + " voce distribui no maximo " + maxAtr
                         + " pontos de atributo (usou " + soma + ").");
             }
             validarTetoAtributo(a, nivel, classeCodigo, trilhaCodigo);
         }
         if (pericias != null) {
+            int max = maxPericias(nivel);
             int sp = pericias.values().stream().mapToInt(v -> v == null ? 0 : v).sum();
             if (sp > max) {
                 throw new IllegalArgumentException(
@@ -473,6 +479,16 @@ public class PersonagemService {
                         + " pontos de pericia (usou " + sp + ").");
             }
         }
+    }
+
+    /** Niveis que dao pontos: cada nivel, exceto multiplos de 5 (que dao o bonus de classe+raca). */
+    private int niveisComPontos(int nivel) {
+        return Math.max(0, (nivel - 1) - (nivel / 5));
+    }
+
+    /** Orcamento de pericias no nivel: base 5 + 4 por nivel com pontos. */
+    int maxPericias(int nivel) {
+        return 5 + 4 * niveisComPontos(nivel);
     }
 
     /** O valor FINAL (pontos distribuidos + bonus fixo de classe/trilha) nao pode passar do teto do nivel. */
