@@ -77,6 +77,13 @@ public class CalculoService {
         if (personagem.getTrilhaId() != null) {
             classeRepository.findById(personagem.getTrilhaId()).ifPresent(fontes::add);
         }
+        // Multiclasse: classe e trilha secundarias tambem aplicam seus bonus.
+        if (personagem.getClasseSecundariaId() != null) {
+            classeRepository.findById(personagem.getClasseSecundariaId()).ifPresent(fontes::add);
+        }
+        if (personagem.getTrilhaSecundariaId() != null) {
+            classeRepository.findById(personagem.getTrilhaSecundariaId()).ifPresent(fontes::add);
+        }
 
         List<Pericia> pericias = periciaRepository.findByGameSystemId(sistema.getId());
         Map<String, Integer> treino = parseTreino(personagem.getJsonPericias());
