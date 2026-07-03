@@ -38,6 +38,9 @@ public class Personagem {
     private Long racaId;
     private Long classeId;
     private Long trilhaId;
+    /** Multiclasse: classe e trilha secundárias (opcionais). */
+    private Long classeSecundariaId;
+    private Long trilhaSecundariaId;
 
     /** Asset (Fase 11) usado como foto/retrato da ficha. */
     private Long avatarAssetId;

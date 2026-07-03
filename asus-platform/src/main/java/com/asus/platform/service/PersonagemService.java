@@ -203,6 +203,21 @@ public class PersonagemService {
                             .map(Classe::getId)
                             .orElseThrow(() -> new NotFoundException("Trilha '" + req.trilhaCodigo() + "' nao encontrada")));
         }
+        if (req.classeSecundariaCodigo() != null) {
+            p.setClasseSecundariaId(req.classeSecundariaCodigo().isBlank() ? null
+                    : classeRepository.findByGameSystemIdAndCodigo(asus.getId(), req.classeSecundariaCodigo())
+                            .map(Classe::getId)
+                            .orElseThrow(() -> new NotFoundException("Classe '" + req.classeSecundariaCodigo() + "' nao encontrada")));
+            if (p.getClasseSecundariaId() == null) {
+                p.setTrilhaSecundariaId(null); // sem classe secundaria, sem trilha secundaria
+            }
+        }
+        if (req.trilhaSecundariaCodigo() != null) {
+            p.setTrilhaSecundariaId(req.trilhaSecundariaCodigo().isBlank() ? null
+                    : classeRepository.findByGameSystemIdAndCodigo(asus.getId(), req.trilhaSecundariaCodigo())
+                            .map(Classe::getId)
+                            .orElseThrow(() -> new NotFoundException("Trilha '" + req.trilhaSecundariaCodigo() + "' nao encontrada")));
+        }
         if (req.divindade() != null) {
             p.setDivindade(req.divindade());
         }
@@ -564,6 +579,10 @@ public class PersonagemService {
         Raca raca = p.getRacaId() == null ? null : racaRepository.findById(p.getRacaId()).orElse(null);
         Classe classe = p.getClasseId() == null ? null : classeRepository.findById(p.getClasseId()).orElse(null);
         Classe trilha = p.getTrilhaId() == null ? null : classeRepository.findById(p.getTrilhaId()).orElse(null);
+        Classe classeSec = p.getClasseSecundariaId() == null ? null
+                : classeRepository.findById(p.getClasseSecundariaId()).orElse(null);
+        Classe trilhaSec = p.getTrilhaSecundariaId() == null ? null
+                : classeRepository.findById(p.getTrilhaSecundariaId()).orElse(null);
 
         ResultadoCalculo r = calculoService.calcular(p);
 
@@ -632,6 +651,10 @@ public class PersonagemService {
                 classe == null ? null : classe.getNome(),
                 trilha == null ? null : trilha.getCodigo(),
                 trilha == null ? null : trilha.getNome(),
+                classeSec == null ? null : classeSec.getCodigo(),
+                classeSec == null ? null : classeSec.getNome(),
+                trilhaSec == null ? null : trilhaSec.getCodigo(),
+                trilhaSec == null ? null : trilhaSec.getNome(),
                 p.getDivindade(),
                 p.getAvatarAssetId(),
                 p.getNivel(),

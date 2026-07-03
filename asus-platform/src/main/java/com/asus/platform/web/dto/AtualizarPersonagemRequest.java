@@ -14,6 +14,8 @@ public record AtualizarPersonagemRequest(
         String racaCodigo,
         String classeCodigo,
         String trilhaCodigo,
+        String classeSecundariaCodigo,
+        String trilhaSecundariaCodigo,
         String divindade,
         Integer nivel,
         Integer xpAtual,

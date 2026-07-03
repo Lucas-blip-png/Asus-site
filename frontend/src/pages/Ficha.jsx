@@ -683,6 +683,28 @@ export default function Ficha() {
                   </div>
                 )
               })()}
+              {/* Multiclasse: classe e trilha secundárias */}
+              <div className="kv"><b>Classe 2ª</b>
+                <select value={p.classeSecundariaCodigo || ''} style={{ maxWidth: 160 }}
+                  onChange={(e) => salvar({ classeSecundariaCodigo: e.target.value })}>
+                  <option value="">— nenhuma —</option>
+                  {classesCat.filter((c) => !c.classePaiCodigo && c.codigo !== p.classeCodigo)
+                    .map((c) => <option key={c.codigo} value={c.codigo}>{c.nome}</option>)}
+                </select>
+              </div>
+              {p.classeSecundariaCodigo && (() => {
+                const ts = classesCat.filter((c) => c.classePaiCodigo === p.classeSecundariaCodigo)
+                if (!ts.length) return null
+                return (
+                  <div className="kv"><b>Trilha 2ª</b>
+                    <select value={p.trilhaSecundariaCodigo || ''} style={{ maxWidth: 160 }}
+                      onChange={(e) => salvar({ trilhaSecundariaCodigo: e.target.value })}>
+                      <option value="">— nenhuma —</option>
+                      {ts.map((t) => <option key={t.codigo} value={t.codigo}>{t.nome}</option>)}
+                    </select>
+                  </div>
+                )
+              })()}
             </div>
           </div>
 
