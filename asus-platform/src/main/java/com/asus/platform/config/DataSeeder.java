@@ -94,6 +94,7 @@ public class DataSeeder implements CommandLineRunner {
             refreshClasses(); // reaplica passivas/descricoes das classes (sem trocar ids)
             refreshPericias(); // reaplica pericias (descricao + exemplos) e adiciona novas
             refreshItens(); // reaplica o catalogo de itens do ASUS (categorias, precos, tipo de dano)
+            refreshHabilidades(); // reaplica habilidades (inclui as GERAIS novas)
             refreshVitrine(); // semeia/atualiza marketplace + templates oficiais
             return;
         }
@@ -452,6 +453,49 @@ public class DataSeeder implements CommandLineRunner {
                 "Alquimia", "Usa alquimia ofensiva e defensiva.");
         hab("CANTO_DIVINO", "Canto Divino", "VIAJANTE", "ATIVA", 3, "PE",
                 "Artes", "Ataques baseados em musica.");
+
+        // ---- Habilidades GERAIS (qualquer classe pode escolher) ----
+        hab("GOLPE_PRECISO", "Golpe Preciso", "GERAL", "ATIVA", 2, "PE",
+                "Nivel 1", "Gasta 2 PE para ganhar +5 na pericia de ataque de um golpe.");
+        hab("INVESTIDA", "Investida", "GERAL", "ATIVA", 2, "PE",
+                "Nivel 1", "Move-se e ataca no mesmo turno; +2 no dano se avancar 6m ou mais.");
+        hab("DEFESA_TOTAL", "Defesa Total", "GERAL", "ATIVA", 2, "PE",
+                "Nivel 1", "Reacao: dobra Bloqueio ou Esquiva contra um ataque, mas nao age no turno.");
+        hab("SEGUNDA_CHANCE", "Segunda Chance", "GERAL", "ATIVA", 3, "PE",
+                "Nivel 1", "1x por dia: rerrola um teste de pericia que voce falhou.");
+        hab("GOLPE_GIRATORIO", "Golpe Giratorio", "GERAL", "ATIVA", 3, "PE",
+                "Nivel 1", "Atinge todos os inimigos adjacentes com um ataque corpo a corpo.");
+        hab("PONTO_VITAL", "Ponto Vital", "GERAL", "ATIVA", 3, "PE",
+                "Nivel 1", "Aumenta em +1 a margem de critico de um ataque.");
+        hab("FOCO_MENTAL", "Foco Mental", "GERAL", "ATIVA", 2, "PM",
+                "Nivel 1", "Ganha +5 em um teste de pericia de Inteligencia ou Sabedoria.");
+        hab("VERSATIL", "Versatil", "GERAL", "PASSIVA", 0, null,
+                "Nivel 1", "Escolha 1 pericia extra para tratar como treinada.");
+        hab("RESISTENCIA_FISICA", "Resistencia Fisica", "GERAL", "PASSIVA", 0, null,
+                "Nivel 1", "Vantagem em testes de Vigor contra fadiga, fome e venenos.");
+        hab("VIGOR_EXTRA", "Vigor Extra", "GERAL", "PASSIVA", 0, null,
+                "Constituicao 2", "Ganha +metade da Constituicao em PV maximo.");
+        hab("REFLEXOS_RAPIDOS", "Reflexos Rapidos", "GERAL", "PASSIVA", 0, null,
+                "Agilidade 2", "+2 na Iniciativa e na Esquiva.");
+        hab("LABIA", "Labia", "GERAL", "PASSIVA", 0, null,
+                "Carisma 2", "+2 em Diplomacia, Enganacao e Aparencia.");
+        hab("INSTINTO_SOBREVIVENCIA", "Instinto de Sobrevivencia", "GERAL", "PASSIVA", 0, null,
+                "Sabedoria 2", "+2 em Percepcao e Sobrevivencia.");
+        hab("MAOS_HABEIS", "Maos Habeis", "GERAL", "PASSIVA", 0, null,
+                "Destreza 2", "+2 em Crime, Oficio e Jogatina.");
+        hab("CONCENTRACAO_ARCANA", "Concentracao Arcana", "GERAL", "PASSIVA", 0, null,
+                "Feiticaria", "Mantem 1 feitico ativo a mais ao mesmo tempo.");
+        hab("APRENDIZ_RAPIDO", "Aprendiz Rapido", "GERAL", "PASSIVA", 0, null,
+                "Inteligencia 2", "+2 em Conhecimento e uma pericia de Inteligencia a sua escolha.");
+    }
+
+    /** Reaplica as habilidades (catalogo) em banco ja existente. */
+    void refreshHabilidades() {
+        gameSystemRepository.findByCodigo(AsusV1Engine.SYSTEM_ID).ifPresent(gs -> {
+            sid = gs.getId();
+            habilidadeRepository.deleteAll(habilidadeRepository.findByGameSystemIdAndOficialTrue(sid));
+            seedHabilidades();
+        });
     }
 
     private void hab(String codigo, String nome, String classe, String tipo, int custo,
