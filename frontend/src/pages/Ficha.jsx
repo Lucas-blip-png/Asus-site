@@ -196,7 +196,10 @@ export default function Ficha() {
   const [novoItem, setNovoItem] = useState({ nome: '', categoria: 'GERAL', espacos: 1, quantidade: 1 })
   const [editItem, setEditItem] = useState(null)
   const [outros, setOutros] = useState([])
+  const [outrosBonus, setOutrosBonus] = useState({})
   const [novaPericia, setNovaPericia] = useState({ nome: '', atributo: 'FORCA' })
+  const [criarHabOpen, setCriarHabOpen] = useState(false)
+  const [novaHab, setNovaHab] = useState({ nome: '', tipo: 'PASSIVA', custo: 0, custoTipo: 'PE', efeito: '' })
   const [rolagem, setRolagem] = useState(null)
   const rolTimer = useRef(null)
 
@@ -255,6 +258,7 @@ export default function Ficha() {
   function aplicar(d) {
     setP(d)
     setTreino(Object.fromEntries((d.pericias || []).filter((pe) => !pe.custom).map((pe) => [pe.codigo, pe.treino])))
+    setOutrosBonus(Object.fromEntries((d.pericias || []).filter((pe) => !pe.custom).map((pe) => [pe.codigo, pe.outros || 0])))
     setOutros((d.pericias || []).filter((pe) => pe.custom).map((pe) => ({ nome: pe.nome, atributo: pe.atributoBase, treino: pe.treino })))
     setDesc({
       anotacoes: d.anotacoes || '', aparencia: d.aparencia || '', personalidade: d.personalidade || '',
@@ -389,14 +393,16 @@ export default function Ficha() {
   // Orçamento de perícias: base 5 + 4 por nível "com pontos" (a cada 5 níveis vira bônus de classe+raça).
   const budgetPericias = p ? 5 + 4 * Math.max(0, (p.nivel - 1) - Math.floor(p.nivel / 5)) : 999
   const usadoPericias = Object.values(treino).reduce((s, v) => s + (Number(v) || 0), 0)
+  // Treino respeita o teto do atributo; o orçamento agora é só indicativo (sem trava).
   const setTr = (cod, delta, cap) =>
     setTreino((t) => {
       const atual = t[cod] || 0
       const novo = Math.max(0, Math.min(cap, atual + delta))
-      const total = Object.values(t).reduce((s, v) => s + (Number(v) || 0), 0) - atual + novo
-      if (delta > 0 && total > budgetPericias) return t
       return { ...t, [cod]: novo }
     })
+  // Bônus "Outros" por perícia: livre, sem teto.
+  const setOutro = (cod, delta) =>
+    setOutrosBonus((o) => ({ ...o, [cod]: Math.max(0, (o[cod] || 0) + delta) }))
   const setTrCustom = (idx, delta, cap) =>
     setOutros((arr) => arr.map((o, i) => (i === idx ? { ...o, treino: Math.max(0, Math.min(cap, o.treino + delta)) } : o)))
   const addOutro = () => {
@@ -483,7 +489,8 @@ export default function Ficha() {
   const recarregarInv = () => { api(`/api/personagens/${id}/inventario`).then(setInventario).catch(() => {}); carregar() }
   async function addCatalogo() {
     if (!itemCat) return
-    try { await api(`/api/personagens/${id}/inventario/do-catalogo/${itemCat}`, { method: 'POST' }); setItemCat(''); recarregarInv() }
+    // Uma arma (item com dano) cria automaticamente um ataque na aba Combate — recarrega os dois.
+    try { await api(`/api/personagens/${id}/inventario/do-catalogo/${itemCat}`, { method: 'POST' }); setItemCat(''); recarregarInv(); recarregarAtaques() }
     catch (e) { setErro(e.message) }
   }
   async function addItemProprio() {
@@ -495,6 +502,7 @@ export default function Ficha() {
       })
       setNovoItem({ nome: '', categoria: 'GERAL', espacos: 1, quantidade: 1 })
       recarregarInv()
+      recarregarAtaques()
     } catch (e) { setErro(e.message) }
   }
   async function setQtd(it, delta) {
@@ -546,6 +554,24 @@ export default function Ficha() {
   }
   async function delHab(codigo) {
     try { await api(`/api/personagens/${id}/habilidades/${codigo}`, { method: 'DELETE' }); recarregarHab() } catch (e) { setErro(e.message) }
+  }
+  async function criarPropriaHab() {
+    if (!novaHab.nome.trim()) return
+    try {
+      await api(`/api/personagens/${id}/habilidades/custom`, {
+        method: 'POST',
+        body: {
+          nome: novaHab.nome.trim(),
+          tipo: novaHab.tipo,
+          custo: Number(novaHab.custo) || 0,
+          custoTipo: novaHab.custoTipo,
+          efeito: novaHab.efeito,
+        },
+      })
+      setNovaHab({ nome: '', tipo: 'PASSIVA', custo: 0, custoTipo: 'PE', efeito: '' })
+      setCriarHabOpen(false)
+      recarregarHab()
+    } catch (e) { setErro(e.message) }
   }
   async function salvarEdicaoHab() {
     if (!editHab) return
@@ -787,7 +813,7 @@ export default function Ficha() {
           })}
 
           <div className="kv" style={{ marginTop: 12 }}>
-            <b>Limites</b><span>Hab {p.limiteHabilidades} · Fei {p.limiteFeiticos} · Bên {p.limiteBencaos}</span>
+            <b>Limites</b><span>Hab ∞ · Fei {p.limiteFeiticos} · Bên {p.limiteBencaos}</span>
           </div>
         </div>
 
@@ -801,17 +827,17 @@ export default function Ficha() {
             </span>
             <div className="spacer" />
             <button className="mini ghost" title="Rolar um d20" onClick={() => rolar('d20', 0)}>🎲 d20</button>
-            <button className="mini" onClick={() => salvar({ pericias: treino, periciasCustom: outros })}>Salvar</button>
+            <button className="mini" onClick={() => salvar({ pericias: treino, periciasOutros: outrosBonus, periciasCustom: outros })}>Salvar</button>
           </div>
           <table className="pericias">
-            <thead><tr><th>Perícia</th><th>Atr</th><th>Treino</th><th>Teto</th></tr></thead>
+            <thead><tr><th>Perícia</th><th>Atr</th><th>Treino</th><th>Outros</th><th>Teto</th></tr></thead>
             <tbody>
               {p.pericias.filter((pe) => !pe.custom).map((pe) => (
-                <tr key={pe.codigo} className={(treino[pe.codigo] ?? 0) > 0 ? 'treinada' : undefined}>
+                <tr key={pe.codigo} className={((treino[pe.codigo] ?? 0) + (outrosBonus[pe.codigo] ?? 0)) > 0 ? 'treinada' : undefined}>
                   <td>
                     <span className="per-nome">
                       <button className="d20-btn" title={`Rolar ${pe.nome}`}
-                        onClick={() => rolar(pe.nome, treino[pe.codigo] ?? 0)}>d20</button>
+                        onClick={() => rolar(pe.nome, (treino[pe.codigo] ?? 0) + (outrosBonus[pe.codigo] ?? 0))}>d20</button>
                       {pe.nome}
                     </span>
                   </td>
@@ -821,6 +847,13 @@ export default function Ficha() {
                       <button className="ghost mini" onClick={() => setTr(pe.codigo, -1, pe.cap)}>−</button>
                       <b className="stat">{treino[pe.codigo] ?? 0}</b>
                       <button className="ghost mini" onClick={() => setTr(pe.codigo, +1, pe.cap)}>+</button>
+                    </span>
+                  </td>
+                  <td>
+                    <span className="step">
+                      <button className="ghost mini" onClick={() => setOutro(pe.codigo, -1)}>−</button>
+                      <b className="stat">{outrosBonus[pe.codigo] ?? 0}</b>
+                      <button className="ghost mini" onClick={() => setOutro(pe.codigo, +1)}>+</button>
                     </span>
                   </td>
                   <td className="muted stat">{pe.cap}</td>
@@ -834,7 +867,7 @@ export default function Ficha() {
                       <span className="per-nome">
                         <button className="d20-btn" title={`Rolar ${o.nome}`}
                           onClick={() => rolar(o.nome, o.treino)}>d20</button>
-                        {o.nome} <span className="tag">Outros</span>
+                        {o.nome} <span className="tag">Extra</span>
                       </span>
                     </td>
                     <td className="muted">{siglaDe(o.atributo)}</td>
@@ -845,6 +878,7 @@ export default function Ficha() {
                         <button className="ghost mini" onClick={() => setTrCustom(idx, +1, cap)}>+</button>
                       </span>
                     </td>
+                    <td className="muted" style={{ textAlign: 'center' }}>—</td>
                     <td className="muted stat">{cap} <button className="ghost mini" onClick={() => delOutro(idx)}>✕</button></td>
                   </tr>
                 )
@@ -857,7 +891,7 @@ export default function Ficha() {
             <select value={novaPericia.atributo} onChange={(e) => setNovaPericia((s) => ({ ...s, atributo: e.target.value }))}>
               {ATRIBS.map(([k, sig]) => <option key={k} value={k.toUpperCase()}>{sig}</option>)}
             </select>
-            <button className="mini" onClick={addOutro}>+ Outros</button>
+            <button className="mini" onClick={addOutro}>+ Extra</button>
           </div>
         </div>
 
@@ -894,14 +928,17 @@ export default function Ficha() {
 
           {aba === 'Habilidades' && (
             <div>
-              <div className="muted" style={{ marginBottom: 6 }}>{habChosen.length}/{p.limiteHabilidades} habilidades (limite = Des/2)</div>
+              <div className="muted" style={{ marginBottom: 6 }}>{habChosen.length} habilidade{habChosen.length === 1 ? '' : 's'} (sem limite)</div>
               <div className="cris-list">
                 {habChosen.map((h) => (
                   <HabRow key={h.codigo} h={h} onEdit={setEditHab} onDelete={delHab} />
                 ))}
               </div>
               {!habChosen.length && <div className="muted">Nenhuma habilidade escolhida.</div>}
-              <button className="mini" onClick={() => { setHabBusca(''); setModalHab(true) }}>+ Adicionar Habilidade</button>
+              <div className="row" style={{ gap: 8, marginTop: 4 }}>
+                <button className="mini" onClick={() => { setHabBusca(''); setModalHab(true) }}>+ Adicionar Habilidade</button>
+                <button className="mini ghost" onClick={() => setCriarHabOpen(true)}>✎ Criar própria</button>
+              </div>
               {!habDisp.length && (
                 <div className="muted" style={{ marginTop: 6 }}>
                   Nada liberado no nível/atributo atuais (a trilha só conta a partir do nível 11).
@@ -1219,6 +1256,47 @@ export default function Ficha() {
                   </div>
                 ))}
               {!habDisp.length && <div className="muted">Nenhuma habilidade disponível no nível/atributo atuais.</div>}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {criarHabOpen && (
+        <div className="modal" onClick={() => setCriarHabOpen(false)}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 520 }}>
+            <div className="row">
+              <h2 style={{ margin: 0 }}>Criar habilidade própria</h2>
+              <div className="spacer" />
+              <button className="ghost mini" onClick={() => setCriarHabOpen(false)}>✕</button>
+            </div>
+            <label>Nome</label>
+            <input autoFocus value={novaHab.nome} onChange={(e) => setNovaHab((s) => ({ ...s, nome: e.target.value }))} />
+            <div className="row" style={{ gap: 8 }}>
+              <div style={{ flex: 1 }}>
+                <label>Tipo</label>
+                <select value={novaHab.tipo} onChange={(e) => setNovaHab((s) => ({ ...s, tipo: e.target.value }))}>
+                  <option value="PASSIVA">PASSIVA</option>
+                  <option value="ATIVA">ATIVA</option>
+                </select>
+              </div>
+              <div style={{ width: 90 }}>
+                <label>Custo</label>
+                <input type="number" min="0" value={novaHab.custo}
+                  onChange={(e) => setNovaHab((s) => ({ ...s, custo: e.target.value }))} />
+              </div>
+              <div style={{ width: 100 }}>
+                <label>Tipo custo</label>
+                <select value={novaHab.custoTipo} onChange={(e) => setNovaHab((s) => ({ ...s, custoTipo: e.target.value }))}>
+                  <option value="PE">PE</option>
+                  <option value="PM">PM</option>
+                </select>
+              </div>
+            </div>
+            <label>Efeito / Descrição</label>
+            <textarea value={novaHab.efeito} onChange={(e) => setNovaHab((s) => ({ ...s, efeito: e.target.value }))} />
+            <div className="row" style={{ marginTop: 12, gap: 8 }}>
+              <button onClick={criarPropriaHab}>Criar</button>
+              <button className="ghost" onClick={() => setCriarHabOpen(false)}>Cancelar</button>
             </div>
           </div>
         </div>

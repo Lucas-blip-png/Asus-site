@@ -235,13 +235,11 @@ public class PersonagemService {
             p.setDivindade(req.divindade());
         }
         if (req.pericias() != null) {
-            int usado = req.pericias().values().stream().mapToInt(v -> v == null ? 0 : v).sum();
-            int orcamento = maxPericias(p.getNivel());
-            if (usado > orcamento) {
-                throw new IllegalArgumentException("Pontos de pericia excedidos: usou " + usado
-                        + " de " + orcamento + " (nivel " + p.getNivel() + ").");
-            }
+            // O orcamento (maxPericias) e apenas informativo na ficha; a distribuicao e livre.
             p.setJsonPericias(serializar(req.pericias()));
+        }
+        if (req.periciasOutros() != null) {
+            p.setJsonPericiasOutros(serializar(req.periciasOutros()));
         }
         if (req.periciasCustom() != null) {
             p.setJsonPericiasCustom(serializarCustom(req.periciasCustom()));
@@ -615,7 +613,11 @@ public class PersonagemService {
         ResultadoCalculo rEf = excessoCarga > 0 ? calculoService.calcular(p, excessoCarga) : r;
         var finaisEf = rEf.atributosFinais();
 
-        List<PericiaCalculadaDto> pericias = new ArrayList<>(rEf.pericias().stream().map(this::toPericiaDto).toList());
+        Map<String, Integer> outrosMap = lerPericiasOutros(p);
+        List<PericiaCalculadaDto> pericias = new ArrayList<>(rEf.pericias().stream()
+                .map(pc -> new PericiaCalculadaDto(pc.codigo(), pc.nome(), pc.atributoBase(), pc.sigla(),
+                        pc.treino(), pc.cap(), Math.max(0, outrosMap.getOrDefault(pc.codigo(), 0)), false))
+                .toList());
         // Perícias "Outros" (concedidas por itens), com teto = 2x atributo final.
         if (p.getJsonPericiasCustom() != null && !p.getJsonPericiasCustom().isBlank()) {
             try {
@@ -635,7 +637,7 @@ public class PersonagemService {
                         int finalAttr = finaisEf == null ? 0 : finaisEf.get(at);
                         int cap = Math.max(0, finalAttr * 2);
                         int treino = Math.max(0, Math.min(node.path("treino").asInt(0), cap));
-                        pericias.add(new PericiaCalculadaDto("OUTROS:" + nome, nome, at.name(), at.getSigla(), treino, cap, true));
+                        pericias.add(new PericiaCalculadaDto("OUTROS:" + nome, nome, at.name(), at.getSigla(), treino, cap, 0, true));
                     }
                 }
             } catch (Exception ignored) {
@@ -700,6 +702,28 @@ public class PersonagemService {
 
     private PericiaCalculadaDto toPericiaDto(PericiaCalculada pc) {
         return new PericiaCalculadaDto(pc.codigo(), pc.nome(), pc.atributoBase(),
-                pc.sigla(), pc.treino(), pc.cap(), false);
+                pc.sigla(), pc.treino(), pc.cap(), 0, false);
+    }
+
+    /** Le o mapa de bonus "Outros" por pericia (codigo -> bonus), tolerante a json invalido. */
+    private Map<String, Integer> lerPericiasOutros(Personagem p) {
+        Map<String, Integer> mapa = new HashMap<>();
+        String json = p.getJsonPericiasOutros();
+        if (json == null || json.isBlank()) {
+            return mapa;
+        }
+        try {
+            com.fasterxml.jackson.databind.JsonNode node = objectMapper.readTree(json);
+            if (node.isObject()) {
+                var it = node.fields();
+                while (it.hasNext()) {
+                    var e = it.next();
+                    mapa.put(e.getKey(), e.getValue().asInt(0));
+                }
+            }
+        } catch (Exception ignored) {
+            // json invalido: ignora
+        }
+        return mapa;
     }
 }

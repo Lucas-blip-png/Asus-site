@@ -22,6 +22,7 @@ public record AtualizarPersonagemRequest(
         Long avatarAssetId,
         @Valid AtributosDto atributosBase,
         Map<String, Integer> pericias,
+        Map<String, Integer> periciasOutros,
         List<PericiaCustomDto> periciasCustom,
         String anotacoes,
         String aparencia,

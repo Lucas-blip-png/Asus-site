@@ -30,6 +30,8 @@ import org.springframework.web.bind.annotation.*;
 public class HabilidadePersonagemController {
 
     private static final int NIVEL_TRILHA = 11;
+    /** Codigo-dono sentinela das habilidades proprias (custom): nunca aparece em "disponiveis". */
+    private static final String CODIGO_PROPRIA = "PROPRIA";
 
     private final PersonagemRepository personagemRepository;
     private final ClasseRepository classeRepository;
@@ -82,15 +84,42 @@ public class HabilidadePersonagemController {
         if (!disponivel(h, p, classesDoPersonagem(p))) {
             throw new IllegalArgumentException("Pre-requisitos nao atendidos para " + h.getNome());
         }
-        int limite = (p.getAtributosFinais() == null ? 0 : p.getAtributosFinais().getDestreza()) / 2;
-        if (codigosEscolhidos(id).size() >= limite) {
-            throw new IllegalArgumentException("Limite de habilidades atingido (" + limite + ")");
-        }
         if (!escolhidasRepository.existsByPersonagemIdAndHabilidadeCodigo(id, codigo)) {
             escolhidasRepository.save(HabilidadePersonagem.builder()
                     .personagemId(id).habilidadeCodigo(codigo).build());
         }
         return h;
+    }
+
+    /**
+     * Cria uma habilidade propria (custom) do personagem: entra no catalogo como nao-oficial,
+     * com um codigo sentinela ("PROPRIA") que nunca aparece na lista de disponiveis de ninguem,
+     * e ja fica escolhida na ficha deste personagem.
+     */
+    @PostMapping("/custom")
+    @ResponseStatus(HttpStatus.CREATED)
+    public HabilidadeEscolhidaResponse criarPropria(@PathVariable Long id, @RequestBody Map<String, Object> body) {
+        Personagem p = carregar(id);
+        String nome = textoOuNull(body.get("nome"));
+        if (nome == null) {
+            throw new IllegalArgumentException("nome da habilidade e obrigatorio");
+        }
+        String tipo = textoOuNull(body.get("tipo"));
+        String codigo = "PROPRIA_" + id + "_" + System.currentTimeMillis();
+        Habilidade h = habilidadeRepository.save(Habilidade.builder()
+                .gameSystemId(p.getGameSystemId())
+                .codigo(codigo)
+                .nome(nome)
+                .classeCodigo(CODIGO_PROPRIA)
+                .tipo(tipo == null ? "PASSIVA" : tipo)
+                .custo(inteiro(body.get("custo")))
+                .custoTipo(textoOuNull(body.get("custoTipo")))
+                .efeito(textoOuNull(body.get("efeito")))
+                .oficial(false)
+                .build());
+        HabilidadePersonagem hp = escolhidasRepository.save(HabilidadePersonagem.builder()
+                .personagemId(id).habilidadeCodigo(codigo).build());
+        return HabilidadeEscolhidaResponse.de(h, hp);
     }
 
     /** Edita (override por personagem) os campos da habilidade escolhida. Campos vazios voltam ao catalogo. */
@@ -124,12 +153,33 @@ public class HabilidadePersonagemController {
         return s.isEmpty() ? null : s;
     }
 
+    private static int inteiro(Object v) {
+        if (v == null) {
+            return 0;
+        }
+        String s = String.valueOf(v).trim();
+        if (s.isEmpty()) {
+            return 0;
+        }
+        try {
+            return (int) Double.parseDouble(s);
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
+
     @DeleteMapping("/{codigo}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void remover(@PathVariable Long id, @PathVariable String codigo) {
         List<HabilidadePersonagem> alvo = escolhidasRepository.findByPersonagemId(id).stream()
                 .filter(e -> e.getHabilidadeCodigo().equals(codigo)).toList();
         escolhidasRepository.deleteAll(alvo);
+        // Habilidade propria (custom): remove tambem a entrada orfa do catalogo.
+        if (codigo != null && codigo.startsWith("PROPRIA_")) {
+            habilidadeRepository.findByGameSystemId(carregar(id).getGameSystemId()).stream()
+                    .filter(h -> codigo.equals(h.getCodigo()) && CODIGO_PROPRIA.equals(h.getClasseCodigo()))
+                    .forEach(habilidadeRepository::delete);
+        }
     }
 
     // ----- helpers -----
