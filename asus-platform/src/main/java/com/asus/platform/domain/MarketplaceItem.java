@@ -39,8 +39,9 @@ public class MarketplaceItem {
 
     private boolean publicado;
 
-    /** Item de vitrine semeado pelo sistema (para o refresh gerenciar). */
-    private boolean oficial;
+    /** Item de vitrine semeado pelo sistema (para o refresh gerenciar). Nullable p/ nao quebrar
+     *  a migracao de tabelas ja existentes (add column NOT NULL falha com linhas antigas). */
+    private Boolean oficial;
 
     @Column(nullable = false)
     private LocalDateTime criadoEm;
