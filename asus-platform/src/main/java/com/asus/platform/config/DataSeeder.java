@@ -89,13 +89,14 @@ public class DataSeeder implements CommandLineRunner {
     public void run(String... args) {
         if (gameSystemRepository.existsByCodigo(AsusV1Engine.SYSTEM_ID)) {
             log.info("Seed ja aplicado; pulando.");
-            ensureAdmin(); // garante a conta de dono mesmo em banco ja existente
-            refreshBestiario(); // reaplica o bestiario autoral (categorias + ranks)
-            refreshClasses(); // reaplica passivas/descricoes das classes (sem trocar ids)
-            refreshPericias(); // reaplica pericias (descricao + exemplos) e adiciona novas
-            refreshItens(); // reaplica o catalogo de itens do ASUS (categorias, precos, tipo de dano)
-            refreshHabilidades(); // reaplica habilidades (inclui as GERAIS novas)
-            refreshVitrine(); // semeia/atualiza marketplace + templates oficiais
+            // Cada refresh isolado: uma falha (ex.: migracao de coluna) nao derruba o app.
+            safeRefresh("admin", this::ensureAdmin);
+            safeRefresh("bestiario", this::refreshBestiario);
+            safeRefresh("classes", this::refreshClasses);
+            safeRefresh("pericias", this::refreshPericias);
+            safeRefresh("itens", this::refreshItens);
+            safeRefresh("habilidades", this::refreshHabilidades);
+            safeRefresh("vitrine", this::refreshVitrine);
             return;
         }
         log.info("Aplicando seed do sistema ASUS...");
@@ -121,6 +122,15 @@ public class DataSeeder implements CommandLineRunner {
                 criaturaRepository.count());
 
         ensureAdmin();
+    }
+
+    /** Roda um passo de seed/refresh isolado: loga e segue se falhar (nao derruba o boot). */
+    private void safeRefresh(String nome, Runnable passo) {
+        try {
+            passo.run();
+        } catch (Exception e) {
+            log.warn("Falha ao reaplicar '{}' (seguindo mesmo assim): {}", nome, e.toString());
+        }
     }
 
     /**
