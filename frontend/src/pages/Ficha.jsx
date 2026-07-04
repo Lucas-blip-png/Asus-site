@@ -19,6 +19,9 @@ const CAMPOS_DESC = [
 const vazioBase = { forca: 0, constituicao: 0, destreza: 0, agilidade: 0, inteligencia: 0, sabedoria: 0, carisma: 0 }
 // Formata espaços/carga aceitando meio-espaço (0,5) no padrão pt-BR.
 const fmtEsp = (n) => String(Math.round((Number(n) || 0) * 100) / 100).replace('.', ',')
+// Nome legível de uma lista de códigos de classe ("CAVALEIRO,BARBARO" -> "Cavaleiro, Barbaro").
+const fmtClasses = (cods) => (cods || '').split(',').map((c) => c.trim()).filter(Boolean)
+  .map((c) => c.split('_').map((w) => (w ? w[0] + w.slice(1).toLowerCase() : '')).join(' ')).join(', ')
 
 function ItemInvRow({ it, onQtd, onEquip, onDelete, onEdit }) {
   const [open, setOpen] = useState(false)
@@ -141,7 +144,7 @@ function HabRow({ h, onEdit, onDelete }) {
           <div className="row" style={{ gap: 6, flexWrap: 'wrap' }}>
             {h.tipo && <span className="tag">{h.tipo}</span>}
             {h.custo > 0 && <span className="tag">Custo {h.custo} {h.custoTipo}</span>}
-            {h.classeCodigo && h.classeCodigo !== 'GERAL' && <span className="tag">{h.classeCodigo}</span>}
+            {h.classeCodigo && h.classeCodigo !== 'GERAL' && <span className="tag">{fmtClasses(h.classeCodigo)}</span>}
           </div>
           {h.efeito && <p className="muted" style={{ fontSize: '.82rem', marginTop: 7 }}>{h.efeito}</p>}
           <div className="row" style={{ gap: 10, marginTop: 9, alignItems: 'center' }}>
@@ -675,9 +678,10 @@ export default function Ficha() {
                 }
                 return (
                   <div className="kv"><b>Trilha</b>
-                    <select value={p.trilhaCodigo || ''} style={{ maxWidth: 160 }}
+                    <select value={p.trilhaCodigo || ''} style={{ maxWidth: 160 }} disabled={p.nivel < 11}
+                      title={p.nivel < 11 ? 'Trilha só a partir do nível 11' : undefined}
                       onChange={(e) => salvar({ trilhaCodigo: e.target.value })}>
-                      <option value="">— nenhuma —</option>
+                      <option value="">{p.nivel < 11 ? 'nível 11+' : '— nenhuma —'}</option>
                       {trilhas.map((t) => <option key={t.codigo} value={t.codigo}>{t.nome}</option>)}
                     </select>
                   </div>
@@ -697,9 +701,10 @@ export default function Ficha() {
                 if (!ts.length) return null
                 return (
                   <div className="kv"><b>Trilha 2ª</b>
-                    <select value={p.trilhaSecundariaCodigo || ''} style={{ maxWidth: 160 }}
+                    <select value={p.trilhaSecundariaCodigo || ''} style={{ maxWidth: 160 }} disabled={p.nivel < 11}
+                      title={p.nivel < 11 ? 'Trilha só a partir do nível 11' : undefined}
                       onChange={(e) => salvar({ trilhaSecundariaCodigo: e.target.value })}>
-                      <option value="">— nenhuma —</option>
+                      <option value="">{p.nivel < 11 ? 'nível 11+' : '— nenhuma —'}</option>
                       {ts.map((t) => <option key={t.codigo} value={t.codigo}>{t.nome}</option>)}
                     </select>
                   </div>
@@ -1204,7 +1209,7 @@ export default function Ficha() {
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <b>{h.nome}</b>
                       <div className="row" style={{ gap: 6, marginTop: 3 }}>
-                        {h.classeCodigo && h.classeCodigo !== 'GERAL' && <span className="tag">{h.classeCodigo}</span>}
+                        {h.classeCodigo && h.classeCodigo !== 'GERAL' && <span className="tag">{fmtClasses(h.classeCodigo)}</span>}
                         {h.nivelMinimo > 1 && <span className="tag">Nv {h.nivelMinimo}</span>}
                         {h.tipo && <span className="tag">{h.tipo}</span>}
                       </div>

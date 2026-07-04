@@ -73,6 +73,8 @@ export default function Personagens() {
   const nivelSel = Number(form.nivel) || 1
   const niveisComPontos = Math.max(0, (nivelSel - 1) - Math.floor(nivelSel / 5))
   const maxPontos = 5 + 2 * niveisComPontos
+  const NIVEL_TRILHA = 11
+  const podeTrilha = nivelSel >= NIVEL_TRILHA
 
   const setAtr = (a, delta) =>
     setForm((f) => {
@@ -94,7 +96,7 @@ export default function Personagens() {
           nome: form.nome,
           racaCodigo: form.racaCodigo,
           classeCodigo: form.classeCodigo,
-          trilhaCodigo: form.trilhaCodigo || null,
+          trilhaCodigo: podeTrilha ? (form.trilhaCodigo || null) : null,
           nivel: Number(form.nivel) || 1,
           atributosBase: form.atributos,
         },
@@ -171,9 +173,11 @@ export default function Personagens() {
             </div>
             <div>
               <label>Trilha</label>
-              <select value={form.trilhaCodigo} onChange={(e) => setForm((f) => ({ ...f, trilhaCodigo: e.target.value }))}>
-                <option value="">(nenhuma)</option>
-                {trilhas.map((t) => <option key={t.codigo} value={t.codigo}>{t.nome}</option>)}
+              <select value={podeTrilha ? form.trilhaCodigo : ''} disabled={!podeTrilha}
+                title={podeTrilha ? undefined : `Trilha só a partir do nível ${NIVEL_TRILHA}`}
+                onChange={(e) => setForm((f) => ({ ...f, trilhaCodigo: e.target.value }))}>
+                <option value="">{podeTrilha ? '(nenhuma)' : `nível ${NIVEL_TRILHA}+`}</option>
+                {podeTrilha && trilhas.map((t) => <option key={t.codigo} value={t.codigo}>{t.nome}</option>)}
               </select>
             </div>
             <div style={{ maxWidth: 90 }}>
@@ -185,9 +189,9 @@ export default function Personagens() {
           <label style={{ marginTop: 10 }}>
             Atributos — {pontos}/{maxPontos} pontos distribuíveis (nível {Number(form.nivel) || 1}) · teto {capNivel}/atributo (os fixos da classe entram automaticamente)
           </label>
-          {form.trilhaCodigo && capNivel <= 4 && (
+          {!podeTrilha && (
             <p className="muted" style={{ fontSize: '.8rem', marginTop: 2 }}>
-              Dica: trilha no nível 1 pode estourar o teto de atributo ({capNivel}). Suba o nível se a criação falhar.
+              A Trilha (subclasse) só pode ser escolhida a partir do nível {NIVEL_TRILHA}.
             </p>
           )}
           <div className="row" style={{ gap: 12, flexWrap: 'wrap' }}>

@@ -45,6 +45,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class PersonagemService {
 
+    /** Nivel minimo para escolher uma trilha (subclasse). */
+    private static final int NIVEL_MINIMO_TRILHA = 11;
+
     private final PersonagemRepository personagemRepository;
     private final GameSystemRepository gameSystemRepository;
     private final RacaRepository racaRepository;
@@ -198,6 +201,11 @@ public class PersonagemService {
                     .orElseThrow(() -> new NotFoundException("Classe '" + req.classeCodigo() + "' nao encontrada")));
         }
         if (req.trilhaCodigo() != null) {
+            int nivelEf = req.nivel() != null ? Math.max(1, req.nivel()) : p.getNivel();
+            if (!req.trilhaCodigo().isBlank() && nivelEf < NIVEL_MINIMO_TRILHA) {
+                throw new IllegalArgumentException(
+                        "Trilha so pode ser escolhida a partir do nivel " + NIVEL_MINIMO_TRILHA + ".");
+            }
             p.setTrilhaId(req.trilhaCodigo().isBlank() ? null
                     : classeRepository.findByGameSystemIdAndCodigo(asus.getId(), req.trilhaCodigo())
                             .map(Classe::getId)
@@ -213,6 +221,11 @@ public class PersonagemService {
             }
         }
         if (req.trilhaSecundariaCodigo() != null) {
+            int nivelEf = req.nivel() != null ? Math.max(1, req.nivel()) : p.getNivel();
+            if (!req.trilhaSecundariaCodigo().isBlank() && nivelEf < NIVEL_MINIMO_TRILHA) {
+                throw new IllegalArgumentException(
+                        "Trilha so pode ser escolhida a partir do nivel " + NIVEL_MINIMO_TRILHA + ".");
+            }
             p.setTrilhaSecundariaId(req.trilhaSecundariaCodigo().isBlank() ? null
                     : classeRepository.findByGameSystemIdAndCodigo(asus.getId(), req.trilhaSecundariaCodigo())
                             .map(Classe::getId)
@@ -475,6 +488,10 @@ public class PersonagemService {
      *  cada atributo limitado ao teto do nivel. */
     private void validarDistribuicaoCriacao(AtributosDto a, Map<String, Integer> pericias, int nivel,
                                             String classeCodigo, String trilhaCodigo) {
+        if (trilhaCodigo != null && !trilhaCodigo.isBlank() && nivel < NIVEL_MINIMO_TRILHA) {
+            throw new IllegalArgumentException(
+                    "Trilha so pode ser escolhida a partir do nivel " + NIVEL_MINIMO_TRILHA + ".");
+        }
         int maxAtr = 5 + 2 * niveisComPontos(nivel);
         if (a != null) {
             int soma = somaAtributos(a);
