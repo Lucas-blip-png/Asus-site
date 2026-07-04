@@ -1,9 +1,11 @@
 package com.asus.platform.web;
 
+import com.asus.platform.domain.Ataque;
 import com.asus.platform.domain.GameSystem;
 import com.asus.platform.domain.ItemJogo;
 import com.asus.platform.domain.ItemPersonagem;
 import com.asus.platform.engine.AsusV1Engine;
+import com.asus.platform.repository.AtaqueRepository;
 import com.asus.platform.repository.GameSystemRepository;
 import com.asus.platform.repository.ItemJogoRepository;
 import com.asus.platform.repository.ItemPersonagemRepository;
@@ -19,13 +21,16 @@ public class InventarioController {
     private final ItemPersonagemRepository inventarioRepository;
     private final ItemJogoRepository itemJogoRepository;
     private final GameSystemRepository gameSystemRepository;
+    private final AtaqueRepository ataqueRepository;
 
     public InventarioController(ItemPersonagemRepository inventarioRepository,
                                 ItemJogoRepository itemJogoRepository,
-                                GameSystemRepository gameSystemRepository) {
+                                GameSystemRepository gameSystemRepository,
+                                AtaqueRepository ataqueRepository) {
         this.inventarioRepository = inventarioRepository;
         this.itemJogoRepository = itemJogoRepository;
         this.gameSystemRepository = gameSystemRepository;
+        this.ataqueRepository = ataqueRepository;
     }
 
     @GetMapping("/personagens/{id}/inventario")
@@ -48,7 +53,9 @@ public class InventarioController {
         if (item.getEspacos() == null) {
             item.setEspacos(0.0);
         }
-        return inventarioRepository.save(item);
+        ItemPersonagem salvo = inventarioRepository.save(item);
+        criarAtaqueSeArma(id, salvo);
+        return salvo;
     }
 
     /** Adiciona ao inventario uma copia de um item do catalogo (por codigo). */
@@ -64,7 +71,32 @@ public class InventarioController {
                 .bonusDefesa(c.getBonusDefesa()).penalidade(c.getPenalidade())
                 .preco(c.getPreco()).moeda(c.getMoeda()).efeito(c.getEfeito()).itemJogoCodigo(c.getCodigo())
                 .build();
-        return inventarioRepository.save(item);
+        ItemPersonagem salvo = inventarioRepository.save(item);
+        criarAtaqueSeArma(id, salvo);
+        return salvo;
+    }
+
+    /**
+     * Se o item e uma arma (tem dano), cria automaticamente um ataque na aba Combate,
+     * a menos que ja exista um ataque com o mesmo nome para este personagem.
+     */
+    private void criarAtaqueSeArma(Long personagemId, ItemPersonagem item) {
+        if (item.getDano() == null || item.getDano().isBlank()) {
+            return;
+        }
+        boolean jaExiste = ataqueRepository.findByPersonagemId(personagemId).stream()
+                .anyMatch(a -> a.getNome() != null && a.getNome().equalsIgnoreCase(item.getNome()));
+        if (jaExiste) {
+            return;
+        }
+        ataqueRepository.save(Ataque.builder()
+                .personagemId(personagemId)
+                .nome(item.getNome())
+                .dano(item.getDano())
+                .critico(item.getCritico())
+                .alcance(item.getAlcance())
+                .efeito(item.getEfeito())
+                .build());
     }
 
     @PutMapping("/inventario/{itemId}")

@@ -106,6 +106,10 @@ public class Personagem {
     @Column(columnDefinition = "TEXT")
     private String jsonPericiasCustom;
 
+    /** Bonus "Outros" por pericia padrao (sem limite): {"VIGOR":2,"COMBATE":1,...}. */
+    @Column(columnDefinition = "TEXT")
+    private String jsonPericiasOutros;
+
     private boolean arquivado;
 
     @Column(nullable = false)
