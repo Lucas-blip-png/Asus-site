@@ -38,6 +38,7 @@ public class Habilidade {
     /** PE ou PM. */
     private String custoTipo;
 
+    @Column(columnDefinition = "TEXT")
     private String requisito;
 
     /** Pre-requisitos derivados para liberar a habilidade (gating). */

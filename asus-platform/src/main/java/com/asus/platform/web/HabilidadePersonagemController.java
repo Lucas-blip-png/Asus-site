@@ -63,12 +63,11 @@ public class HabilidadePersonagemController {
     @GetMapping("/disponiveis")
     public List<Habilidade> disponiveis(@PathVariable Long id) {
         Personagem p = carregar(id);
-        String classeCod = codigo(p.getClasseId());
-        String trilhaCod = codigo(p.getTrilhaId());
+        Set<String> classes = classesDoPersonagem(p);
         Set<String> cods = codigosEscolhidos(id);
         return habilidadeRepository.findByGameSystemId(p.getGameSystemId()).stream()
                 .filter(h -> !cods.contains(h.getCodigo()))
-                .filter(h -> disponivel(h, p, classeCod, trilhaCod))
+                .filter(h -> disponivel(h, p, classes))
                 .toList();
     }
 
@@ -77,12 +76,10 @@ public class HabilidadePersonagemController {
     public Habilidade adicionar(@PathVariable Long id, @RequestBody Map<String, String> body) {
         String codigo = body.get("codigo");
         Personagem p = carregar(id);
-        String classeCod = codigo(p.getClasseId());
-        String trilhaCod = codigo(p.getTrilhaId());
         Habilidade h = habilidadeRepository.findByGameSystemId(p.getGameSystemId()).stream()
                 .filter(x -> x.getCodigo().equals(codigo)).findFirst()
                 .orElseThrow(() -> new NotFoundException("Habilidade '" + codigo + "' nao encontrada"));
-        if (!disponivel(h, p, classeCod, trilhaCod)) {
+        if (!disponivel(h, p, classesDoPersonagem(p))) {
             throw new IllegalArgumentException("Pre-requisitos nao atendidos para " + h.getNome());
         }
         int limite = (p.getAtributosFinais() == null ? 0 : p.getAtributosFinais().getDestreza()) / 2;
@@ -137,18 +134,21 @@ public class HabilidadePersonagemController {
 
     // ----- helpers -----
 
-    private boolean disponivel(Habilidade h, Personagem p, String classeCod, String trilhaCod) {
-        String dono = h.getClasseCodigo();
-        boolean daTrilha = trilhaCod != null && trilhaCod.equals(dono);
-        boolean pertence = "GERAL".equals(dono) || (classeCod != null && classeCod.equals(dono)) || daTrilha;
+    private boolean disponivel(Habilidade h, Personagem p, Set<String> classesDoPersonagem) {
+        String donoRaw = h.getClasseCodigo() == null ? "" : h.getClasseCodigo();
+        Set<String> donos = new HashSet<>();
+        for (String c : donoRaw.split(",")) {
+            String t = c.trim();
+            if (!t.isBlank()) {
+                donos.add(t);
+            }
+        }
+        boolean geral = donos.isEmpty() || donos.contains("GERAL");
+        boolean pertence = geral || donos.stream().anyMatch(classesDoPersonagem::contains);
         if (!pertence) {
             return false;
         }
-        int nivelMin = Math.max(1, h.getNivelMinimo());
-        if (daTrilha) {
-            nivelMin = Math.max(nivelMin, NIVEL_TRILHA); // trilha so a partir do nivel 11
-        }
-        if (p.getNivel() < nivelMin) {
+        if (p.getNivel() < Math.max(1, h.getNivelMinimo())) {
             return false;
         }
         if (h.getAtributoRequisito() != null && !h.getAtributoRequisito().isBlank()) {
@@ -159,6 +159,19 @@ public class HabilidadePersonagemController {
             }
         }
         return true;
+    }
+
+    /** Codigos das classes do personagem: primaria, trilha, secundaria e trilha secundaria. */
+    private Set<String> classesDoPersonagem(Personagem p) {
+        Set<String> s = new HashSet<>();
+        for (Long cid : new Long[]{p.getClasseId(), p.getTrilhaId(),
+                p.getClasseSecundariaId(), p.getTrilhaSecundariaId()}) {
+            String c = codigo(cid);
+            if (c != null) {
+                s.add(c);
+            }
+        }
+        return s;
     }
 
     private Set<String> codigosEscolhidos(Long id) {
