@@ -377,6 +377,18 @@ export default function Ficha() {
     }
   }
 
+  // Overlay OBS por personagem: abre a página pública e copia a URL pro Browser Source.
+  const [overlayCopiado, setOverlayCopiado] = useState(false)
+  function abrirOverlay() {
+    const url = `${window.location.origin}/overlay/ficha/${id}`
+    try {
+      navigator.clipboard?.writeText(url)
+      setOverlayCopiado(true)
+      setTimeout(() => setOverlayCopiado(false), 2500)
+    } catch { /* ignora clipboard indisponivel */ }
+    window.open(url, '_blank', 'noopener')
+  }
+
   // ----- foto -----
   async function trocarFoto(file) {
     if (!file) return
@@ -679,6 +691,10 @@ export default function Ficha() {
           <Link to={`/campanhas/${campanhaAtiva.id}`} className="tag">💬 Campanha: {campanhaAtiva.nome}</Link>
         )}
         <div className="spacer" />
+        <button className="ghost mini" onClick={abrirOverlay}
+          title="Abre o overlay pro OBS (retrato + dados) e copia a URL">
+          📺 {overlayCopiado ? 'URL copiada!' : 'Overlay OBS'}
+        </button>
         <button className="ghost mini" onClick={() => { setApagarTxt(''); setApagarOpen(true) }}>
           🗑 Apagar ficha
         </button>

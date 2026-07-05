@@ -1,6 +1,7 @@
 package com.asus.platform.web;
 
 import com.asus.platform.domain.Campanha;
+import com.asus.platform.domain.Personagem;
 import com.asus.platform.repository.AtaqueRepository;
 import com.asus.platform.repository.CampanhaPersonagemRepository;
 import com.asus.platform.repository.CampanhaRepository;
@@ -105,6 +106,18 @@ public class PersonagemController {
     @GetMapping("/personagens/{id}")
     public PersonagemResponse buscar(@PathVariable Long id) {
         return service.buscar(id);
+    }
+
+    /** Info minima e publica para o overlay OBS por personagem (nome + retrato). */
+    @GetMapping("/personagens/{id}/overlay")
+    public Map<String, Object> overlay(@PathVariable Long id) {
+        Personagem p = personagemRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Personagem " + id + " nao encontrado"));
+        Map<String, Object> m = new java.util.HashMap<>();
+        m.put("id", p.getId());
+        m.put("nome", p.getNome());
+        m.put("avatarAssetId", p.getAvatarAssetId());
+        return m;
     }
 
     @PostMapping("/personagens/import")

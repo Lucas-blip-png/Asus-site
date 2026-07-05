@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -69,6 +70,12 @@ public class SecurityConfig {
                     // Webhooks (ex.: Stripe) e o fluxo OAuth2 do Google sao publicos.
                     reg.requestMatchers("/api/webhooks/**", "/oauth2/**", "/login/oauth2/**").permitAll();
                     reg.requestMatchers("/ws/**", "/ws-sockjs/**", "/h2-console/**", "/error").permitAll();
+                    // O conteudo de um asset (avatar/capa) e carregado via <img> e background-image,
+                    // que NAO enviam o header Authorization. Liberamos o GET por id para as imagens
+                    // aparecerem mesmo com a seguranca ligada (o upload/listagem seguem protegidos).
+                    reg.requestMatchers(HttpMethod.GET, "/api/assets/*/conteudo").permitAll();
+                    // Info minima do overlay OBS por personagem (nome + retrato): pagina publica sem login.
+                    reg.requestMatchers(HttpMethod.GET, "/api/personagens/*/overlay").permitAll();
                     if (enforce) {
                         reg.requestMatchers("/api/**").authenticated();
                     }

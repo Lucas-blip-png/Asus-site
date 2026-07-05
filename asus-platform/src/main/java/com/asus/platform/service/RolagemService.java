@@ -86,7 +86,12 @@ public class RolagemService {
                 "Campanha", campanhaId, req.rotulo(), null, String.valueOf(resultado.total()));
 
         // Tempo real: transmite a versao mascarada (ocultas continuam ocultas para os demais).
-        realtimeNotifier.rolagem(campanhaId, RolagemResponse.de(rolagem, false));
+        RolagemResponse mascarada = RolagemResponse.de(rolagem, false);
+        realtimeNotifier.rolagem(campanhaId, mascarada);
+        // Overlay OBS por personagem: publica no topico do personagem que rolou.
+        if (rolagem.getPersonagemId() != null) {
+            realtimeNotifier.rolagemPersonagem(rolagem.getPersonagemId(), mascarada);
+        }
 
         // Quem rola sempre ve o proprio resultado, mesmo oculto.
         return RolagemResponse.de(rolagem, true);
@@ -113,9 +118,13 @@ public class RolagemService {
                 "Rolagem", rolagemId, null, null, String.valueOf(rolagem.getTotal()));
 
         // Tempo real: agora revelada, transmite o conteudo completo.
-        realtimeNotifier.rolagem(campanhaId, RolagemResponse.de(rolagem, true));
+        RolagemResponse completa = RolagemResponse.de(rolagem, true);
+        realtimeNotifier.rolagem(campanhaId, completa);
+        if (rolagem.getPersonagemId() != null) {
+            realtimeNotifier.rolagemPersonagem(rolagem.getPersonagemId(), completa);
+        }
 
-        return RolagemResponse.de(rolagem, true);
+        return completa;
     }
 
     private String formatarDetalhe(ResultadoDado r) {
