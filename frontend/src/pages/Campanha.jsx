@@ -462,7 +462,7 @@ export default function Campanha() {
     <>
       {/* Barra de ações (estilo CRIS) */}
       <div className="camp-actions">
-        <button className="act" onClick={abrirAddPerso}>＋ Adicionar Agentes</button>
+        <button className="act" onClick={abrirAddPerso}>＋ Adicionar Personagens</button>
         <Link className="act" to={`/overlay/${id}`}>📺 Overlay OBS</Link>
         {ehMestre ? (
           <>
@@ -670,7 +670,7 @@ export default function Campanha() {
         <div className="modal" onClick={() => setAddPersoOpen(false)}>
           <div className="modal-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 440 }}>
             <div className="row">
-              <h2 style={{ margin: 0 }}>Adicionar agente</h2>
+              <h2 style={{ margin: 0 }}>Adicionar personagem</h2>
               <div className="spacer" />
               <button className="ghost mini" onClick={() => setAddPersoOpen(false)}>✕</button>
             </div>

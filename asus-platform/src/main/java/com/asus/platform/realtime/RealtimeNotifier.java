@@ -25,6 +25,11 @@ public class RealtimeNotifier {
         messaging.convertAndSend("/topic/campanhas/" + campanhaId + "/rolagens", rolagem);
     }
 
+    /** Nova rolagem de um personagem (usado pelo overlay OBS por personagem). */
+    public void rolagemPersonagem(Long personagemId, RolagemResponse rolagem) {
+        messaging.convertAndSend("/topic/personagens/" + personagemId + "/rolagens", rolagem);
+    }
+
     /** Mudanca de status (PV/PM/PE) de um personagem. */
     public void statusPersonagem(Long personagemId, Object status) {
         messaging.convertAndSend("/topic/personagens/" + personagemId + "/status", status);
