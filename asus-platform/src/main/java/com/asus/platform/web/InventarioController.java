@@ -54,7 +54,7 @@ public class InventarioController {
             item.setEspacos(0.0);
         }
         ItemPersonagem salvo = inventarioRepository.save(item);
-        criarAtaqueSeArma(id, salvo);
+        garantirAtaque(salvo);
         return salvo;
     }
 
@@ -72,31 +72,42 @@ public class InventarioController {
                 .preco(c.getPreco()).moeda(c.getMoeda()).efeito(c.getEfeito()).itemJogoCodigo(c.getCodigo())
                 .build();
         ItemPersonagem salvo = inventarioRepository.save(item);
-        criarAtaqueSeArma(id, salvo);
+        garantirAtaque(salvo);
         return salvo;
     }
 
+    /** Envia um item do inventario para a aba Combate (cria o ataque; idempotente por nome). */
+    @PostMapping("/inventario/{itemId}/para-combate")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Ataque paraCombate(@PathVariable Long itemId) {
+        ItemPersonagem item = inventarioRepository.findById(itemId)
+                .orElseThrow(() -> new NotFoundException("Item de inventario " + itemId + " nao encontrado"));
+        Ataque a = garantirAtaque(item);
+        if (a == null) {
+            throw new IllegalArgumentException("Este item nao e uma arma (defina o dano antes de enviar pro combate).");
+        }
+        return a;
+    }
+
     /**
-     * Se o item e uma arma (tem dano), cria automaticamente um ataque na aba Combate,
-     * a menos que ja exista um ataque com o mesmo nome para este personagem.
+     * Garante que exista um ataque na aba Combate para uma arma (item com dano):
+     * devolve o ataque de mesmo nome se ja existir, senao cria. Retorna null se o item nao tem dano.
      */
-    private void criarAtaqueSeArma(Long personagemId, ItemPersonagem item) {
+    private Ataque garantirAtaque(ItemPersonagem item) {
         if (item.getDano() == null || item.getDano().isBlank()) {
-            return;
+            return null;
         }
-        boolean jaExiste = ataqueRepository.findByPersonagemId(personagemId).stream()
-                .anyMatch(a -> a.getNome() != null && a.getNome().equalsIgnoreCase(item.getNome()));
-        if (jaExiste) {
-            return;
-        }
-        ataqueRepository.save(Ataque.builder()
-                .personagemId(personagemId)
-                .nome(item.getNome())
-                .dano(item.getDano())
-                .critico(item.getCritico())
-                .alcance(item.getAlcance())
-                .efeito(item.getEfeito())
-                .build());
+        return ataqueRepository.findByPersonagemId(item.getPersonagemId()).stream()
+                .filter(a -> a.getNome() != null && a.getNome().equalsIgnoreCase(item.getNome()))
+                .findFirst()
+                .orElseGet(() -> ataqueRepository.save(Ataque.builder()
+                        .personagemId(item.getPersonagemId())
+                        .nome(item.getNome())
+                        .dano(item.getDano())
+                        .critico(item.getCritico())
+                        .alcance(item.getAlcance())
+                        .efeito(item.getEfeito())
+                        .build()));
     }
 
     @PutMapping("/inventario/{itemId}")
