@@ -32,8 +32,10 @@ export default function OverlayFicha() {
   const [info, setInfo] = useState(null)
   const [status, setStatus] = useState(null)
   const [ultima, setUltima] = useState(null)
+  const [fotoErro, setFotoErro] = useState(false)
 
   useEffect(() => {
+    setFotoErro(false)
     api(`/api/personagens/${personagemId}/overlay`, { auth: false })
       .then((d) => { setInfo(d); setStatus(d.status || null) })
       .catch(() => {})
@@ -54,21 +56,23 @@ export default function OverlayFicha() {
   )
 
   const critClass = ultima?.critico ? 'crit' : ultima?.falhaCritica ? 'fumble' : ''
-  const foto = {
-    width: 132, height: 132, borderRadius: '50%',
-    backgroundSize: 'cover', backgroundPosition: 'center',
+  const temFoto = info?.avatarAssetId && !fotoErro
+  const circulo = {
+    width: 132, height: 132, borderRadius: '50%', overflow: 'hidden',
     border: '3px solid rgba(255,255,255,.85)', boxShadow: '0 6px 26px rgba(0,0,0,.55)',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
-    fontSize: 52, fontWeight: 700, color: '#fff',
-    background: info?.avatarAssetId ? undefined : '#3a3a55',
-    backgroundImage: info?.avatarAssetId ? `url(/api/assets/${info.avatarAssetId}/conteudo)` : undefined,
+    fontSize: 52, fontWeight: 700, color: '#fff', background: '#3a3a55',
   }
 
   return (
     <div className="overlay-root">
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
-        <div style={foto}>
-          {!info?.avatarAssetId && (info?.nome || '?').charAt(0).toUpperCase()}
+        <div style={circulo}>
+          {temFoto ? (
+            <img src={`/api/assets/${info.avatarAssetId}/conteudo`} alt=""
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              onError={() => setFotoErro(true)} />
+          ) : (info?.nome || '?').charAt(0).toUpperCase()}
         </div>
         {info?.nome && (
           <div style={{ fontWeight: 700, fontSize: 18, color: '#fff', textShadow: '0 1px 4px rgba(0,0,0,.85)' }}>
