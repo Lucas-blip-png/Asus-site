@@ -402,10 +402,7 @@ export default function Ficha() {
     } catch (e) { setErro(e.message) }
   }
 
-  // Orçamento de perícias: base 5 + 4 por nível "com pontos" (a cada 5 níveis vira bônus de classe+raça).
-  const budgetPericias = p ? 5 + 4 * Math.max(0, (p.nivel - 1) - Math.floor(p.nivel / 5)) : 999
-  const usadoPericias = Object.values(treino).reduce((s, v) => s + (Number(v) || 0), 0)
-  // Treino respeita o teto do atributo; o orçamento agora é só indicativo (sem trava).
+  // Treino respeita o teto do atributo; sem orçamento/trava de pontos.
   const setTr = (cod, delta, cap) =>
     setTreino((t) => {
       const atual = t[cod] || 0
@@ -837,10 +834,6 @@ export default function Ficha() {
         <div className="ficha-col">
           <div className="row">
             <h2>Perícias</h2>
-            <span className="tag" title="Pontos de perícia distribuídos / orçamento do nível"
-              style={usadoPericias > budgetPericias ? { color: 'var(--fumble)', borderColor: 'var(--fumble)' } : undefined}>
-              {usadoPericias}/{budgetPericias} pts
-            </span>
             <div className="spacer" />
             <button className="mini ghost" title="Rolar um d20" onClick={() => rolar('d20', 0)}>🎲 d20</button>
             <button className="mini" onClick={() => salvar({ pericias: treino, periciasOutros: outrosBonus, periciasCustom: outros })}>Salvar</button>
