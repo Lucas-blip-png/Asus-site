@@ -24,6 +24,7 @@ import com.asus.platform.web.dto.PersonagemResponse;
 import com.asus.platform.web.dto.ProgressoRequest;
 import com.asus.platform.web.dto.ProgressoResponse;
 import com.asus.platform.web.dto.SnapshotResponse;
+import com.asus.platform.web.dto.StatusDto;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
@@ -117,6 +118,7 @@ public class PersonagemController {
         m.put("id", p.getId());
         m.put("nome", p.getNome());
         m.put("avatarAssetId", p.getAvatarAssetId());
+        m.put("status", StatusDto.de(p.getStatus()));
         return m;
     }
 
