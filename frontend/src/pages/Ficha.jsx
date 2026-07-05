@@ -23,7 +23,7 @@ const fmtEsp = (n) => String(Math.round((Number(n) || 0) * 100) / 100).replace('
 const fmtClasses = (cods) => (cods || '').split(',').map((c) => c.trim()).filter(Boolean)
   .map((c) => c.split('_').map((w) => (w ? w[0] + w.slice(1).toLowerCase() : '')).join(' ')).join(', ')
 
-function ItemInvRow({ it, onQtd, onEquip, onDelete, onEdit }) {
+function ItemInvRow({ it, onQtd, onEquip, onDelete, onEdit, onCombate }) {
   const [open, setOpen] = useState(false)
   const resumo = [it.dano && `Dano ${it.dano}`, it.bonusDefesa != null && `Defesa +${it.bonusDefesa}`].filter(Boolean).join(' · ')
   return (
@@ -55,6 +55,7 @@ function ItemInvRow({ it, onQtd, onEquip, onDelete, onEdit }) {
               <input type="checkbox" checked={!!it.equipado} onChange={() => onEquip(it)} /> equipado
             </label>
             <div className="spacer" />
+            {it.dano && <button className="ghost mini" title="Criar ataque na aba Combate" onClick={() => onCombate(it)}>⚔ Combate</button>}
             <button className="ghost mini" onClick={() => onEdit(it)}>Editar</button>
             <button className="ghost mini" onClick={() => onDelete(it.id)}>Remover</button>
           </div>
@@ -509,9 +510,17 @@ export default function Ficha() {
         method: 'POST',
         body: { ...novoItem, espacos: Number(novoItem.espacos) || 0, quantidade: Number(novoItem.quantidade) || 1 },
       })
-      setNovoItem({ nome: '', categoria: 'GERAL', espacos: 1, quantidade: 1 })
+      setNovoItem({ nome: '', categoria: 'GERAL', espacos: 1, quantidade: 1, dano: '', critico: '' })
       recarregarInv()
       recarregarAtaques()
+    } catch (e) { setErro(e.message) }
+  }
+  // Envia uma arma do inventário para a aba Combate (cria o ataque; idempotente).
+  async function enviarProCombate(it) {
+    try {
+      await api(`/api/inventario/${it.id}/para-combate`, { method: 'POST' })
+      await recarregarAtaques()
+      setAba('Combate')
     } catch (e) { setErro(e.message) }
   }
   async function setQtd(it, delta) {
@@ -930,7 +939,7 @@ export default function Ficha() {
                   onChange={(e) => setNovoAtaque((s) => ({ ...s, nome: e.target.value }))} />
                 <input placeholder="Dano (1d8)" value={novoAtaque.dano}
                   onChange={(e) => setNovoAtaque((s) => ({ ...s, dano: e.target.value }))} />
-                <input placeholder="Crítico (x2)" value={novoAtaque.critico}
+                <input placeholder="Crít (x2, x3…)" value={novoAtaque.critico}
                   onChange={(e) => setNovoAtaque((s) => ({ ...s, critico: e.target.value }))} />
                 <input placeholder="Alcance" value={novoAtaque.alcance}
                   onChange={(e) => setNovoAtaque((s) => ({ ...s, alcance: e.target.value }))} />
@@ -1021,7 +1030,7 @@ export default function Ficha() {
               <div className="cris-list">
                 {inventario.map((it) => (
                   <ItemInvRow key={it.id} it={it} onQtd={setQtd} onEquip={toggleEquip}
-                    onDelete={delItem} onEdit={setEditItem} />
+                    onDelete={delItem} onEdit={setEditItem} onCombate={enviarProCombate} />
                 ))}
               </div>
               {!inventario.length && <div className="muted">Inventário vazio.</div>}
@@ -1038,9 +1047,16 @@ export default function Ficha() {
               <div className="add-form">
                 <input placeholder="Item próprio" value={novoItem.nome}
                   onChange={(e) => setNovoItem((s) => ({ ...s, nome: e.target.value }))} />
+                <input placeholder="Dano (1d8)" style={{ maxWidth: 100 }} value={novoItem.dano || ''}
+                  onChange={(e) => setNovoItem((s) => ({ ...s, dano: e.target.value }))} />
+                <input placeholder="Crít (x2, x3…)" style={{ maxWidth: 110 }} value={novoItem.critico || ''}
+                  onChange={(e) => setNovoItem((s) => ({ ...s, critico: e.target.value }))} />
                 <input type="number" min="0" step="0.5" placeholder="Espaços" style={{ maxWidth: 90 }} value={novoItem.espacos}
                   onChange={(e) => setNovoItem((s) => ({ ...s, espacos: e.target.value }))} />
                 <button className="mini" onClick={addItemProprio}>+ Próprio</button>
+              </div>
+              <div className="muted" style={{ fontSize: '.76rem', marginTop: 2 }}>
+                Item com <b>dano</b> vira arma e cria um ataque no Combate automaticamente. Já tem armas no inventário? Use o botão <b>⚔ Combate</b> em cada uma.
               </div>
             </div>
           )}
@@ -1089,7 +1105,7 @@ export default function Ficha() {
               </div>
               <div style={{ width: 90 }}>
                 <label>Crítico</label>
-                <input placeholder="x2" value={editItem.critico || ''}
+                <input placeholder="x2, x3…" value={editItem.critico || ''}
                   onChange={(e) => setEditItem((s) => ({ ...s, critico: e.target.value }))} />
               </div>
               <div style={{ width: 100 }}>
@@ -1128,7 +1144,7 @@ export default function Ficha() {
               </div>
               <div style={{ width: 110 }}>
                 <label>Crítico</label>
-                <input placeholder="x2" value={editAtaque.critico || ''}
+                <input placeholder="x2, x3…" value={editAtaque.critico || ''}
                   onChange={(e) => setEditAtaque((s) => ({ ...s, critico: e.target.value }))} />
               </div>
             </div>
