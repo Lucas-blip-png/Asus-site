@@ -68,10 +68,14 @@ public class AsusV1Engine implements GameSystemEngine {
                 ? Atributos.builder().build() : ctx.atributosBase().copia();
         passos.add("Atributos base: " + descrever(finais));
 
+        // Treino distribuido pelo jogador (jsonPericias) — editavel na ficha.
         Map<String, Integer> treino = new HashMap<>();
         if (ctx.periciasTreino() != null) {
             ctx.periciasTreino().forEach((k, v) -> treino.put(k.toUpperCase(Locale.ROOT), v));
         }
+        // Bonus fixo de pericia vindo de classe/trilha — NAO editavel, NAO salvo em jsonPericias
+        // (senao seria somado de novo a cada save, inflando a pericia).
+        Map<String, Integer> bonusPericia = new HashMap<>();
 
         // Bonus de classe e trilha (PV/PM/PE da classe + atributos + treino de pericias)
         List<Classe> fontes = ctx.fontesBonus() == null ? List.of() : ctx.fontesBonus();
@@ -106,7 +110,7 @@ public class AsusV1Engine implements GameSystemEngine {
                 Iterator<Map.Entry<String, JsonNode>> it = pers.fields();
                 while (it.hasNext()) {
                     Map.Entry<String, JsonNode> e = it.next();
-                    treino.merge(e.getKey().toUpperCase(Locale.ROOT), e.getValue().asInt(), Integer::sum);
+                    bonusPericia.merge(e.getKey().toUpperCase(Locale.ROOT), e.getValue().asInt(), Integer::sum);
                 }
             }
         }
@@ -151,8 +155,10 @@ public class AsusV1Engine implements GameSystemEngine {
                 continue;
             }
             int cap = Math.max(0, finais.get(a) * 2);
-            int t = Math.max(0, Math.min(treino.getOrDefault(p.getCodigo().toUpperCase(Locale.ROOT), 0), cap));
-            pericias.add(new PericiaCalculada(p.getCodigo(), p.getNome(), a.name(), a.getSigla(), t, cap));
+            String cod = p.getCodigo().toUpperCase(Locale.ROOT);
+            int t = Math.max(0, Math.min(treino.getOrDefault(cod, 0), cap));
+            int b = Math.max(0, bonusPericia.getOrDefault(cod, 0));
+            pericias.add(new PericiaCalculada(p.getCodigo(), p.getNome(), a.name(), a.getSigla(), t, cap, b));
         }
 
         return new ResultadoCalculo(finais, status, pericias,

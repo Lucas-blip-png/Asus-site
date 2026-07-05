@@ -1,8 +1,9 @@
 package com.asus.platform.engine;
 
 /**
- * Resultado do calculo de uma pericia (ASUS): valor treinado e o teto.
- * Teste = 1d20 + treino. A pericia pode subir ate 2x o atributo governante (cap).
+ * Resultado do calculo de uma pericia (ASUS): treino distribuido pelo jogador,
+ * o teto (2x atributo governante) e o bonus fixo vindo de classe/trilha (nao editavel).
+ * Teste = 1d20 + treino + bonus.
  */
 public record PericiaCalculada(
         String codigo,
@@ -10,5 +11,6 @@ public record PericiaCalculada(
         String atributoBase,
         String sigla,
         int treino,
-        int cap
+        int cap,
+        int bonus
 ) {}

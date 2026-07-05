@@ -848,13 +848,17 @@ export default function Ficha() {
           <table className="pericias">
             <thead><tr><th>Perícia</th><th>Atr</th><th>Treino</th><th>Outros</th><th>Teto</th></tr></thead>
             <tbody>
-              {p.pericias.filter((pe) => !pe.custom).map((pe) => (
-                <tr key={pe.codigo} className={((treino[pe.codigo] ?? 0) + (outrosBonus[pe.codigo] ?? 0)) > 0 ? 'treinada' : undefined}>
+              {p.pericias.filter((pe) => !pe.custom).map((pe) => {
+                const bonusClasse = pe.bonus || 0
+                const mod = (treino[pe.codigo] ?? 0) + bonusClasse + (outrosBonus[pe.codigo] ?? 0)
+                return (
+                <tr key={pe.codigo} className={mod > 0 ? 'treinada' : undefined}>
                   <td>
                     <span className="per-nome">
-                      <button className="d20-btn" title={`Rolar ${pe.nome}`}
-                        onClick={() => rolar(pe.nome, (treino[pe.codigo] ?? 0) + (outrosBonus[pe.codigo] ?? 0))}>d20</button>
+                      <button className="d20-btn" title={`Rolar ${pe.nome} (${mod >= 0 ? '+' : ''}${mod})`}
+                        onClick={() => rolar(pe.nome, mod)}>d20</button>
                       {pe.nome}
+                      {bonusClasse > 0 && <span className="tag" title="bônus fixo de classe/trilha">+{bonusClasse}</span>}
                     </span>
                   </td>
                   <td className="muted">{pe.sigla}</td>
@@ -874,7 +878,8 @@ export default function Ficha() {
                   </td>
                   <td className="muted stat">{pe.cap}</td>
                 </tr>
-              ))}
+                )
+              })}
               {outros.map((o, idx) => {
                 const cap = 2 * ((p.atributosFinais[o.atributo.toLowerCase()]) || 0)
                 return (
