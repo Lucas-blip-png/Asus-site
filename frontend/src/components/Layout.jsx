@@ -18,7 +18,10 @@ export default function Layout() {
         .catch(() => {})
     buscar()
     const t = setInterval(buscar, 30000)
-    return () => { ativo = false; clearInterval(t) }
+    // A tela de Notificações dispara este evento ao marcar tudo como lido: zera na hora.
+    const zerar = () => setNaoLidas(0)
+    window.addEventListener('notificacoes-lidas', zerar)
+    return () => { ativo = false; clearInterval(t); window.removeEventListener('notificacoes-lidas', zerar) }
   }, [user?.id])
 
   return (

@@ -36,6 +36,15 @@ public class NotificacaoController {
         return repository.save(n);
     }
 
+    /** Marca todas as notificacoes nao lidas do usuario como lidas (zera o contador do sino). */
+    @PostMapping("/me/notificacoes/marcar-todas-lidas")
+    public Map<String, Long> marcarTodasLidas(@RequestParam Long usuarioId) {
+        List<Notificacao> pendentes = repository.findByUsuarioIdAndLidaFalse(usuarioId);
+        pendentes.forEach(n -> n.setLida(true));
+        repository.saveAll(pendentes);
+        return Map.of("marcadas", (long) pendentes.size());
+    }
+
     @PostMapping("/notificacoes/{id}/lida")
     public Notificacao marcarLida(@PathVariable Long id) {
         Notificacao n = repository.findById(id)
