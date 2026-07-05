@@ -12,7 +12,29 @@ export default function Notificacoes() {
     if (!user?.id) return
     api(`/api/me/notificacoes?usuarioId=${user.id}`).then(setLista).catch((e) => setErro(e.message))
   }, [user?.id])
-  useEffect(() => { carregar() }, [carregar])
+
+  // Ao abrir a tela: carrega e marca tudo como lido, zerando o contador do sino.
+  useEffect(() => {
+    if (!user?.id) return undefined
+    let ativo = true
+    api(`/api/me/notificacoes?usuarioId=${user.id}`)
+      .then((l) => {
+        if (!ativo) return
+        setLista(l)
+        if (l.some((n) => !n.lida)) {
+          api(`/api/me/notificacoes/marcar-todas-lidas?usuarioId=${user.id}`, { method: 'POST' })
+            .then(() => {
+              if (!ativo) return
+              setLista((prev) => prev.map((n) => ({ ...n, lida: true })))
+              // avisa o sino (Layout) pra zerar na hora, sem esperar o polling
+              window.dispatchEvent(new Event('notificacoes-lidas'))
+            })
+            .catch(() => {})
+        }
+      })
+      .catch((e) => setErro(e.message))
+    return () => { ativo = false }
+  }, [user?.id])
 
   async function marcarLida(id) {
     try { await api(`/api/notificacoes/${id}/lida`, { method: 'POST' }); carregar() }
