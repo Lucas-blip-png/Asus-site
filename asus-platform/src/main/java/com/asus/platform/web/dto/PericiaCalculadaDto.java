@@ -8,4 +8,5 @@ public record PericiaCalculadaDto(
         int treino,
         int cap,
         int outros,
+        int bonus,
         boolean custom) {}

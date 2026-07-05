@@ -61,15 +61,17 @@ class AsusV1EngineTest {
         assertThat(r.deslocamento()).isEqualTo(4);
         assertThat(r.cargaMaxima()).isEqualTo(10);
 
-        // Vigor: treino 2 (bonus de classe), cap = 2*Con(6) = 12
+        // Vigor: treino do jogador 0, bonus fixo de classe +2 (separado, nao editavel), cap = 2*Con(6) = 12
         PericiaCalculada vig = acharPericia(r, "VIGOR");
-        assertThat(vig.treino()).isEqualTo(2);
+        assertThat(vig.treino()).isEqualTo(0);
+        assertThat(vig.bonus()).isEqualTo(2);
         assertThat(vig.cap()).isEqualTo(12);
         assertThat(vig.sigla()).isEqualTo("Con");
 
-        // Combate: sem treino, cap = 2*For(5) = 10
+        // Combate: sem treino nem bonus, cap = 2*For(5) = 10
         PericiaCalculada com = acharPericia(r, "COMBATE");
         assertThat(com.treino()).isEqualTo(0);
+        assertThat(com.bonus()).isEqualTo(0);
         assertThat(com.cap()).isEqualTo(10);
 
         assertThat(r.passos()).isNotEmpty();
