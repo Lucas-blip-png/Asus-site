@@ -243,10 +243,8 @@ public class CampanhaService {
         Personagem personagem = personagemRepository.findById(personagemId)
                 .orElseThrow(() -> new NotFoundException("Personagem " + personagemId + " nao encontrado"));
 
-        if (!personagem.getOrganizacaoId().equals(campanha.getOrganizacaoId())) {
-            throw new IllegalArgumentException(
-                    "Personagem e campanha pertencem a organizacoes diferentes");
-        }
+        // Uma campanha reune personagens de jogadores diferentes (cada usuario tem a sua
+        // organizacao pessoal), entao NAO exigimos que o personagem seja da mesma org da campanha.
         if (campanhaPersonagemRepository.existsByCampanhaIdAndPersonagemId(campanhaId, personagemId)) {
             throw new IllegalArgumentException("Personagem ja esta nesta campanha");
         }
