@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useState } from 'react'
-import { api } from './api.js'
+import { api, limparOrgId, setUnauthorizedHandler } from './api.js'
 
 const AuthContext = createContext(null)
 export function useAuth() {
@@ -13,6 +13,7 @@ export function AuthProvider({ children }) {
   const logout = useCallback(() => {
     localStorage.removeItem('accessToken')
     localStorage.removeItem('refreshToken')
+    limparOrgId()
     setUser(null)
   }, [])
 
@@ -44,6 +45,11 @@ export function AuthProvider({ children }) {
       }
     }
     carregar()
+  }, [logout])
+
+  // Token expirado (401) desloga o usuário; o wrapper Protected redireciona para /login.
+  useEffect(() => {
+    setUnauthorizedHandler(() => { logout() })
   }, [logout])
 
   const login = (email, senha) =>

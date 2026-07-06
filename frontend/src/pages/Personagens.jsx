@@ -122,7 +122,9 @@ export default function Personagens() {
         <input placeholder="Buscar" value={busca} onChange={(e) => setBusca(e.target.value)} />
       </div>
       <div className="grid">
-        {filtrados.map((p) => (
+        {filtrados.map((p) => {
+          const s = p.status || {}
+          return (
           <Link key={p.id} to={`/personagens/${p.id}`} className="entity-card">
             <div
               className="av"
@@ -138,13 +140,14 @@ export default function Personagens() {
                 {p.racaNome} · {p.classeNome}{p.trilhaNome ? ` · ${p.trilhaNome}` : ''}
               </div>
               <div className="foot">
-                <span className="tag">PV {p.status.pvMax}</span>
-                <span className="tag">PM {p.status.pmMax}</span>
-                <span className="tag">PE {p.status.peMax}</span>
+                <span className="tag">PV {s.pvMax ?? '—'}</span>
+                <span className="tag">PM {s.pmMax ?? '—'}</span>
+                <span className="tag">PE {s.peMax ?? '—'}</span>
               </div>
             </div>
           </Link>
-        ))}
+          )
+        })}
         {filtrados.length === 0 && <p className="muted">Nenhum personagem encontrado.</p>}
       </div>
 
