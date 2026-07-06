@@ -9,6 +9,7 @@ import com.asus.platform.repository.ClasseRepository;
 import com.asus.platform.repository.HabilidadePersonagemRepository;
 import com.asus.platform.repository.HabilidadeRepository;
 import com.asus.platform.repository.PersonagemRepository;
+import com.asus.platform.web.dto.HabilidadeDisponivelResponse;
 import com.asus.platform.web.dto.HabilidadeEscolhidaResponse;
 import java.util.HashSet;
 import java.util.List;
@@ -63,13 +64,21 @@ public class HabilidadePersonagemController {
     }
 
     @GetMapping("/disponiveis")
-    public List<Habilidade> disponiveis(@PathVariable Long id) {
+    public List<HabilidadeDisponivelResponse> disponiveis(@PathVariable Long id) {
         Personagem p = carregar(id);
         Set<String> classes = classesDoPersonagem(p);
         Set<String> cods = codigosEscolhidos(id);
+        // Mostra todas as habilidades da(s) classe(s) do personagem (ou GERAL), inclusive as que
+        // ainda estao bloqueadas por requisito — o front exibe o motivo e nao deixa pegar ate atingir.
         return habilidadeRepository.findByGameSystemId(p.getGameSystemId()).stream()
                 .filter(h -> !cods.contains(h.getCodigo()))
-                .filter(h -> disponivel(h, p, classes))
+                .filter(h -> pertenceClasse(h, classes))
+                .map(h -> {
+                    String motivo = motivoBloqueio(h, p);
+                    return HabilidadeDisponivelResponse.de(h, motivo != null, motivo);
+                })
+                .sorted(java.util.Comparator.comparing(HabilidadeDisponivelResponse::bloqueada)
+                        .thenComparing(HabilidadeDisponivelResponse::nome))
                 .toList();
     }
 
@@ -185,6 +194,11 @@ public class HabilidadePersonagemController {
     // ----- helpers -----
 
     private boolean disponivel(Habilidade h, Personagem p, Set<String> classesDoPersonagem) {
+        return pertenceClasse(h, classesDoPersonagem) && motivoBloqueio(h, p) == null;
+    }
+
+    /** A habilidade e da(s) classe/trilha do personagem, ou GERAL (vale para todas). */
+    private boolean pertenceClasse(Habilidade h, Set<String> classesDoPersonagem) {
         String donoRaw = h.getClasseCodigo() == null ? "" : h.getClasseCodigo();
         Set<String> donos = new HashSet<>();
         for (String c : donoRaw.split(",")) {
@@ -194,21 +208,25 @@ public class HabilidadePersonagemController {
             }
         }
         boolean geral = donos.isEmpty() || donos.contains("GERAL");
-        boolean pertence = geral || donos.stream().anyMatch(classesDoPersonagem::contains);
-        if (!pertence) {
-            return false;
-        }
-        if (p.getNivel() < Math.max(1, h.getNivelMinimo())) {
-            return false;
+        return geral || donos.stream().anyMatch(classesDoPersonagem::contains);
+    }
+
+    /** Motivo do bloqueio por requisito (nivel/atributo), ou null se ja atende. */
+    private String motivoBloqueio(Habilidade h, Personagem p) {
+        int nivelMin = Math.max(1, h.getNivelMinimo());
+        if (p.getNivel() < nivelMin) {
+            return "Requer nível " + nivelMin;
         }
         if (h.getAtributoRequisito() != null && !h.getAtributoRequisito().isBlank()) {
             int val = p.getAtributosFinais() == null ? 0
                     : p.getAtributosFinais().get(Atributo.valueOf(h.getAtributoRequisito()));
             if (val < h.getValorAtributoRequisito()) {
-                return false;
+                String n = h.getAtributoRequisito();
+                return "Requer " + h.getValorAtributoRequisito() + " de "
+                        + n.charAt(0) + n.substring(1).toLowerCase();
             }
         }
-        return true;
+        return null;
     }
 
     /** Codigos das classes do personagem: primaria, trilha, secundaria e trilha secundaria. */

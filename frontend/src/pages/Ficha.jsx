@@ -1364,20 +1364,25 @@ export default function Ficha() {
               {habDisp
                 .filter((h) => (h.nome + ' ' + (h.classeCodigo || '')).toLowerCase().includes(habBusca.toLowerCase()))
                 .map((h) => (
-                  <div key={h.codigo} className="hab-opt">
+                  <div key={h.codigo} className="hab-opt" style={h.bloqueada ? { opacity: 0.6 } : undefined}>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <b>{h.nome}</b>
-                      <div className="row" style={{ gap: 6, marginTop: 3 }}>
+                      <div className="row" style={{ gap: 6, marginTop: 3, flexWrap: 'wrap' }}>
                         {h.classeCodigo && h.classeCodigo !== 'GERAL' && <span className="tag">{fmtClasses(h.classeCodigo)}</span>}
                         {h.nivelMinimo > 1 && <span className="tag">Nv {h.nivelMinimo}</span>}
                         {h.tipo && <span className="tag">{h.tipo}</span>}
+                        {h.bloqueada && (
+                          <span className="tag" style={{ color: 'var(--fumble)', borderColor: 'var(--fumble)' }}>🔒 {h.motivo}</span>
+                        )}
                       </div>
                       {h.efeito && <div className="muted" style={{ fontSize: '.78rem', marginTop: 3 }}>{h.efeito}</div>}
                     </div>
-                    <button className="mini" title="Adicionar" onClick={() => addHab(h.codigo)}>+</button>
+                    {h.bloqueada
+                      ? <span className="tag" title={h.motivo} style={{ alignSelf: 'center' }}>🔒</span>
+                      : <button className="mini" title="Adicionar" onClick={() => addHab(h.codigo)}>+</button>}
                   </div>
                 ))}
-              {!habDisp.length && <div className="muted">Nenhuma habilidade disponível no nível/atributo atuais.</div>}
+              {!habDisp.length && <div className="muted">Nenhuma habilidade para a sua classe.</div>}
             </div>
           </div>
         </div>

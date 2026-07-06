@@ -60,6 +60,7 @@ public class PersonagemService {
     private final PlanoService planoService;
     private final ProgressaoNivelRepository progressaoNivelRepository;
     private final ItemPersonagemRepository itemPersonagemRepository;
+    private final PassivasService passivasService;
     private final ObjectMapper objectMapper;
 
     public PersonagemService(PersonagemRepository personagemRepository,
@@ -74,6 +75,7 @@ public class PersonagemService {
                              PlanoService planoService,
                              ProgressaoNivelRepository progressaoNivelRepository,
                              ItemPersonagemRepository itemPersonagemRepository,
+                             PassivasService passivasService,
                              ObjectMapper objectMapper) {
         this.personagemRepository = personagemRepository;
         this.gameSystemRepository = gameSystemRepository;
@@ -87,6 +89,7 @@ public class PersonagemService {
         this.planoService = planoService;
         this.progressaoNivelRepository = progressaoNivelRepository;
         this.itemPersonagemRepository = itemPersonagemRepository;
+        this.passivasService = passivasService;
         this.objectMapper = objectMapper;
     }
 
@@ -118,6 +121,9 @@ public class PersonagemService {
         Personagem p = montarSalvar(organizacaoId, usuarioId, req.nome(), req.jogador(),
                 req.racaCodigo(), req.classeCodigo(), req.trilhaCodigo(), req.divindade(),
                 nivelInicial, 0, req.atributosBase(), req.pericias());
+
+        // Passivas da classe/trilha já entram na ficha ao criar (e nas de nível maior, ao subir).
+        passivasService.concederPassivas(p);
 
         snapshotService.criar(p, "CRIACAO");
         auditoriaService.registrar(organizacaoId, p.getUsuarioId(), "PERSONAGEM_CRIADO",
@@ -251,6 +257,11 @@ public class PersonagemService {
         p = personagemRepository.save(p);
 
         boolean subiuNivel = p.getNivel() > nivelAntigo;
+        // Subiu de nível ou mudou de classe/trilha → concede as passivas novas automaticamente.
+        if (subiuNivel || req.classeCodigo() != null || req.trilhaCodigo() != null
+                || req.classeSecundariaCodigo() != null || req.trilhaSecundariaCodigo() != null) {
+            passivasService.concederPassivas(p);
+        }
         snapshotService.criar(p, subiuNivel ? "LEVEL_UP" : "EDICAO");
         auditoriaService.registrar(p.getOrganizacaoId(), p.getUsuarioId(), "PERSONAGEM_ATUALIZADO",
                 "Personagem", p.getId(),
@@ -361,6 +372,8 @@ public class PersonagemService {
         p = personagemRepository.save(p);
 
         if (nivelAlvo != nivelAntes) {
+            // Passivas de nível maior entram sozinhas ao "upar".
+            passivasService.concederPassivas(p);
             snapshotService.criar(p, "LEVEL_UP");
             auditoriaService.registrar(p.getOrganizacaoId(), p.getUsuarioId(), "PERSONAGEM_ATUALIZADO",
                     "Personagem", p.getId(), "nivel", String.valueOf(nivelAntes), String.valueOf(nivelAlvo));
