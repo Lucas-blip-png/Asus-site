@@ -130,13 +130,17 @@ public class PersonagemController {
 
     @PutMapping("/personagens/{id}")
     public PersonagemResponse atualizar(@PathVariable Long id,
+                                        @org.springframework.security.core.annotation.AuthenticationPrincipal UsuarioPrincipal principal,
                                         @Valid @RequestBody AtualizarPersonagemRequest req) {
+        exigirAcessoPersonagem(id, principal);
         return service.atualizar(id, req);
     }
 
     @PatchMapping("/personagens/{id}/status")
     public PersonagemResponse atualizarStatus(@PathVariable Long id,
+                                              @org.springframework.security.core.annotation.AuthenticationPrincipal UsuarioPrincipal principal,
                                               @RequestBody AtualizarStatusRequest req) {
+        exigirAcessoPersonagem(id, principal);
         return service.atualizarStatus(id, req.pvAtual(), req.pmAtual(), req.peAtual(),
                 req.pvMax(), req.pmMax(), req.peMax());
     }
@@ -144,15 +148,34 @@ public class PersonagemController {
     /** Atualiza XP/nivel; sobe de nivel automaticamente pelo XP e devolve os ganhos (popup). */
     @PatchMapping("/personagens/{id}/progresso")
     public ProgressoResponse atualizarProgresso(@PathVariable Long id,
+                                                @org.springframework.security.core.annotation.AuthenticationPrincipal UsuarioPrincipal principal,
                                                 @RequestBody ProgressoRequest req) {
+        exigirAcessoPersonagem(id, principal);
         return service.atualizarProgresso(id, req.xpAtual(), req.nivel());
+    }
+
+    /**
+     * Só o dono do personagem (ou o dono/dev da instância) pode alterá-lo. Quando não há
+     * autenticação (modo aberto de desenvolvimento, {@code enforce=false}), não bloqueia.
+     */
+    private void exigirAcessoPersonagem(Long id, UsuarioPrincipal principal) {
+        if (principal == null || donoService.ehDono(principal.id())) {
+            return;
+        }
+        Long donoId = personagemRepository.findById(id)
+                .map(com.asus.platform.domain.Personagem::getUsuarioId).orElse(null);
+        if (donoId != null && !donoId.equals(principal.id())) {
+            throw new AcessoNegadoException("Você não tem permissão sobre este personagem.");
+        }
     }
 
     /** Apaga a ficha e todos os vinculos (inventario, ataques, magias, habilidades, snapshots, campanhas). */
     @DeleteMapping("/personagens/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Transactional
-    public void apagar(@PathVariable Long id) {
+    public void apagar(@PathVariable Long id,
+                       @org.springframework.security.core.annotation.AuthenticationPrincipal UsuarioPrincipal principal) {
+        exigirAcessoPersonagem(id, principal);
         itemRepository.deleteAll(itemRepository.findByPersonagemId(id));
         ataqueRepository.deleteAll(ataqueRepository.findByPersonagemId(id));
         feiticoRepository.deleteAll(feiticoRepository.findByPersonagemId(id));
