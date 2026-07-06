@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { api } from '../api.js'
+import { api, obterOrgId } from '../api.js'
 import { inscrever } from '../ws.js'
 import { useAuth } from '../auth.jsx'
 import { dataHora } from '../format.js'
@@ -386,7 +386,10 @@ export default function Campanha() {
   async function abrirAddPerso() {
     setErro(null)
     try {
-      const lista = await api(`/api/organizacoes/${campanha.organizacaoId}/personagens`).catch(() => [])
+      // Carrega os personagens do PRÓPRIO usuário (cada jogador tem sua organização),
+      // não os do dono da campanha — assim quem entrou por convite adiciona os seus.
+      const oid = await obterOrgId()
+      const lista = await api(`/api/organizacoes/${oid}/personagens`).catch(() => [])
       setOrgPersonagens(lista || [])
       setSelAdd('')
       setAddPersoOpen(true)
