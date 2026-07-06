@@ -25,31 +25,43 @@ public class RolagemService {
     private final Dado dado;
     private final AuditoriaService auditoriaService;
     private final RealtimeNotifier realtimeNotifier;
+    private final com.asus.platform.repository.PersonagemRepository personagemRepository;
 
     public RolagemService(RolagemRepository rolagemRepository,
                           CampanhaService campanhaService,
                           Dado dado,
                           AuditoriaService auditoriaService,
-                          RealtimeNotifier realtimeNotifier) {
+                          RealtimeNotifier realtimeNotifier,
+                          com.asus.platform.repository.PersonagemRepository personagemRepository) {
         this.rolagemRepository = rolagemRepository;
         this.campanhaService = campanhaService;
         this.dado = dado;
         this.auditoriaService = auditoriaService;
         this.realtimeNotifier = realtimeNotifier;
+        this.personagemRepository = personagemRepository;
+    }
+
+    /** Nome do personagem que rolou (para exibir no historico), ou null. */
+    private String nomePersonagem(Long personagemId) {
+        if (personagemId == null) {
+            return null;
+        }
+        return personagemRepository.findById(personagemId)
+                .map(com.asus.platform.domain.Personagem::getNome).orElse(null);
     }
 
     /** Lista o historico. Rolagens ocultas nao reveladas vem com o resultado mascarado. */
     public List<RolagemResponse> listar(Long campanhaId) {
         campanhaService.carregar(campanhaId); // valida existencia
         return rolagemRepository.findByCampanhaIdOrderByCriadoEmDescIdDesc(campanhaId).stream()
-                .map(r -> RolagemResponse.de(r, false)).toList();
+                .map(r -> RolagemResponse.de(r, false, nomePersonagem(r.getPersonagemId()))).toList();
     }
 
     /** Para o Escudo do Mestre (Fase 8): historico completo, sem mascarar ocultas. */
     public List<RolagemResponse> listarCompleto(Long campanhaId) {
         campanhaService.carregar(campanhaId); // valida existencia
         return rolagemRepository.findByCampanhaIdOrderByCriadoEmDescIdDesc(campanhaId).stream()
-                .map(r -> RolagemResponse.de(r, true)).toList();
+                .map(r -> RolagemResponse.de(r, true, nomePersonagem(r.getPersonagemId()))).toList();
     }
 
     @Transactional
@@ -86,7 +98,8 @@ public class RolagemService {
                 "Campanha", campanhaId, req.rotulo(), null, String.valueOf(resultado.total()));
 
         // Tempo real: transmite a versao mascarada (ocultas continuam ocultas para os demais).
-        RolagemResponse mascarada = RolagemResponse.de(rolagem, false);
+        String nome = nomePersonagem(rolagem.getPersonagemId());
+        RolagemResponse mascarada = RolagemResponse.de(rolagem, false, nome);
         realtimeNotifier.rolagem(campanhaId, mascarada);
         // Overlay OBS por personagem: publica no topico do personagem que rolou.
         if (rolagem.getPersonagemId() != null) {
@@ -94,7 +107,7 @@ public class RolagemService {
         }
 
         // Quem rola sempre ve o proprio resultado, mesmo oculto.
-        return RolagemResponse.de(rolagem, true);
+        return RolagemResponse.de(rolagem, true, nome);
     }
 
     @Transactional
@@ -118,7 +131,7 @@ public class RolagemService {
                 "Rolagem", rolagemId, null, null, String.valueOf(rolagem.getTotal()));
 
         // Tempo real: agora revelada, transmite o conteudo completo.
-        RolagemResponse completa = RolagemResponse.de(rolagem, true);
+        RolagemResponse completa = RolagemResponse.de(rolagem, true, nomePersonagem(rolagem.getPersonagemId()));
         realtimeNotifier.rolagem(campanhaId, completa);
         if (rolagem.getPersonagemId() != null) {
             realtimeNotifier.rolagemPersonagem(rolagem.getPersonagemId(), completa);

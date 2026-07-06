@@ -740,7 +740,7 @@ export default function Campanha() {
 
       {toast && (
         <div className={`roll-toast ${toast.critico ? 'crit' : toast.falhaCritica ? 'fumble' : ''}`}>
-          <div className="muted">{toast.rotulo || toast.expressao}</div>
+          <div className="muted">{toast.personagemNome ? `${toast.personagemNome} · ` : ''}{toast.rotulo || toast.expressao}</div>
           <div className="rt-total">
             {toast.total}{toast.critico ? ' ✦' : ''}{toast.falhaCritica ? ' ✗' : ''}
           </div>

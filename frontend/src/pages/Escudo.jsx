@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { api } from '../api.js'
 import { inscrever } from '../ws.js'
 import { useAuth } from '../auth.jsx'
+import { dataHora } from '../format.js'
 import ResultadosPanel from '../components/ResultadosPanel.jsx'
 
 const ATRIBS = [
@@ -155,6 +156,41 @@ export default function Escudo() {
           )
         })}
         {data.personagens.length === 0 && <p className="muted">Nenhum personagem na campanha.</p>}
+      </div>
+
+      {/* Rolagens dos jogadores (o mestre vê tudo, inclusive as privadas) */}
+      <div className="card" style={{ marginTop: 16 }}>
+        <div className="row"><h2 style={{ margin: 0 }}>Rolagens dos jogadores</h2>
+          <span className="muted" style={{ fontSize: '.78rem', alignSelf: 'center' }}>· em tempo real</span></div>
+        <div className="lista-vert" style={{ maxHeight: 380, overflow: 'auto', marginTop: 10 }}>
+          {rolagens.map((r) => {
+            const oculto = r.oculta && r.total == null
+            const cor = r.critico ? 'var(--crit, #4ad06a)' : r.falhaCritica ? 'var(--fumble, #e0554a)' : 'var(--text)'
+            return (
+              <div key={r.id} className="sessao-row">
+                <div className="hex" style={{ fontWeight: 700, fontSize: '1.1rem', minWidth: 40, textAlign: 'center', color: oculto ? 'var(--muted)' : cor }}>
+                  {oculto ? '🎲' : (r.total ?? '—')}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div className="row" style={{ gap: 6, flexWrap: 'wrap' }}>
+                    {r.personagemNome && <b style={{ color: 'var(--gold, #e0b64a)' }}>{r.personagemNome}</b>}
+                    <span>{r.rotulo || r.expressao}</span>
+                    {r.critico && <span className="tag">crítico</span>}
+                    {r.falhaCritica && <span className="tag">falha</span>}
+                    {r.oculta && <span className="tag">privada</span>}
+                  </div>
+                  <div className="muted" style={{ fontSize: '.72rem' }}>
+                    {oculto ? 'rolagem privada' : (r.detalhe || r.expressao)} · {dataHora(r.criadoEm)}
+                  </div>
+                </div>
+                {r.oculta && !r.revelada && (
+                  <button className="ghost mini" onClick={() => revelar(r.id)} title="Revelar para todos">👁 Revelar</button>
+                )}
+              </div>
+            )
+          })}
+          {!rolagens.length && <div className="muted">Nenhuma rolagem ainda.</div>}
+        </div>
       </div>
 
       <ResultadosPanel rolagens={rolagens} onRolar={rolar} ehMestre onRevelar={revelar} />
