@@ -266,10 +266,11 @@ export default function Ficha() {
   // Rola um ATAQUE: d20 + treino da perícia ligada (sem atributo) e o DANO (dados da arma).
   // Numa campanha, registra no histórico/Escudo com o nome do personagem; senão, rola local.
   async function rolarAtaque(a) {
-    const per = a.pericia
-      ? (p.pericias || []).find((pe) => !pe.custom
-        && ((pe.nome || '').toLowerCase() === String(a.pericia).toLowerCase() || pe.codigo === a.pericia))
-      : null
+    // Ataque com arma usa a perícia Combate por padrão (regra do livro). Se o ataque
+    // tiver outra perícia definida (ex.: Pontaria p/ à distância), usa essa.
+    const achaPericia = (chave) => (p.pericias || []).find((pe) => !pe.custom
+      && ((pe.nome || '').toLowerCase() === String(chave).toLowerCase() || pe.codigo === String(chave).toUpperCase()))
+    const per = (a.pericia ? achaPericia(a.pericia) : null) || achaPericia('COMBATE')
     const mod = per ? (treino[per.codigo] ?? per.treino ?? 0) + (per.bonus || 0) + (outrosBonus[per.codigo] ?? per.outros ?? 0) : 0
     const modTxt = mod ? (mod > 0 ? `+${mod}` : `${mod}`) : ''
     const { alvo, mult } = parseCritico(a.critico)
