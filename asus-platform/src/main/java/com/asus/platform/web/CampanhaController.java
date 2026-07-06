@@ -59,13 +59,21 @@ public class CampanhaController {
 
     @PutMapping("/campanhas/{id}")
     public CampanhaResponse atualizar(@PathVariable Long id,
+                                      @AuthenticationPrincipal UsuarioPrincipal principal,
                                       @RequestBody AtualizarCampanhaRequest req) {
+        if (principal != null) {
+            service.exigirPermissao(id, principal.id(), com.asus.platform.domain.Permissao.GERENCIAR_CAMPANHA);
+        }
         return service.atualizar(id, req);
     }
 
     @DeleteMapping("/campanhas/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void apagar(@PathVariable Long id) {
+    public void apagar(@PathVariable Long id,
+                       @AuthenticationPrincipal UsuarioPrincipal principal) {
+        if (principal != null) {
+            service.exigirPermissao(id, principal.id(), com.asus.platform.domain.Permissao.GERENCIAR_CAMPANHA);
+        }
         service.apagar(id);
     }
 
