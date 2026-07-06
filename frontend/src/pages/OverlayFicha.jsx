@@ -41,9 +41,23 @@ export default function OverlayFicha() {
       .catch(() => {})
   }, [personagemId])
 
+  // Rolagens em tempo real. Ataque de arma vem em duas rolagens ("⚔ Arma" e
+  // "🗡 Arma (dano)"); a gente junta as duas num só card ATAQUE + DANO.
   useEffect(
     () => inscrever(`/topic/personagens/${personagemId}/rolagens`, (r) => {
-      if (r && r.total != null) setUltima(r)
+      if (!r || r.total == null) return
+      const rot = r.rotulo || ''
+      if (rot.startsWith('⚔')) {
+        const nome = rot.replace(/^⚔\s*/, '').trim()
+        setUltima({ tipo: 'ataque', id: r.id, nome, ataque: r.total, dano: null, crit: !!r.critico, fumble: !!r.falhaCritica })
+      } else if (rot.startsWith('🗡')) {
+        const nome = rot.replace(/^🗡\s*/, '').replace(/\(dano\).*/i, '').trim()
+        setUltima((prev) => (prev && prev.tipo === 'ataque' && prev.nome === nome)
+          ? { ...prev, id: r.id, dano: r.total, crit: prev.crit || !!r.critico }
+          : { tipo: 'roll', id: r.id, rotulo: rot, total: r.total, detalhe: r.detalhe, crit: !!r.critico, fumble: !!r.falhaCritica })
+      } else {
+        setUltima({ tipo: 'roll', id: r.id, rotulo: rot || r.expressao, total: r.total, detalhe: r.detalhe, crit: !!r.critico, fumble: !!r.falhaCritica })
+      }
     }),
     [personagemId],
   )
@@ -52,7 +66,7 @@ export default function OverlayFicha() {
     [personagemId],
   )
 
-  const critClass = ultima?.critico ? 'crit' : ultima?.falhaCritica ? 'fumble' : ''
+  const critClass = ultima?.crit ? 'crit' : ultima?.fumble ? 'fumble' : ''
   const temFoto = info?.avatarAssetId && !fotoErro
   const inicial = (info?.nome || '?').charAt(0).toUpperCase()
 
@@ -97,17 +111,40 @@ export default function OverlayFicha() {
           )}
 
           <div style={{ borderTop: '1px solid rgba(255,255,255,.08)', marginTop: 8, paddingTop: 8 }}>
-            {ultima ? (
+            {ultima?.tipo === 'ataque' ? (
+              <div className="pop" key={ultima.id} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ textAlign: 'center' }}>
+                  <div className={`overlay-total ${critClass}`} style={{ fontSize: '1.9rem', margin: 0 }}>{ultima.ataque}</div>
+                  <div className="muted" style={{ fontSize: '.56rem', letterSpacing: 1.3 }}>ATAQUE</div>
+                </div>
+                {ultima.dano != null && (
+                  <>
+                    <div style={{ width: 1, alignSelf: 'stretch', background: 'rgba(255,255,255,.15)' }} />
+                    <div style={{ textAlign: 'center' }}>
+                      <div className="overlay-total" style={{ fontSize: '1.9rem', margin: 0 }}>{ultima.dano}</div>
+                      <div className="muted" style={{ fontSize: '.56rem', letterSpacing: 1.3 }}>DANO</div>
+                    </div>
+                  </>
+                )}
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ textTransform: 'uppercase', letterSpacing: 1.2, fontSize: '.64rem', fontWeight: 700, color: 'var(--gold-3, #e0b64a)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    ⚔ {ultima.nome}
+                  </div>
+                  {ultima.crit && <div className="muted" style={{ fontSize: '.66rem' }}>CRÍTICO!</div>}
+                  {ultima.fumble && <div className="muted" style={{ fontSize: '.66rem' }}>FALHA!</div>}
+                </div>
+              </div>
+            ) : ultima ? (
               <div className="pop" key={ultima.id} style={{ display: 'flex', alignItems: 'center', gap: 11 }}>
                 <div className={`overlay-total ${critClass}`} style={{ fontSize: '2.3rem', margin: 0 }}>{ultima.total}</div>
                 <div style={{ minWidth: 0 }}>
                   <div style={{ textTransform: 'uppercase', letterSpacing: 1.2, fontSize: '.66rem', fontWeight: 700, color: 'var(--gold-3, #e0b64a)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {ultima.rotulo || ultima.expressao}
+                    {ultima.rotulo}
                   </div>
                   <div className="muted" style={{ fontSize: '.68rem' }}>
                     {ultima.detalhe}
-                    {ultima.critico ? ' · CRÍTICO!' : ''}
-                    {ultima.falhaCritica ? ' · FALHA!' : ''}
+                    {ultima.crit ? ' · CRÍTICO!' : ''}
+                    {ultima.fumble ? ' · FALHA!' : ''}
                   </div>
                 </div>
               </div>
