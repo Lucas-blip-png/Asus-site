@@ -260,9 +260,9 @@ export default function Campanha() {
 
   function carregar() {
     api(`/api/campanhas/${id}`).then(setCampanha).catch((e) => setErro(e.message))
-    api(`/api/campanhas/${id}/rolagens`).then(setRolagens)
-    api(`/api/campanhas/${id}/membros`).then(setMembros)
-    api(`/api/campanhas/${id}/personagens`).then(setPersonagens)
+    api(`/api/campanhas/${id}/rolagens`).then(setRolagens).catch(() => {})
+    api(`/api/campanhas/${id}/membros`).then(setMembros).catch(() => {})
+    api(`/api/campanhas/${id}/personagens`).then(setPersonagens).catch(() => {})
     api(`/api/campanhas/${id}/sessoes`).then(setSessoes).catch(() => {})
     api(`/api/campanhas/${id}/combates`).then(setCombates).catch(() => {})
   }

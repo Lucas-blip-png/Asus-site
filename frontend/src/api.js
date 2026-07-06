@@ -25,9 +25,10 @@ export async function api(path, { method = 'GET', body, auth = true, headers = {
   if (res.status === 401 && onUnauthorized) onUnauthorized()
 
   const text = await res.text()
-  const data = text ? JSON.parse(text) : null
+  let data = null
+  try { data = text ? JSON.parse(text) : null } catch { data = null }
   if (!res.ok) {
-    throw new Error((data && data.message) || res.statusText)
+    throw new Error((data && data.message) || res.statusText || ('HTTP ' + res.status))
   }
   return data
 }
@@ -43,3 +44,5 @@ export async function obterOrgId() {
   cachedOrgId = org.id
   return cachedOrgId
 }
+
+export function limparOrgId() { cachedOrgId = null }

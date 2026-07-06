@@ -320,10 +320,10 @@ export default function Ficha() {
     })
   }
   // Rolagem livre vinda do painel de Resultados (chat).
-  async function rolarPainel(expressao, rot) {
+  async function rolarPainel(expressao, rot, privada) {
     await api(`/api/campanhas/${campanhaAtiva.id}/rolagens`, {
       method: 'POST',
-      body: { expressao, rotulo: rot, personagemId: Number(id), usuarioId: user?.id },
+      body: { expressao, rotulo: rot, oculta: !!privada, personagemId: Number(id), usuarioId: user?.id },
     })
   }
   useEffect(() => () => { clearTimeout(rolTimer.current); clearTimeout(atqTimer.current) }, [])

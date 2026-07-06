@@ -97,9 +97,11 @@ public class SistemaController {
     @GetMapping("/asus/habilidades")
     public List<Habilidade> habilidades(@RequestParam(required = false) String classe) {
         Long id = asusSystem().getId();
-        return classe == null
+        List<Habilidade> lista = classe == null
                 ? habilidadeRepository.findByGameSystemId(id)
                 : habilidadeRepository.findByGameSystemIdAndClasseCodigo(id, classe);
+        // Nao expoe as habilidades "proprias" (custom por personagem) no catalogo do Livro.
+        return lista.stream().filter(h -> !"PROPRIA".equals(h.getClasseCodigo())).toList();
     }
 
     @GetMapping("/asus/itens")
