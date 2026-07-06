@@ -21,9 +21,14 @@ public record RolagemResponse(
         Boolean falhaCritica,
         boolean oculta,
         boolean revelada,
-        LocalDateTime criadoEm) {
+        LocalDateTime criadoEm,
+        String personagemNome) {
 
     public static RolagemResponse de(Rolagem r, boolean revelarConteudo) {
+        return de(r, revelarConteudo, null);
+    }
+
+    public static RolagemResponse de(Rolagem r, boolean revelarConteudo, String personagemNome) {
         boolean mostrar = revelarConteudo || !r.isOculta() || r.isRevelada();
         return new RolagemResponse(
                 r.getId(), r.getCampanhaId(), r.getPersonagemId(), r.getUsuarioId(),
@@ -33,6 +38,6 @@ public record RolagemResponse(
                 mostrar ? r.getNaturalD20() : null,
                 mostrar ? r.isCritico() : null,
                 mostrar ? r.isFalhaCritica() : null,
-                r.isOculta(), r.isRevelada(), r.getCriadoEm());
+                r.isOculta(), r.isRevelada(), r.getCriadoEm(), personagemNome);
     }
 }

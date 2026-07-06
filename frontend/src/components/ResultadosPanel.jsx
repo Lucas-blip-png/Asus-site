@@ -67,7 +67,10 @@ export default function ResultadosPanel({ rolagens = [], onRolar, ehMestre = fal
                     {oculto ? '🎲' : (r.total ?? '—')}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div className="rt">{r.rotulo || r.expressao}{r.oculta ? ' 🔒' : ''}</div>
+                    <div className="rt">
+                      {r.personagemNome && <b style={{ color: 'var(--gold, #e0b64a)' }}>{r.personagemNome} · </b>}
+                      {r.rotulo || r.expressao}{r.oculta ? ' 🔒' : ''}
+                    </div>
                     <div className="muted" style={{ fontSize: '.72rem' }}>
                       {oculto ? 'rolagem privada' : (r.detalhe || r.expressao)}
                     </div>

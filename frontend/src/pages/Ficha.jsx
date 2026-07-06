@@ -23,6 +23,33 @@ const fmtEsp = (n) => String(Math.round((Number(n) || 0) * 100) / 100).replace('
 const fmtClasses = (cods) => (cods || '').split(',').map((c) => c.trim()).filter(Boolean)
   .map((c) => c.split('_').map((w) => (w ? w[0] + w.slice(1).toLowerCase() : '')).join(' ')).join(', ')
 
+// Interpreta o dano ("1d6", "2d8+3", "1d10-1"). Retorna null se não for dado.
+function parseDano(expr) {
+  const s = String(expr || '').replace(/\s+/g, '').toLowerCase()
+  const m = s.match(/^(\d*)d(\d+)([+-]\d+)?$/)
+  if (!m) return null
+  return { qtd: Math.min(50, Math.max(1, Number(m[1] || 1))), faces: Math.max(2, Number(m[2])), mod: m[3] ? Number(m[3]) : 0 }
+}
+// Monta "NdM+K" a partir das partes (usado para dobrar os dados no crítico).
+const exprDano = ({ qtd, faces, mod }) => `${qtd}d${faces}${mod ? (mod > 0 ? '+' + mod : mod) : ''}`
+// Rola localmente uma expressão de dano já parseada. Retorna { total, rolls }.
+function rolarDanoLocal({ qtd, faces, mod }) {
+  const rolls = []
+  for (let i = 0; i < qtd; i++) rolls.push(1 + Math.floor(Math.random() * faces))
+  return { total: rolls.reduce((a, b) => a + b, 0) + mod, rolls }
+}
+// Interpreta o crítico: "18/x2" -> {alvo:18,mult:2}; "18" -> {alvo:18,mult:2}; "x3" -> {alvo:20,mult:3}.
+function parseCritico(critStr) {
+  const s = String(critStr || '').toLowerCase()
+  let mult = 2
+  let alvo = 20
+  const mMult = s.match(/x\s*(\d+)/)
+  if (mMult) mult = Math.max(1, Number(mMult[1]))
+  const mAlvo = s.replace(/x\s*\d+/g, '').match(/(\d+)/)
+  if (mAlvo) alvo = Math.min(20, Math.max(2, Number(mAlvo[1])))
+  return { alvo, mult }
+}
+
 function ItemInvRow({ it, onQtd, onEquip, onDelete, onEdit, onCombate }) {
   const [open, setOpen] = useState(false)
   const resumo = [it.dano && `Dano ${it.dano}`, it.bonusDefesa != null && `Defesa +${it.bonusDefesa}`].filter(Boolean).join(' · ')
@@ -65,7 +92,7 @@ function ItemInvRow({ it, onQtd, onEquip, onDelete, onEdit, onCombate }) {
   )
 }
 
-function AtaqueRow({ a, onEdit, onDelete }) {
+function AtaqueRow({ a, onRoll, onEdit, onDelete }) {
   const [open, setOpen] = useState(false)
   const resumo = [a.dano && `Dano ${a.dano}`, a.critico && `Crít ${a.critico}`].filter(Boolean).join(' · ')
   return (
@@ -76,6 +103,8 @@ function AtaqueRow({ a, onEdit, onDelete }) {
         {resumo && <span className="sub">{resumo}</span>}
         <div className="spacer" />
         {a.alcance && <span className="tag">{a.alcance}</span>}
+        <button className="d20-btn" title={`Rolar ataque de ${a.nome}`}
+          onClick={(e) => { e.stopPropagation(); onRoll(a) }}>🎲</button>
       </div>
       {open && (
         <div className="cris-body">
@@ -203,11 +232,18 @@ export default function Ficha() {
   const [novaHab, setNovaHab] = useState({ nome: '', tipo: 'PASSIVA', custo: 0, custoTipo: 'PE', efeito: '' })
   const [rolagem, setRolagem] = useState(null)
   const rolTimer = useRef(null)
+  const [ataqueRoll, setAtaqueRoll] = useState(null)
+  const atqTimer = useRef(null)
 
   function toastRolagem(r) {
     setRolagem(r)
     clearTimeout(rolTimer.current)
     rolTimer.current = setTimeout(() => setRolagem(null), 5000)
+  }
+  function toastAtaque(r) {
+    setAtaqueRoll(r)
+    clearTimeout(atqTimer.current)
+    atqTimer.current = setTimeout(() => setAtaqueRoll(null), 9000)
   }
   // Rola 1d20 + modificador. Se o personagem está numa campanha, rola no servidor
   // (aparece no chat de Resultados de todos); senão, rola localmente.
@@ -227,6 +263,61 @@ export default function Ficha() {
     const d = 1 + Math.floor(Math.random() * 20)
     toastRolagem({ rotulo, d, mod: m, total: d + m, crit: d === 20, fumble: d === 1 })
   }
+  // Rola um ATAQUE: d20 + treino da perícia ligada (sem atributo) e o DANO (dados da arma).
+  // Numa campanha, registra no histórico/Escudo com o nome do personagem; senão, rola local.
+  async function rolarAtaque(a) {
+    const per = a.pericia
+      ? (p.pericias || []).find((pe) => !pe.custom
+        && ((pe.nome || '').toLowerCase() === String(a.pericia).toLowerCase() || pe.codigo === a.pericia))
+      : null
+    const mod = per ? (treino[per.codigo] ?? per.treino ?? 0) + (per.bonus || 0) + (outrosBonus[per.codigo] ?? per.outros ?? 0) : 0
+    const modTxt = mod ? (mod > 0 ? `+${mod}` : `${mod}`) : ''
+    const { alvo, mult } = parseCritico(a.critico)
+    const dano = parseDano(a.dano)
+
+    if (campanhaAtiva) {
+      try {
+        const ra = await api(`/api/campanhas/${campanhaAtiva.id}/rolagens`, {
+          method: 'POST',
+          body: { expressao: `1d20${modTxt}`, rotulo: `⚔ ${a.nome}`, personagemId: Number(id), usuarioId: user?.id },
+        })
+        const dNat = ra.naturalD20 ?? null
+        const crit = dNat != null && dNat >= alvo
+        let danoTotal = null
+        let formulaDano = '—'
+        if (dano) {
+          const partes = crit ? { ...dano, qtd: dano.qtd * mult } : dano
+          const rd = await api(`/api/campanhas/${campanhaAtiva.id}/rolagens`, {
+            method: 'POST',
+            body: { expressao: exprDano(partes), rotulo: `🗡 ${a.nome} (dano)${crit ? ' CRÍTICO' : ''}`, personagemId: Number(id), usuarioId: user?.id },
+          })
+          danoTotal = rd.total
+          formulaDano = `${exprDano(partes)} = ${rd.total}`
+        }
+        toastAtaque({
+          nome: a.nome, ataque: ra.total, dano: danoTotal, crit, fumble: dNat === 1,
+          formulaAtaque: `1d20${modTxt} = ${ra.total}`, formulaDano,
+          per: per ? per.nome : null, critInfo: `${alvo}/x${mult}`,
+        })
+        return
+      } catch { /* cai pro local */ }
+    }
+    const d = 1 + Math.floor(Math.random() * 20)
+    const crit = d >= alvo
+    let danoTotal = null
+    let formulaDano = '—'
+    if (dano) {
+      const partes = crit ? { ...dano, qtd: dano.qtd * mult } : dano
+      const rd = rolarDanoLocal(partes)
+      danoTotal = rd.total
+      formulaDano = `${exprDano(partes)} = [${rd.rolls.join(', ')}]${dano.mod ? (dano.mod > 0 ? '+' + dano.mod : dano.mod) : ''}`
+    }
+    toastAtaque({
+      nome: a.nome, ataque: d + mod, dano: danoTotal, crit, fumble: d === 1,
+      formulaAtaque: `1d20${modTxt} = [${d}]${modTxt}`, formulaDano,
+      per: per ? per.nome : null, critInfo: `${alvo}/x${mult}`,
+    })
+  }
   // Rolagem livre vinda do painel de Resultados (chat).
   async function rolarPainel(expressao, rot) {
     await api(`/api/campanhas/${campanhaAtiva.id}/rolagens`, {
@@ -234,7 +325,7 @@ export default function Ficha() {
       body: { expressao, rotulo: rot, personagemId: Number(id), usuarioId: user?.id },
     })
   }
-  useEffect(() => () => clearTimeout(rolTimer.current), [])
+  useEffect(() => () => { clearTimeout(rolTimer.current); clearTimeout(atqTimer.current) }, [])
 
   // Descobre a campanha do personagem (para o chat de Resultados na ficha).
   useEffect(() => {
@@ -930,7 +1021,7 @@ export default function Ficha() {
             <div>
               <div className="cris-list">
                 {ataques.map((a) => (
-                  <AtaqueRow key={a.id} a={a} onEdit={setEditAtaque} onDelete={delAtaque} />
+                  <AtaqueRow key={a.id} a={a} onRoll={rolarAtaque} onEdit={setEditAtaque} onDelete={delAtaque} />
                 ))}
               </div>
               {!ataques.length && <div className="muted">Nenhum ataque cadastrado.</div>}
@@ -1341,6 +1432,38 @@ export default function Ficha() {
           <div className="muted" style={{ fontSize: '.75rem' }}>
             d20 ({rolagem.d}){rolagem.mod ? ` + ${rolagem.mod}` : ''}
             {rolagem.crit ? ' · CRÍTICO!' : ''}{rolagem.fumble ? ' · FALHA!' : ''}
+          </div>
+        </div>
+      )}
+
+      {ataqueRoll && (
+        <div className={`roll-toast atq ${ataqueRoll.crit ? 'crit' : ataqueRoll.fumble ? 'fumble' : ''}`}
+          style={{ minWidth: 230 }}>
+          <div className="row" style={{ alignItems: 'center', gap: 8 }}>
+            <b>{ataqueRoll.nome}</b>
+            <div className="spacer" />
+            <button className="ghost mini" onClick={() => setAtaqueRoll(null)}>✕</button>
+          </div>
+          <div className="row" style={{ marginTop: 4, textAlign: 'center', gap: 0 }}>
+            <div style={{ flex: 1 }}>
+              <div className="rt-total">{ataqueRoll.ataque}</div>
+              <div className="muted" style={{ fontSize: '.66rem', letterSpacing: 1.5 }}>ATAQUE</div>
+            </div>
+            {ataqueRoll.dano != null && (
+              <>
+                <div style={{ width: 1, background: 'rgba(255,255,255,.18)', margin: '6px 0' }} />
+                <div style={{ flex: 1 }}>
+                  <div className="rt-total">{ataqueRoll.dano}</div>
+                  <div className="muted" style={{ fontSize: '.66rem', letterSpacing: 1.5 }}>DANO</div>
+                </div>
+              </>
+            )}
+          </div>
+          <div className="muted" style={{ fontSize: '.68rem', marginTop: 5 }}>
+            Atq: {ataqueRoll.formulaAtaque}{ataqueRoll.per ? ` (${ataqueRoll.per})` : ''}
+            {ataqueRoll.dano != null && <> · Dano: {ataqueRoll.formulaDano}</>}
+            {` · crít ${ataqueRoll.critInfo}`}
+            {ataqueRoll.crit ? ' · CRÍTICO!' : ataqueRoll.fumble ? ' · FALHA!' : ''}
           </div>
         </div>
       )}
