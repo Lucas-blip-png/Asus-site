@@ -25,9 +25,12 @@ import org.springframework.web.bind.annotation.*;
 public class CampanhaController {
 
     private final CampanhaService service;
+    private final com.asus.platform.service.AcessoService acessoService;
 
-    public CampanhaController(CampanhaService service) {
+    public CampanhaController(CampanhaService service,
+                              com.asus.platform.service.AcessoService acessoService) {
         this.service = service;
+        this.acessoService = acessoService;
     }
 
     @GetMapping("/organizacoes/{orgId}/campanhas")
@@ -107,7 +110,12 @@ public class CampanhaController {
     @ResponseStatus(HttpStatus.CREATED)
     public CampanhaPersonagemResponse adicionarPersonagem(
             @PathVariable Long id,
+            @AuthenticationPrincipal UsuarioPrincipal principal,
             @Valid @RequestBody AdicionarPersonagemCampanhaRequest req) {
+        // So o dono do personagem (ou o mestre da campanha) pode vincula-lo.
+        if (principal != null) {
+            acessoService.exigirDonoPersonagemOuMestre(req.personagemId(), service.buscar(id).mestreId(), principal);
+        }
         return service.adicionarPersonagem(id, req.personagemId());
     }
 

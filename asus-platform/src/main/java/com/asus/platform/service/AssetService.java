@@ -32,17 +32,20 @@ public class AssetService {
     private final PlanoService planoService;
     private final AuditoriaService auditoriaService;
     private final ArmazenamentoAssets armazenamento;
+    private final DonoService donoService;
 
     public AssetService(AssetRepository assetRepository,
                         OrganizacaoService organizacaoService,
                         PlanoService planoService,
                         AuditoriaService auditoriaService,
-                        ArmazenamentoAssets armazenamento) {
+                        ArmazenamentoAssets armazenamento,
+                        DonoService donoService) {
         this.assetRepository = assetRepository;
         this.organizacaoService = organizacaoService;
         this.planoService = planoService;
         this.auditoriaService = auditoriaService;
         this.armazenamento = armazenamento;
+        this.donoService = donoService;
     }
 
     public List<AssetResponse> listar(Long organizacaoId) {
@@ -122,8 +125,14 @@ public class AssetService {
     }
 
     @Transactional
-    public void apagar(Long id) {
+    public void apagar(Long id, com.asus.platform.security.UsuarioPrincipal principal) {
         Asset asset = carregar(id);
+        // So o dono do upload (ou o dono/dev) pode apagar; assets antigos sem dono ficam livres.
+        if (principal != null && asset.getUsuarioId() != null
+                && !asset.getUsuarioId().equals(principal.id())
+                && !donoService.ehDono(principal.id())) {
+            throw new com.asus.platform.web.AcessoNegadoException("Este asset pertence a outro usuário.");
+        }
         armazenamento.apagar(asset.getStoragePath());
         assetRepository.delete(asset);
         auditoriaService.registrar(asset.getOrganizacaoId(), asset.getUsuarioId(), "ASSET_REMOVIDO",

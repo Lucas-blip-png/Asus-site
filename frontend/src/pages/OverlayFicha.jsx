@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { api } from '../api.js'
 import { inscrever } from '../ws.js'
@@ -42,19 +42,32 @@ export default function OverlayFicha() {
   }, [personagemId])
 
   // Rolagens em tempo real. Ataque de arma vem em duas rolagens ("⚔ Arma" e
-  // "🗡 Arma (dano)"); a gente junta as duas num só card ATAQUE + DANO.
+  // "🗡 Arma (dano)"); pareamos as duas num só card ATAQUE + DANO usando um
+  // buffer por NOME da arma — assim ataques rápidos/fora de ordem não se misturam.
+  const ataquesPendentes = useRef(new Map())
   useEffect(
     () => inscrever(`/topic/personagens/${personagemId}/rolagens`, (r) => {
       if (!r || r.total == null) return
       const rot = r.rotulo || ''
+      const agora = Date.now()
+      // limpa pendentes velhos (>15s sem o dano chegar)
+      for (const [k, v] of ataquesPendentes.current) {
+        if (agora - v.em > 15000) ataquesPendentes.current.delete(k)
+      }
       if (rot.startsWith('⚔')) {
         const nome = rot.replace(/^⚔\s*/, '').trim()
-        setUltima({ tipo: 'ataque', id: r.id, nome, ataque: r.total, dano: null, crit: !!r.critico, fumble: !!r.falhaCritica })
+        const atq = { tipo: 'ataque', id: r.id, nome, ataque: r.total, dano: null, crit: !!r.critico, fumble: !!r.falhaCritica, em: agora }
+        ataquesPendentes.current.set(nome, atq)
+        setUltima(atq)
       } else if (rot.startsWith('🗡')) {
         const nome = rot.replace(/^🗡\s*/, '').replace(/\(dano\).*/i, '').trim()
-        setUltima((prev) => (prev && prev.tipo === 'ataque' && prev.nome === nome)
-          ? { ...prev, id: r.id, dano: r.total, crit: prev.crit || !!r.critico }
-          : { tipo: 'roll', id: r.id, rotulo: rot, total: r.total, detalhe: r.detalhe, crit: !!r.critico, fumble: !!r.falhaCritica })
+        const pendente = ataquesPendentes.current.get(nome)
+        if (pendente) {
+          ataquesPendentes.current.delete(nome)
+          setUltima({ ...pendente, id: r.id, dano: r.total, crit: pendente.crit || !!r.critico })
+        } else {
+          setUltima({ tipo: 'roll', id: r.id, rotulo: rot, total: r.total, detalhe: r.detalhe, crit: !!r.critico, fumble: !!r.falhaCritica })
+        }
       } else {
         setUltima({ tipo: 'roll', id: r.id, rotulo: rot || r.expressao, total: r.total, detalhe: r.detalhe, crit: !!r.critico, fumble: !!r.falhaCritica })
       }

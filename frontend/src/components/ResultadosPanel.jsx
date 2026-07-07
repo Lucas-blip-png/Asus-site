@@ -14,8 +14,15 @@ export default function ResultadosPanel({ rolagens = [], onRolar, ehMestre = fal
   const [rotulo, setRotulo] = useState('')
   const [privada, setPrivada] = useState(false)
   const [erro, setErro] = useState(null)
+  // Quantas rolagens já foram "vistas" (abrir o painel marca todas como vistas).
+  const [vistas, setVistas] = useState(0)
 
-  const naoVistas = rolagens.length
+  const naoVistas = Math.max(0, rolagens.length - vistas)
+  function alternar() {
+    // Abrir (ou fechar depois de ler) marca tudo como visto.
+    setVistas(rolagens.length)
+    setAberto((o) => !o)
+  }
 
   async function enviar(e) {
     e.preventDefault()
@@ -31,7 +38,7 @@ export default function ResultadosPanel({ rolagens = [], onRolar, ehMestre = fal
 
   return (
     <>
-      <button className="chat-fab" title="Resultados de dados" onClick={() => setAberto((o) => !o)}>
+      <button className="chat-fab" title="Resultados de dados" onClick={alternar}>
         💬
         {!aberto && naoVistas > 0 && <span className="chat-badge">{naoVistas > 99 ? '99+' : naoVistas}</span>}
       </button>
@@ -41,7 +48,7 @@ export default function ResultadosPanel({ rolagens = [], onRolar, ehMestre = fal
           <div className="rp-head">
             <b>Resultados</b>
             <div className="spacer" />
-            <button className="ghost mini" onClick={() => setAberto(false)}>✕</button>
+            <button className="ghost mini" onClick={() => { setVistas(rolagens.length); setAberto(false) }}>✕</button>
           </div>
 
           <form className="rp-roll" onSubmit={enviar}>

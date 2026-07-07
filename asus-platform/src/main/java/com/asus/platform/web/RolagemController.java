@@ -29,8 +29,12 @@ public class RolagemController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public RolagemResponse rolar(@PathVariable Long id, @Valid @RequestBody RolarRequest req) {
-        return service.rolar(id, req);
+    public RolagemResponse rolar(@PathVariable Long id, @Valid @RequestBody RolarRequest req,
+                                 @AuthenticationPrincipal UsuarioPrincipal principal) {
+        // A autoria da rolagem vem do JWT (evita rolar "em nome" de outro usuario).
+        RolarRequest efetivo = principal == null ? req
+                : new RolarRequest(req.expressao(), req.rotulo(), req.personagemId(), principal.id(), req.oculta());
+        return service.rolar(id, efetivo);
     }
 
     /** Revela uma rolagem oculta. O usuario vem do JWT (não do cliente); a query só vale no modo aberto/dev. */

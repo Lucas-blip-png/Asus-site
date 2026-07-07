@@ -72,11 +72,13 @@ export default function Escudo() {
     return () => subs.forEach((u) => u && u())
   }, [idsPersonagens])
 
-  async function ajustar(pid, campo, delta, atual) {
+  async function ajustar(pid, campo, delta, atual, max) {
     try {
+      // Não passa do teto ao subir nem de 0 ao descer.
+      const alvo = Math.max(0, Math.min(max ?? Infinity, (atual ?? 0) + delta))
       await api(`/api/campanhas/${id}/escudo/personagens/${pid}/status?usuarioId=${user?.id}`, {
         method: 'PATCH',
-        body: { [campo]: Math.max(0, (atual ?? 0) + delta) },
+        body: { [campo]: alvo },
       })
       carregar()
     } catch (e) { setErro(e.message) }
@@ -141,8 +143,8 @@ export default function Escudo() {
               {BARRAS.map(([rot, cls, k]) => (
                 s[k + 'Max'] != null && (
                   <Recurso key={k} label={rot} cls={cls} atual={s[k + 'Atual']} max={s[k + 'Max']}
-                    onMinus={() => ajustar(p.id, k + 'Atual', -1, s[k + 'Atual'])}
-                    onPlus={() => ajustar(p.id, k + 'Atual', +1, s[k + 'Atual'])} />
+                    onMinus={() => ajustar(p.id, k + 'Atual', -1, s[k + 'Atual'], s[k + 'Max'])}
+                    onPlus={() => ajustar(p.id, k + 'Atual', +1, s[k + 'Atual'], s[k + 'Max'])} />
                 )
               ))}
 
