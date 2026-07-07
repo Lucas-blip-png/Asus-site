@@ -33,4 +33,12 @@ public class AcessoService {
             throw new AcessoNegadoException("Você não tem permissão sobre este personagem.");
         }
     }
+
+    /** Como {@link #exigirDonoPersonagem}, mas o MESTRE indicado tambem passa (fluxos de campanha). */
+    public void exigirDonoPersonagemOuMestre(Long personagemId, Long mestreId, UsuarioPrincipal principal) {
+        if (principal != null && mestreId != null && mestreId.equals(principal.id())) {
+            return;
+        }
+        exigirDonoPersonagem(personagemId, principal);
+    }
 }

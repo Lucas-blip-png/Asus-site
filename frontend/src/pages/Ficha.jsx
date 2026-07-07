@@ -348,8 +348,10 @@ export default function Ficha() {
       setP((prev) => (prev ? { ...prev, status: { ...prev.status, ...s } } : prev)),
     ), [id])
 
+  // Reset COMPLETO (só no carregamento inicial): repõe também os editores
+  // (treino, outros, descrição, atributos, nível/XP) a partir do servidor.
   function aplicar(d) {
-    setP(d)
+    aplicarLeve(d)
     setTreino(Object.fromEntries((d.pericias || []).filter((pe) => !pe.custom).map((pe) => [pe.codigo, pe.treino])))
     setOutrosBonus(Object.fromEntries((d.pericias || []).filter((pe) => !pe.custom).map((pe) => [pe.codigo, pe.outros || 0])))
     setOutros((d.pericias || []).filter((pe) => pe.custom).map((pe) => ({ nome: pe.nome, atributo: pe.atributoBase, treino: pe.treino })))
@@ -360,18 +362,25 @@ export default function Ficha() {
     setBase({ ...vazioBase, ...(d.atributosBase || {}) })
     setNivelInput(String(d.nivel ?? 0))
     setXpInput(String(d.xpAtual ?? 0))
+  }
+
+  // Atualização LEVE (após qualquer mutação): atualiza a ficha calculada sem
+  // sobrescrever o que o jogador está digitando (descrição, treino, atributos…).
+  function aplicarLeve(d) {
+    setP(d)
     setStatusInput({ pvAtual: d.status.pvAtual, pmAtual: d.status.pmAtual, peAtual: d.status.peAtual })
   }
 
   async function carregar() {
     const d = await api(`/api/personagens/${id}`)
-    aplicar(d)
+    aplicarLeve(d)
     return d
   }
 
   useEffect(() => {
-    carregar()
+    api(`/api/personagens/${id}`)
       .then((d) => {
+        aplicar(d)
         api(`/api/personagens/${id}/habilidades`).then(setHabChosen).catch(() => {})
         api(`/api/personagens/${id}/habilidades/disponiveis`).then(setHabDisp).catch(() => {})
         api('/api/sistemas/asus/itens').then(setItens).catch(() => {})
@@ -452,7 +461,11 @@ export default function Ficha() {
         method: 'PATCH',
         body: { xpAtual: Number(xpInput) || 0, nivel: Number(nivelInput) || 0 },
       })
-      aplicar(resp.personagem)
+      aplicarLeve(resp.personagem)
+      setNivelInput(String(resp.personagem.nivel ?? 0))
+      setXpInput(String(resp.personagem.xpAtual ?? 0))
+      // Subir de nível pode liberar passivas novas automaticamente — recarrega a aba.
+      recarregarHab()
       if (resp.niveisGanhos && resp.niveisGanhos.length) setLevelUp(resp.niveisGanhos)
     } catch (e) { setErro(e.message) }
   }

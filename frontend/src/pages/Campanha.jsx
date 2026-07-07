@@ -188,7 +188,7 @@ function CombateTracker({ combate, personagens, onClose, onMudou }) {
               <button className="ghost mini" title="-5 PV" onClick={() => patchPart(p.id, { pvAtual: Math.max(0, p.pvAtual - 5) })}>«</button>
               <button className="ghost mini" title="-1 PV" onClick={() => patchPart(p.id, { pvAtual: Math.max(0, p.pvAtual - 1) })}>‹</button>
               <b className="stat" style={{ minWidth: 54, textAlign: 'center' }}>{p.pvAtual}/{p.pvMax}</b>
-              <button className="ghost mini" title="+1 PV" onClick={() => patchPart(p.id, { pvAtual: p.pvAtual + 1 })}>›</button>
+              <button className="ghost mini" title="+1 PV" onClick={() => patchPart(p.id, { pvAtual: Math.min(p.pvMax || Infinity, p.pvAtual + 1) })}>›</button>
               <button className="ghost mini" title="Rolar iniciativa" onClick={() => patchPart(p.id, { iniciativa: d20() })}>🎲</button>
               <button className="ghost mini" title="Adicionar efeito/condição"
                 onClick={() => setCondForm({ pid: p.id, nome: '', turnos: '' })}>＋ef</button>
