@@ -9,8 +9,11 @@ import com.asus.platform.repository.AtaqueRepository;
 import com.asus.platform.repository.GameSystemRepository;
 import com.asus.platform.repository.ItemJogoRepository;
 import com.asus.platform.repository.ItemPersonagemRepository;
+import com.asus.platform.security.UsuarioPrincipal;
+import com.asus.platform.service.AcessoService;
 import java.util.List;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 /** Inventario do personagem (aba Inventário): catalogo T20 + itens proprios, respeitando carga. */
@@ -22,15 +25,18 @@ public class InventarioController {
     private final ItemJogoRepository itemJogoRepository;
     private final GameSystemRepository gameSystemRepository;
     private final AtaqueRepository ataqueRepository;
+    private final AcessoService acessoService;
 
     public InventarioController(ItemPersonagemRepository inventarioRepository,
                                 ItemJogoRepository itemJogoRepository,
                                 GameSystemRepository gameSystemRepository,
-                                AtaqueRepository ataqueRepository) {
+                                AtaqueRepository ataqueRepository,
+                                AcessoService acessoService) {
         this.inventarioRepository = inventarioRepository;
         this.itemJogoRepository = itemJogoRepository;
         this.gameSystemRepository = gameSystemRepository;
         this.ataqueRepository = ataqueRepository;
+        this.acessoService = acessoService;
     }
 
     @GetMapping("/personagens/{id}/inventario")
@@ -41,7 +47,9 @@ public class InventarioController {
     /** Adiciona um item proprio (custom). */
     @PostMapping("/personagens/{id}/inventario")
     @ResponseStatus(HttpStatus.CREATED)
-    public ItemPersonagem adicionar(@PathVariable Long id, @RequestBody ItemPersonagem item) {
+    public ItemPersonagem adicionar(@PathVariable Long id, @RequestBody ItemPersonagem item,
+                                    @AuthenticationPrincipal UsuarioPrincipal principal) {
+        acessoService.exigirDonoPersonagem(id, principal);
         if (item.getNome() == null || item.getNome().isBlank()) {
             throw new IllegalArgumentException("nome do item e obrigatorio");
         }
@@ -61,7 +69,9 @@ public class InventarioController {
     /** Adiciona ao inventario uma copia de um item do catalogo (por codigo). */
     @PostMapping("/personagens/{id}/inventario/do-catalogo/{codigo}")
     @ResponseStatus(HttpStatus.CREATED)
-    public ItemPersonagem doCatalogo(@PathVariable Long id, @PathVariable String codigo) {
+    public ItemPersonagem doCatalogo(@PathVariable Long id, @PathVariable String codigo,
+                                     @AuthenticationPrincipal UsuarioPrincipal principal) {
+        acessoService.exigirDonoPersonagem(id, principal);
         ItemJogo c = itemJogoRepository.findByGameSystemIdAndCodigo(asus(), codigo)
                 .orElseThrow(() -> new NotFoundException("Item '" + codigo + "' nao encontrado no catalogo"));
         ItemPersonagem item = ItemPersonagem.builder()
@@ -79,9 +89,11 @@ public class InventarioController {
     /** Envia um item do inventario para a aba Combate (cria o ataque; idempotente por nome). */
     @PostMapping("/inventario/{itemId}/para-combate")
     @ResponseStatus(HttpStatus.CREATED)
-    public Ataque paraCombate(@PathVariable Long itemId) {
+    public Ataque paraCombate(@PathVariable Long itemId,
+                              @AuthenticationPrincipal UsuarioPrincipal principal) {
         ItemPersonagem item = inventarioRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Item de inventario " + itemId + " nao encontrado"));
+        acessoService.exigirDonoPersonagem(item.getPersonagemId(), principal);
         Ataque a = garantirAtaque(item);
         if (a == null) {
             throw new IllegalArgumentException("Este item nao e uma arma (defina o dano antes de enviar pro combate).");
@@ -111,9 +123,11 @@ public class InventarioController {
     }
 
     @PutMapping("/inventario/{itemId}")
-    public ItemPersonagem atualizar(@PathVariable Long itemId, @RequestBody ItemPersonagem patch) {
+    public ItemPersonagem atualizar(@PathVariable Long itemId, @RequestBody ItemPersonagem patch,
+                                    @AuthenticationPrincipal UsuarioPrincipal principal) {
         ItemPersonagem item = inventarioRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Item de inventario " + itemId + " nao encontrado"));
+        acessoService.exigirDonoPersonagem(item.getPersonagemId(), principal);
         if (patch.getQuantidade() != null) {
             item.setQuantidade(Math.max(0, patch.getQuantidade()));
         }
@@ -140,8 +154,14 @@ public class InventarioController {
 
     @DeleteMapping("/inventario/{itemId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void remover(@PathVariable Long itemId) {
-        inventarioRepository.deleteById(itemId);
+    public void remover(@PathVariable Long itemId,
+                        @AuthenticationPrincipal UsuarioPrincipal principal) {
+        ItemPersonagem item = inventarioRepository.findById(itemId).orElse(null);
+        if (item == null) {
+            return;
+        }
+        acessoService.exigirDonoPersonagem(item.getPersonagemId(), principal);
+        inventarioRepository.delete(item);
     }
 
     private Long asus() {

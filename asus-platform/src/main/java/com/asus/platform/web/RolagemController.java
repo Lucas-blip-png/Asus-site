@@ -33,11 +33,12 @@ public class RolagemController {
         return service.rolar(id, req);
     }
 
-    /** Revela uma rolagem oculta. Só o mestre (permissão via JWT) pode; ignora usuarioId do cliente. */
+    /** Revela uma rolagem oculta. O usuario vem do JWT (não do cliente); a query só vale no modo aberto/dev. */
     @PostMapping("/{rolagemId}/revelar")
     public RolagemResponse revelar(@PathVariable Long id,
                                    @PathVariable Long rolagemId,
+                                   @RequestParam(required = false) Long usuarioId,
                                    @AuthenticationPrincipal UsuarioPrincipal principal) {
-        return service.revelar(id, rolagemId, principal != null ? principal.id() : null);
+        return service.revelar(id, rolagemId, principal != null ? principal.id() : usuarioId);
     }
 }
