@@ -296,22 +296,29 @@ export default function Campanha() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [campanha?.id, user])
 
-  // Tempo real (Fase 6): novas rolagens entram no topo + toast
+  // Tempo real (Fase 6): novas rolagens entram no topo + toast.
+  // Deduplica por id: se quem rolou já inseriu a versão completa (rolagem privada),
+  // a versão mascarada que chega pelo broadcast não sobrescreve.
   useEffect(
     () =>
       inscrever(`/topic/campanhas/${id}/rolagens`, (r) => {
-        setRolagens((prev) => [r, ...prev])
+        setRolagens((prev) => (prev.some((x) => x.id === r.id) ? prev : [r, ...prev]))
         if (r && r.total != null) flashToast(r)
       }),
     [id],
   )
 
-  // Rolagem vinda do painel de Resultados (chat). privada => oculta (só o mestre).
+  // Rolagem vinda do painel de Resultados (chat). privada => oculta (só o mestre vê o valor).
   async function rolarPainel(expressao, rot, privada) {
-    await api(`/api/campanhas/${id}/rolagens`, {
+    const r = await api(`/api/campanhas/${id}/rolagens`, {
       method: 'POST',
       body: { expressao, rotulo: rot, oculta: !!privada, usuarioId: user?.id },
     })
+    // Quem rolou vê o próprio resultado completo na hora, mesmo sendo privado.
+    if (r && r.id != null) {
+      setRolagens((prev) => [r, ...prev.filter((x) => x.id !== r.id)])
+      if (r.total != null) flashToast(r)
+    }
   }
   const ehMestre = !!user && (campanha?.mestreId === user.id || user.dono)
 

@@ -1,11 +1,13 @@
 package com.asus.platform.web;
 
+import com.asus.platform.security.UsuarioPrincipal;
 import com.asus.platform.service.RolagemService;
 import com.asus.platform.web.dto.RolagemResponse;
 import com.asus.platform.web.dto.RolarRequest;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 /** Rolagens de uma campanha (plano, secao 21.5). */
@@ -20,8 +22,9 @@ public class RolagemController {
     }
 
     @GetMapping
-    public List<RolagemResponse> listar(@PathVariable Long id) {
-        return service.listar(id);
+    public List<RolagemResponse> listar(@PathVariable Long id,
+                                        @AuthenticationPrincipal UsuarioPrincipal principal) {
+        return service.listar(id, principal != null ? principal.id() : null);
     }
 
     @PostMapping
@@ -30,10 +33,11 @@ public class RolagemController {
         return service.rolar(id, req);
     }
 
+    /** Revela uma rolagem oculta. Só o mestre (permissão via JWT) pode; ignora usuarioId do cliente. */
     @PostMapping("/{rolagemId}/revelar")
     public RolagemResponse revelar(@PathVariable Long id,
                                    @PathVariable Long rolagemId,
-                                   @RequestParam(required = false) Long usuarioId) {
-        return service.revelar(id, rolagemId, usuarioId);
+                                   @AuthenticationPrincipal UsuarioPrincipal principal) {
+        return service.revelar(id, rolagemId, principal != null ? principal.id() : null);
     }
 }
