@@ -439,17 +439,17 @@ export default function Ficha() {
   // ----- atributos: o valor FINAL (base + fixos da classe) não passa do teto do nível -----
   const tetoAtributo = (p && p.limiteAtributo > 0) ? p.limiteAtributo : 99
   const bonusClasse = (attr) => (p ? ((p.atributosFinais[attr] || 0) - (p.atributosBase[attr] || 0)) : 0)
-  function setAtr(attr, delta) {
-    const cap = tetoAtributo - bonusClasse(attr) // teto menos o bônus fixo da classe
-    setBase((b) => {
-      const atual = Number(b[attr]) || 0
-      const novo = Math.max(0, Math.min(cap, atual + delta))
-      return { ...b, [attr]: novo }
-    })
+  const [editandoAtr, setEditandoAtr] = useState(false)
+  // Edita direto o valor FINAL: converte pra base (≥ 0) respeitando o teto do nível.
+  function setAtrFinal(attr, valor) {
+    const bonus = bonusClasse(attr)
+    const alvo = Math.max(bonus, Math.min(tetoAtributo, Number(valor) || 0))
+    setBase((b) => ({ ...b, [attr]: alvo - bonus }))
   }
   async function salvarAtributos() {
     try {
       await api(`/api/personagens/${id}`, { method: 'PUT', body: { atributosBase: base } })
+      setEditandoAtr(false)
       carregar()
     } catch (e) { setErro(e.message) }
   }
@@ -870,27 +870,41 @@ export default function Ficha() {
             <Heptagono atributos={p.atributosFinais} max={20} />
           </div>
 
-          {/* Editor de atributos (5 pontos distribuíveis sobre os fixos da classe) */}
+          {/* Atributos: mostra só o valor final; a caneta liga a edição direto no número */}
           <div className="atr-edit">
             <div className="row">
               <b>Atributos</b>
               <div className="spacer" />
               <span className="tag" title="teto por atributo no nível atual">teto {tetoAtributo}</span>
-              <button className="mini" onClick={salvarAtributos}>Salvar</button>
+              {editandoAtr ? (
+                <button className="mini" onClick={salvarAtributos}>Salvar</button>
+              ) : (
+                <button className="ghost mini" title="Editar atributos" onClick={() => setEditandoAtr(true)}>✎</button>
+              )}
             </div>
             <div className="atr-grid">
-              {ATRIBS.map(([k, sig]) => (
-                <div key={k} className="atr-cell">
-                  <span className="muted">{sig}</span>
-                  <span className="step">
-                    <button className="ghost mini" onClick={() => setAtr(k, -1)}>−</button>
-                    <b className="stat">{base[k] ?? 0}</b>
-                    <button className="ghost mini" onClick={() => setAtr(k, +1)}>+</button>
-                  </span>
-                  <span className="muted" title="final (base + fixos da classe)">= {(base[k] ?? 0) + bonusClasse(k)}</span>
-                </div>
-              ))}
+              {ATRIBS.map(([k, sig]) => {
+                const valorFinal = (base[k] ?? 0) + bonusClasse(k)
+                return (
+                  <div key={k} className="atr-cell">
+                    <span className="muted">{sig}</span>
+                    {editandoAtr ? (
+                      <input type="number" min={bonusClasse(k)} max={tetoAtributo} value={valorFinal}
+                        style={{ width: 58, textAlign: 'center', fontWeight: 700 }}
+                        title={bonusClasse(k) > 0 ? `inclui +${bonusClasse(k)} fixo da classe` : undefined}
+                        onChange={(e) => setAtrFinal(k, e.target.value)} />
+                    ) : (
+                      <b className="stat" style={{ fontSize: '1.1rem' }}>{valorFinal}</b>
+                    )}
+                  </div>
+                )
+              })}
             </div>
+            {editandoAtr && (
+              <p className="muted" style={{ fontSize: '.72rem', margin: '6px 0 0' }}>
+                O valor já inclui os fixos da classe · teto {tetoAtributo} por atributo.
+              </p>
+            )}
           </div>
 
           {/* Nível e XP (level-up automático) */}
