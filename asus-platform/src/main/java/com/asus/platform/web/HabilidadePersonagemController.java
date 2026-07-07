@@ -9,6 +9,8 @@ import com.asus.platform.repository.ClasseRepository;
 import com.asus.platform.repository.HabilidadePersonagemRepository;
 import com.asus.platform.repository.HabilidadeRepository;
 import com.asus.platform.repository.PersonagemRepository;
+import com.asus.platform.security.UsuarioPrincipal;
+import com.asus.platform.service.AcessoService;
 import com.asus.platform.web.dto.HabilidadeDisponivelResponse;
 import com.asus.platform.web.dto.HabilidadeEscolhidaResponse;
 import java.util.HashSet;
@@ -18,6 +20,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -38,15 +41,18 @@ public class HabilidadePersonagemController {
     private final ClasseRepository classeRepository;
     private final HabilidadeRepository habilidadeRepository;
     private final HabilidadePersonagemRepository escolhidasRepository;
+    private final AcessoService acessoService;
 
     public HabilidadePersonagemController(PersonagemRepository personagemRepository,
                                           ClasseRepository classeRepository,
                                           HabilidadeRepository habilidadeRepository,
-                                          HabilidadePersonagemRepository escolhidasRepository) {
+                                          HabilidadePersonagemRepository escolhidasRepository,
+                                          AcessoService acessoService) {
         this.personagemRepository = personagemRepository;
         this.classeRepository = classeRepository;
         this.habilidadeRepository = habilidadeRepository;
         this.escolhidasRepository = escolhidasRepository;
+        this.acessoService = acessoService;
     }
 
     @GetMapping
@@ -84,7 +90,9 @@ public class HabilidadePersonagemController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Habilidade adicionar(@PathVariable Long id, @RequestBody Map<String, String> body) {
+    public Habilidade adicionar(@PathVariable Long id, @RequestBody Map<String, String> body,
+                                @AuthenticationPrincipal UsuarioPrincipal principal) {
+        acessoService.exigirDonoPersonagem(id, principal);
         String codigo = body.get("codigo");
         Personagem p = carregar(id);
         Habilidade h = habilidadeRepository.findByGameSystemId(p.getGameSystemId()).stream()
@@ -107,7 +115,9 @@ public class HabilidadePersonagemController {
      */
     @PostMapping("/custom")
     @ResponseStatus(HttpStatus.CREATED)
-    public HabilidadeEscolhidaResponse criarPropria(@PathVariable Long id, @RequestBody Map<String, Object> body) {
+    public HabilidadeEscolhidaResponse criarPropria(@PathVariable Long id, @RequestBody Map<String, Object> body,
+                                                    @AuthenticationPrincipal UsuarioPrincipal principal) {
+        acessoService.exigirDonoPersonagem(id, principal);
         Personagem p = carregar(id);
         String nome = textoOuNull(body.get("nome"));
         if (nome == null) {
@@ -134,7 +144,9 @@ public class HabilidadePersonagemController {
     /** Edita (override por personagem) os campos da habilidade escolhida. Campos vazios voltam ao catalogo. */
     @PutMapping("/{codigo}")
     public HabilidadeEscolhidaResponse editar(@PathVariable Long id, @PathVariable String codigo,
-                                              @RequestBody Map<String, Object> body) {
+                                              @RequestBody Map<String, Object> body,
+                                              @AuthenticationPrincipal UsuarioPrincipal principal) {
+        acessoService.exigirDonoPersonagem(id, principal);
         Personagem p = carregar(id);
         HabilidadePersonagem hp = escolhidasRepository.findByPersonagemId(id).stream()
                 .filter(e -> e.getHabilidadeCodigo().equals(codigo)).findFirst()
@@ -179,7 +191,9 @@ public class HabilidadePersonagemController {
 
     @DeleteMapping("/{codigo}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void remover(@PathVariable Long id, @PathVariable String codigo) {
+    public void remover(@PathVariable Long id, @PathVariable String codigo,
+                        @AuthenticationPrincipal UsuarioPrincipal principal) {
+        acessoService.exigirDonoPersonagem(id, principal);
         List<HabilidadePersonagem> alvo = escolhidasRepository.findByPersonagemId(id).stream()
                 .filter(e -> e.getHabilidadeCodigo().equals(codigo)).toList();
         escolhidasRepository.deleteAll(alvo);

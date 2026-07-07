@@ -77,19 +77,25 @@ public class CampanhaController {
         service.apagar(id);
     }
 
+    private static Long uid(UsuarioPrincipal principal, Long usuarioIdQuery) {
+        return principal != null ? principal.id() : usuarioIdQuery;
+    }
+
     /** Anotações privadas do mestre (gateadas por permissão; não saem no CampanhaResponse). */
     @GetMapping("/campanhas/{id}/anotacoes")
     public Map<String, String> obterAnotacoes(@PathVariable Long id,
-                                              @RequestParam(required = false) Long usuarioId) {
-        return Map.of("anotacoes", Optional.ofNullable(service.obterAnotacoes(id, usuarioId)).orElse(""));
+                                              @RequestParam(required = false) Long usuarioId,
+                                              @AuthenticationPrincipal UsuarioPrincipal principal) {
+        return Map.of("anotacoes", Optional.ofNullable(service.obterAnotacoes(id, uid(principal, usuarioId))).orElse(""));
     }
 
     @PutMapping("/campanhas/{id}/anotacoes")
     public Map<String, String> salvarAnotacoes(@PathVariable Long id,
                                                @RequestParam(required = false) Long usuarioId,
+                                               @AuthenticationPrincipal UsuarioPrincipal principal,
                                                @RequestBody Map<String, String> body) {
         return Map.of("anotacoes",
-                Optional.ofNullable(service.salvarAnotacoes(id, usuarioId, body.get("anotacoes"))).orElse(""));
+                Optional.ofNullable(service.salvarAnotacoes(id, uid(principal, usuarioId), body.get("anotacoes"))).orElse(""));
     }
 
     @GetMapping("/campanhas/{id}/personagens")
