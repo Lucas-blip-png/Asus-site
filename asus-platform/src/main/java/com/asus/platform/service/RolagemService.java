@@ -50,11 +50,22 @@ public class RolagemService {
                 .map(com.asus.platform.domain.Personagem::getNome).orElse(null);
     }
 
-    /** Lista o historico. Rolagens ocultas nao reveladas vem com o resultado mascarado. */
     public List<RolagemResponse> listar(Long campanhaId) {
-        campanhaService.carregar(campanhaId); // valida existencia
+        return listar(campanhaId, null);
+    }
+
+    /**
+     * Lista o historico. Rolagens ocultas nao reveladas vem mascaradas para os jogadores,
+     * mas o MESTRE (e o proprio autor da rolagem) veem o resultado completo.
+     */
+    public List<RolagemResponse> listar(Long campanhaId, Long usuarioId) {
+        Campanha campanha = campanhaService.carregar(campanhaId);
+        boolean mestre = usuarioId != null && usuarioId.equals(campanha.getMestreId());
         return rolagemRepository.findByCampanhaIdOrderByCriadoEmDescIdDesc(campanhaId).stream()
-                .map(r -> RolagemResponse.de(r, false, nomePersonagem(r.getPersonagemId()))).toList();
+                .map(r -> {
+                    boolean completo = mestre || (usuarioId != null && usuarioId.equals(r.getUsuarioId()));
+                    return RolagemResponse.de(r, completo, nomePersonagem(r.getPersonagemId()));
+                }).toList();
     }
 
     /** Para o Escudo do Mestre (Fase 8): historico completo, sem mascarar ocultas. */
