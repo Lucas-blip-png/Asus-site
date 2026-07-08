@@ -59,6 +59,11 @@ public class CampanhaService {
     private final CombateParticipanteRepository combateParticipanteRepository;
     private final AuditoriaService auditoriaService;
     private final PlanoService planoService;
+    private final com.asus.platform.repository.SessaoRepository sessaoRepository;
+    private final com.asus.platform.repository.PresencaSessaoRepository presencaSessaoRepository;
+    private final com.asus.platform.repository.RolagemRepository rolagemRepository;
+    private final com.asus.platform.repository.HandoutRepository handoutRepository;
+    private final com.asus.platform.repository.MensagemCampanhaRepository mensagemCampanhaRepository;
 
     /** Email do dono/dev (config asus.admin.email): vê todas as campanhas. */
     @Value("${asus.admin.email:dev@asus.local}")
@@ -76,7 +81,12 @@ public class CampanhaService {
                            CombateRepository combateRepository,
                            CombateParticipanteRepository combateParticipanteRepository,
                            AuditoriaService auditoriaService,
-                           PlanoService planoService) {
+                           PlanoService planoService,
+                           com.asus.platform.repository.SessaoRepository sessaoRepository,
+                           com.asus.platform.repository.PresencaSessaoRepository presencaSessaoRepository,
+                           com.asus.platform.repository.RolagemRepository rolagemRepository,
+                           com.asus.platform.repository.HandoutRepository handoutRepository,
+                           com.asus.platform.repository.MensagemCampanhaRepository mensagemCampanhaRepository) {
         this.campanhaRepository = campanhaRepository;
         this.campanhaPersonagemRepository = campanhaPersonagemRepository;
         this.campanhaMembroRepository = campanhaMembroRepository;
@@ -90,6 +100,11 @@ public class CampanhaService {
         this.combateParticipanteRepository = combateParticipanteRepository;
         this.auditoriaService = auditoriaService;
         this.planoService = planoService;
+        this.sessaoRepository = sessaoRepository;
+        this.presencaSessaoRepository = presencaSessaoRepository;
+        this.rolagemRepository = rolagemRepository;
+        this.handoutRepository = handoutRepository;
+        this.mensagemCampanhaRepository = mensagemCampanhaRepository;
     }
 
     public List<CampanhaResponse> listar(Long organizacaoId) {
@@ -228,6 +243,14 @@ public class CampanhaService {
                 combateParticipanteRepository.deleteAll(
                         combateParticipanteRepository.findByCombateIdOrderByIniciativaDescIdAsc(combate.getId())));
         combateRepository.deleteAll(combateRepository.findByCampanhaIdOrderByCriadoEmDesc(id));
+        // Demais vínculos: sessões (e presenças), rolagens, convites, handouts e chat.
+        sessaoRepository.findByCampanhaIdOrderByInicio(id).forEach(s ->
+                presencaSessaoRepository.deleteAll(presencaSessaoRepository.findBySessaoId(s.getId())));
+        sessaoRepository.deleteAll(sessaoRepository.findByCampanhaIdOrderByInicio(id));
+        rolagemRepository.deleteAll(rolagemRepository.findByCampanhaIdOrderByCriadoEmDescIdDesc(id));
+        conviteRepository.deleteAll(conviteRepository.findByCampanhaId(id));
+        handoutRepository.deleteAll(handoutRepository.findByCampanhaIdOrderByCriadoEmDescIdDesc(id));
+        mensagemCampanhaRepository.deleteAll(mensagemCampanhaRepository.findByCampanhaId(id));
         campanhaRepository.delete(campanha);
         auditoriaService.registrar(campanha.getOrganizacaoId(), campanha.getMestreId(),
                 "CAMPANHA_APAGADA", "Campanha", id, null, campanha.getNome(), null);
