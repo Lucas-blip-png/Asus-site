@@ -11,6 +11,7 @@ public record CampanhaResponse(
         String nome,
         String descricao,
         String capaAssetId,
+        String discordWebhookUrl,
         CampanhaConfigDto config,
         boolean arquivada,
         LocalDateTime criadoEm,
@@ -19,7 +20,7 @@ public record CampanhaResponse(
     public static CampanhaResponse de(Campanha c, String systemId) {
         return new CampanhaResponse(
                 c.getId(), c.getOrganizacaoId(), c.getMestreId(), systemId,
-                c.getNome(), c.getDescricao(), c.getCapaAssetId(),
+                c.getNome(), c.getDescricao(), c.getCapaAssetId(), c.getDiscordWebhookUrl(),
                 CampanhaConfigDto.de(c.getConfig()), c.isArquivada(),
                 c.getCriadoEm(), c.getAtualizadoEm());
     }

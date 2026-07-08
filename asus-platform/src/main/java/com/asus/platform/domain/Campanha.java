@@ -40,6 +40,9 @@ public class Campanha {
     /** Asset de capa (id). Os assets em si chegam na Fase 11. */
     private String capaAssetId;
 
+    /** Webhook do Discord do grupo (críticos, level-ups e sessões caem no canal). */
+    private String discordWebhookUrl;
+
     @Embedded
     private CampanhaConfig config;
 

@@ -34,5 +34,12 @@ public class Combate {
 
     private boolean ativo;
 
+    /** Imagem de fundo do mapa tático (asset id). */
+    private Long mapaAssetId;
+
+    /** Névoa de guerra: JSON com as células REVELADAS (ex.: [0,1,15]); null = névoa desligada. */
+    @Column(columnDefinition = "TEXT")
+    private String fogJson;
+
     private LocalDateTime criadoEm;
 }

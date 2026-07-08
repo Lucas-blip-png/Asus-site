@@ -8,4 +8,5 @@ public interface PersonagemRepository extends JpaRepository<Personagem, Long> {
     List<Personagem> findByOrganizacaoIdAndArquivadoFalse(Long organizacaoId);
     long countByOrganizacaoIdAndArquivadoFalse(Long organizacaoId);
     List<Personagem> findByUsuarioId(Long usuarioId);
+    java.util.Optional<Personagem> findByShareToken(String shareToken);
 }

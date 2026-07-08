@@ -62,6 +62,15 @@ public class CombateController {
         if (body.containsKey("ativo")) {
             c.setAtivo(Boolean.parseBoolean(String.valueOf(body.get("ativo"))));
         }
+        // Mapa tático: imagem de fundo (null remove) e névoa (JSON das células reveladas; null desliga).
+        if (body.containsKey("mapaAssetId")) {
+            Object v = body.get("mapaAssetId");
+            c.setMapaAssetId(v == null ? null : (long) Double.parseDouble(String.valueOf(v)));
+        }
+        if (body.containsKey("fogJson")) {
+            Object v = body.get("fogJson");
+            c.setFogJson(v == null ? null : String.valueOf(v));
+        }
         return combateRepository.save(c);
     }
 

@@ -26,19 +26,22 @@ public class RolagemService {
     private final AuditoriaService auditoriaService;
     private final RealtimeNotifier realtimeNotifier;
     private final com.asus.platform.repository.PersonagemRepository personagemRepository;
+    private final DiscordNotifier discordNotifier;
 
     public RolagemService(RolagemRepository rolagemRepository,
                           CampanhaService campanhaService,
                           Dado dado,
                           AuditoriaService auditoriaService,
                           RealtimeNotifier realtimeNotifier,
-                          com.asus.platform.repository.PersonagemRepository personagemRepository) {
+                          com.asus.platform.repository.PersonagemRepository personagemRepository,
+                          DiscordNotifier discordNotifier) {
         this.rolagemRepository = rolagemRepository;
         this.campanhaService = campanhaService;
         this.dado = dado;
         this.auditoriaService = auditoriaService;
         this.realtimeNotifier = realtimeNotifier;
         this.personagemRepository = personagemRepository;
+        this.discordNotifier = discordNotifier;
     }
 
     /** Nome do personagem que rolou (para exibir no historico), ou null. */
@@ -116,6 +119,15 @@ public class RolagemService {
         // Overlay OBS por personagem: publica no topico do personagem que rolou.
         if (rolagem.getPersonagemId() != null) {
             realtimeNotifier.rolagemPersonagem(rolagem.getPersonagemId(), mascarada);
+        }
+
+        // Críticos e falhas públicos caem no Discord do grupo (se configurado).
+        if (!oculta && (critico || falhaCritica)) {
+            String quem = nome != null ? nome : "Alguém";
+            String rot = req.rotulo() == null || req.rotulo().isBlank() ? expressao.canonico() : req.rotulo();
+            discordNotifier.enviar(campanha.getDiscordWebhookUrl(), critico
+                    ? "⭐ **" + quem + "** tirou **20 natural** em " + rot + "! (total " + resultado.total() + ")"
+                    : "💀 **" + quem + "** tirou **1 natural** em " + rot + "…");
         }
 
         // Quem rola sempre ve o proprio resultado, mesmo oculto.

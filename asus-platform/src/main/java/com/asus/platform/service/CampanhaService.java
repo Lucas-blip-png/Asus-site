@@ -179,6 +179,15 @@ public class CampanhaService {
         if (req.capaAssetId() != null) {
             campanha.setCapaAssetId(req.capaAssetId());
         }
+        if (req.discordWebhookUrl() != null) {
+            String url = req.discordWebhookUrl().trim();
+            // So aceita webhook do proprio Discord (evita usar o servidor pra chamar URL arbitraria).
+            if (!url.isEmpty() && !url.startsWith("https://discord.com/api/webhooks/")
+                    && !url.startsWith("https://discordapp.com/api/webhooks/")) {
+                throw new IllegalArgumentException("URL deve ser um webhook do Discord (https://discord.com/api/webhooks/...)");
+            }
+            campanha.setDiscordWebhookUrl(url.isEmpty() ? null : url);
+        }
         if (req.arquivada() != null) {
             campanha.setArquivada(req.arquivada());
         }
@@ -364,7 +373,7 @@ public class CampanhaService {
 
     // ----- helpers -----
 
-    Campanha carregar(Long id) {
+    public Campanha carregar(Long id) {
         return campanhaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Campanha " + id + " nao encontrada"));
     }
