@@ -28,4 +28,5 @@ public record AtualizarPersonagemRequest(
         String aparencia,
         String personalidade,
         String historico,
-        String objetivo) {}
+        String objetivo,
+        Double dinheiro) {}

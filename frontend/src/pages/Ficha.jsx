@@ -6,7 +6,7 @@ import { useAuth } from '../auth.jsx'
 import Heptagono from '../components/Heptagono.jsx'
 import ResultadosPanel from '../components/ResultadosPanel.jsx'
 
-const ABAS = ['Combate', 'Habilidades', 'Magias', 'Inventário', 'Descrição']
+const ABAS = ['Combate', 'Habilidades', 'Magias', 'Bênçãos', 'Inventário', 'Descrição']
 const BARRAS = [['Vida', 'vida', 'pv'], ['Mana', 'mana', 'pm'], ['Energia', 'energia', 'pe']]
 const ATRIBS = [
   ['forca', 'For'], ['constituicao', 'Con'], ['destreza', 'Des'], ['agilidade', 'Agi'],
@@ -158,6 +158,35 @@ function FeiticoRow({ f, onEdit, onDelete }) {
   )
 }
 
+function BencaoRow({ b, onEdit, onDelete }) {
+  const [open, setOpen] = useState(false)
+  const resumo = [b.divindade, b.custo > 0 && `${b.custo} ${b.custoTipo || 'PE'}`].filter(Boolean).join(' · ')
+  return (
+    <div className={`cris-row${open ? ' open' : ''}`}>
+      <div className="cris-head" onClick={() => setOpen((o) => !o)}>
+        <span className="chev">▾</span>
+        <b className="nm">✨ {b.nome}</b>
+        {resumo && <span className="sub">{resumo}</span>}
+        <div className="spacer" />
+      </div>
+      {open && (
+        <div className="cris-body">
+          <div className="row" style={{ gap: 6, flexWrap: 'wrap' }}>
+            {b.divindade && <span className="tag">{b.divindade}</span>}
+            {b.custo > 0 && <span className="tag">Custo {b.custo} {b.custoTipo || 'PE'}</span>}
+          </div>
+          {b.efeito && <p className="muted" style={{ fontSize: '.82rem', marginTop: 7 }}>{b.efeito}</p>}
+          <div className="row" style={{ gap: 10, marginTop: 9, alignItems: 'center' }}>
+            <div className="spacer" />
+            <button className="ghost mini" onClick={() => onEdit(b)}>Editar</button>
+            <button className="ghost mini" onClick={() => onDelete(b.id)}>Remover</button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 function HabRow({ h, onEdit, onDelete }) {
   const [open, setOpen] = useState(false)
   return (
@@ -230,6 +259,12 @@ export default function Ficha() {
   const [novaPericia, setNovaPericia] = useState({ nome: '', atributo: 'FORCA' })
   const [criarHabOpen, setCriarHabOpen] = useState(false)
   const [novaHab, setNovaHab] = useState({ nome: '', tipo: 'PASSIVA', custo: 0, custoTipo: 'PE', efeito: '' })
+  const [dinheiroEdit, setDinheiroEdit] = useState(null)
+  const [bencaos, setBencaos] = useState([])
+  const [novaBencao, setNovaBencao] = useState({ nome: '', divindade: '', custo: 0, custoTipo: 'PE', efeito: '' })
+  const [editBencao, setEditBencao] = useState(null)
+  const [feiticosProntos, setFeiticosProntos] = useState([])
+  const [feiticoProntoSel, setFeiticoProntoSel] = useState('')
   const [rolagem, setRolagem] = useState(null)
   const rolTimer = useRef(null)
   const [ataqueRoll, setAtaqueRoll] = useState(null)
@@ -245,23 +280,34 @@ export default function Ficha() {
     clearTimeout(atqTimer.current)
     atqTimer.current = setTimeout(() => setAtaqueRoll(null), 9000)
   }
-  // Rola 1d20 + modificador. Se o personagem está numa campanha, rola no servidor
-  // (aparece no chat de Resultados de todos); senão, rola localmente.
+  // Modo do d20: N = normal, V = vantagem (2d20 pega o maior), D = desvantagem (menor).
+  const [modoD20, setModoD20] = useState('N')
+  const baseD20 = () => (modoD20 === 'V' ? '2d20kh1' : modoD20 === 'D' ? '2d20kl1' : '1d20')
+  const rolarD20Local = () => {
+    const d1 = 1 + Math.floor(Math.random() * 20)
+    if (modoD20 === 'N') return d1
+    const d2 = 1 + Math.floor(Math.random() * 20)
+    return modoD20 === 'V' ? Math.max(d1, d2) : Math.min(d1, d2)
+  }
+  const sufixoModo = modoD20 === 'V' ? ' (vant)' : modoD20 === 'D' ? ' (desv)' : ''
+  // Rola d20 + modificador (com vantagem/desvantagem conforme o modo). Se o personagem
+  // está numa campanha, rola no servidor (aparece no chat de todos); senão, local.
   async function rolar(rotulo, mod = 0) {
     const m = Number(mod) || 0
+    const rot = rotulo + sufixoModo
     if (campanhaAtiva) {
-      const expressao = '1d20' + (m > 0 ? `+${m}` : m < 0 ? `${m}` : '')
+      const expressao = baseD20() + (m > 0 ? `+${m}` : m < 0 ? `${m}` : '')
       try {
         const r = await api(`/api/campanhas/${campanhaAtiva.id}/rolagens`, {
           method: 'POST',
-          body: { expressao, rotulo, personagemId: Number(id), usuarioId: user?.id },
+          body: { expressao, rotulo: rot, personagemId: Number(id), usuarioId: user?.id },
         })
-        toastRolagem({ rotulo, d: r.naturalD20 ?? r.total, mod: m, total: r.total, crit: !!r.critico, fumble: !!r.falhaCritica })
+        toastRolagem({ rotulo: rot, d: r.naturalD20 ?? r.total, mod: m, total: r.total, crit: !!r.critico, fumble: !!r.falhaCritica })
         return
       } catch { /* cai pro local */ }
     }
-    const d = 1 + Math.floor(Math.random() * 20)
-    toastRolagem({ rotulo, d, mod: m, total: d + m, crit: d === 20, fumble: d === 1 })
+    const d = rolarD20Local()
+    toastRolagem({ rotulo: rot, d, mod: m, total: d + m, crit: d === 20, fumble: d === 1 })
   }
   // Rola um ATAQUE: d20 + treino da perícia ligada (sem atributo) e o DANO (dados da arma).
   // Numa campanha, registra no histórico/Escudo com o nome do personagem; senão, rola local.
@@ -280,7 +326,7 @@ export default function Ficha() {
       try {
         const ra = await api(`/api/campanhas/${campanhaAtiva.id}/rolagens`, {
           method: 'POST',
-          body: { expressao: `1d20${modTxt}`, rotulo: `⚔ ${a.nome}`, personagemId: Number(id), usuarioId: user?.id },
+          body: { expressao: `${baseD20()}${modTxt}`, rotulo: `⚔ ${a.nome}${sufixoModo}`, personagemId: Number(id), usuarioId: user?.id },
         })
         const dNat = ra.naturalD20 ?? null
         const crit = dNat != null && dNat >= alvo
@@ -297,13 +343,13 @@ export default function Ficha() {
         }
         toastAtaque({
           nome: a.nome, ataque: ra.total, dano: danoTotal, crit, fumble: dNat === 1,
-          formulaAtaque: `1d20${modTxt} = ${ra.total}`, formulaDano,
+          formulaAtaque: `${baseD20()}${modTxt} = ${ra.total}`, formulaDano,
           per: per ? per.nome : null, critInfo: `${alvo}/x${mult}`,
         })
         return
       } catch { /* cai pro local */ }
     }
-    const d = 1 + Math.floor(Math.random() * 20)
+    const d = rolarD20Local()
     const crit = d >= alvo
     let danoTotal = null
     let formulaDano = '—'
@@ -315,7 +361,7 @@ export default function Ficha() {
     }
     toastAtaque({
       nome: a.nome, ataque: d + mod, dano: danoTotal, crit, fumble: d === 1,
-      formulaAtaque: `1d20${modTxt} = [${d}]${modTxt}`, formulaDano,
+      formulaAtaque: `${baseD20()}${modTxt} = [${d}]${modTxt}`, formulaDano,
       per: per ? per.nome : null, critInfo: `${alvo}/x${mult}`,
     })
   }
@@ -387,6 +433,8 @@ export default function Ficha() {
         api('/api/sistemas/asus/classes').then(setClassesCat).catch(() => {})
         api(`/api/personagens/${id}/ataques`).then(setAtaques).catch(() => {})
         api(`/api/personagens/${id}/feiticos`).then(setFeiticos).catch(() => {})
+        api(`/api/personagens/${id}/bencaos`).then(setBencaos).catch(() => {})
+        api('/api/sistemas/asus/feiticos/prontos').then(setFeiticosProntos).catch(() => {})
         api(`/api/personagens/${id}/inventario`).then(setInventario).catch(() => {})
       })
       .catch((e) => setErro(e.message))
@@ -405,6 +453,16 @@ export default function Ficha() {
     try {
       const novo = Math.max(0, Number(statusInput[campo]) || 0)
       await api(`/api/personagens/${id}/status`, { method: 'PATCH', body: { [campo]: novo } })
+      carregar()
+    } catch (e) { setErro(e.message) }
+  }
+  // Descanso longo: restaura PV, PM e PE ao máximo de uma vez.
+  async function descansoLongo() {
+    try {
+      await api(`/api/personagens/${id}/status`, {
+        method: 'PATCH',
+        body: { pvAtual: p.status.pvMax, pmAtual: p.status.pmMax, peAtual: p.status.peMax },
+      })
       carregar()
     } catch (e) { setErro(e.message) }
   }
@@ -597,6 +655,50 @@ export default function Ficha() {
       })
       setEditFeitico(null)
       recarregarFeiticos()
+    } catch (e) { setErro(e.message) }
+  }
+  // Adiciona um feitiço pronto do catálogo (Livro) direto na ficha.
+  async function addFeiticoPronto() {
+    const f = feiticosProntos.find((x) => x.nome === feiticoProntoSel)
+    if (!f) return
+    try {
+      await api(`/api/personagens/${id}/feiticos`, { method: 'POST', body: f })
+      setFeiticoProntoSel('')
+      recarregarFeiticos()
+    } catch (e) { setErro(e.message) }
+  }
+
+  // ----- bênçãos (limite Sab/2 é informativo) -----
+  const recarregarBencaos = () => api(`/api/personagens/${id}/bencaos`).then(setBencaos).catch(() => {})
+  async function addBencao() {
+    if (!novaBencao.nome.trim()) return
+    try {
+      await api(`/api/personagens/${id}/bencaos`, {
+        method: 'POST',
+        body: { ...novaBencao, custo: Number(novaBencao.custo) || 0 },
+      })
+      setNovaBencao({ nome: '', divindade: '', custo: 0, custoTipo: 'PE', efeito: '' })
+      recarregarBencaos()
+    } catch (e) { setErro(e.message) }
+  }
+  async function delBencao(bid) {
+    try { await api(`/api/bencaos/${bid}`, { method: 'DELETE' }); recarregarBencaos() } catch (e) { setErro(e.message) }
+  }
+  async function salvarEdicaoBencao() {
+    if (!editBencao) return
+    try {
+      await api(`/api/bencaos/${editBencao.id}`, {
+        method: 'PUT',
+        body: {
+          nome: editBencao.nome,
+          divindade: editBencao.divindade || '',
+          custo: editBencao.custo === '' || editBencao.custo == null ? null : Number(editBencao.custo),
+          custoTipo: editBencao.custoTipo || '',
+          efeito: editBencao.efeito || '',
+        },
+      })
+      setEditBencao(null)
+      recarregarBencaos()
     } catch (e) { setErro(e.message) }
   }
 
@@ -802,6 +904,9 @@ export default function Ficha() {
           <Link to={`/campanhas/${campanhaAtiva.id}`} className="tag">💬 Campanha: {campanhaAtiva.nome}</Link>
         )}
         <div className="spacer" />
+        <button className="ghost mini" title="Imprimir / salvar a ficha em PDF" onClick={() => window.print()}>
+          🖨 PDF
+        </button>
         <button className="ghost mini" onClick={abrirOverlay}
           title="Abre o overlay pro OBS (retrato + dados) e copia a URL">
           📺 {overlayCopiado ? 'URL copiada!' : 'Overlay OBS'}
@@ -953,6 +1058,11 @@ export default function Ficha() {
             )
           })}
 
+          <button className="ghost mini" style={{ marginTop: 10, width: '100%' }}
+            title="Restaura Vida, Mana e Energia ao máximo" onClick={descansoLongo}>
+            🛌 Descanso longo
+          </button>
+
           <div className="kv" style={{ marginTop: 12 }}>
             <b>Limites</b><span>Hab ∞ · Fei {p.limiteFeiticos} · Bên {p.limiteBencaos}</span>
           </div>
@@ -963,6 +1073,16 @@ export default function Ficha() {
           <div className="row">
             <h2>Perícias</h2>
             <div className="spacer" />
+            {/* Modo do d20: vale para toda rolagem (perícias e ataques) */}
+            <span className="abas" style={{ margin: 0 }}>
+              {[['N', 'Normal', 'Rolagem normal (1d20)'],
+                ['V', '↑ Vant', 'Vantagem: rola 2d20 e pega o MAIOR'],
+                ['D', '↓ Desv', 'Desvantagem: rola 2d20 e pega o MENOR']].map(([v, rot, tip]) => (
+                <button key={v} className={modoD20 === v ? 'ativo' : undefined} title={tip}
+                  style={{ padding: '2px 8px', fontSize: '.72rem' }}
+                  onClick={() => setModoD20(v)}>{rot}</button>
+              ))}
+            </span>
             <button className="mini ghost" title="Rolar um d20" onClick={() => rolar('d20', 0)}>🎲 d20</button>
             <button className="mini" onClick={() => salvar({ pericias: treino, periciasOutros: outrosBonus, periciasCustom: outros })}>Salvar</button>
           </div>
@@ -1100,6 +1220,16 @@ export default function Ficha() {
                 ))}
               </div>
               {!feiticos.length && <div className="muted">Nenhum feitiço cadastrado.</div>}
+              {/* Feitiços prontos do catálogo */}
+              <div className="add-form">
+                <select value={feiticoProntoSel} onChange={(e) => setFeiticoProntoSel(e.target.value)} style={{ flex: '1 1 180px' }}>
+                  <option value="">— feitiço pronto do catálogo —</option>
+                  {feiticosProntos.map((f) => (
+                    <option key={f.nome} value={f.nome}>{f.nome} ({f.circulo}º · {f.custoPm} PM)</option>
+                  ))}
+                </select>
+                <button className="mini" onClick={addFeiticoPronto}>+ Adicionar</button>
+              </div>
               <div className="add-form" style={{ alignItems: 'flex-end' }}>
                 <div style={{ flex: '1 1 130px' }}>
                   <label>Nome</label>
@@ -1131,8 +1261,68 @@ export default function Ficha() {
             </div>
           )}
 
+          {aba === 'Bênçãos' && (
+            <div>
+              <div className="muted" style={{ marginBottom: 6 }}>
+                {bencaos.length}/{p.limiteBencaos} bênçãos (limite = Sab/2, informativo)
+                {p.divindade ? ` · Divindade: ${p.divindade}` : ''}
+              </div>
+              <div className="cris-list">
+                {bencaos.map((b) => (
+                  <BencaoRow key={b.id} b={b} onEdit={setEditBencao} onDelete={delBencao} />
+                ))}
+              </div>
+              {!bencaos.length && <div className="muted">Nenhuma bênção recebida.</div>}
+              <div className="add-form" style={{ alignItems: 'flex-end' }}>
+                <div style={{ flex: '1 1 130px' }}>
+                  <label>Nome</label>
+                  <input placeholder="Nome da bênção" value={novaBencao.nome}
+                    onChange={(e) => setNovaBencao((s) => ({ ...s, nome: e.target.value }))} />
+                </div>
+                <div style={{ flex: '1 1 110px' }}>
+                  <label>Divindade</label>
+                  <input placeholder={p.divindade || 'Divindade'} value={novaBencao.divindade}
+                    onChange={(e) => setNovaBencao((s) => ({ ...s, divindade: e.target.value }))} />
+                </div>
+                <div style={{ width: 80 }}>
+                  <label>Custo</label>
+                  <input type="number" min="0" value={novaBencao.custo}
+                    onChange={(e) => setNovaBencao((s) => ({ ...s, custo: e.target.value }))} />
+                </div>
+                <div style={{ width: 90 }}>
+                  <label>Tipo</label>
+                  <select value={novaBencao.custoTipo} onChange={(e) => setNovaBencao((s) => ({ ...s, custoTipo: e.target.value }))}>
+                    <option value="PE">PE</option>
+                    <option value="PM">PM</option>
+                  </select>
+                </div>
+                <div style={{ flex: '1 1 140px' }}>
+                  <label>Efeito</label>
+                  <input value={novaBencao.efeito}
+                    onChange={(e) => setNovaBencao((s) => ({ ...s, efeito: e.target.value }))} />
+                </div>
+                <button className="mini" onClick={addBencao}>+ Bênção</button>
+              </div>
+            </div>
+          )}
+
           {aba === 'Inventário' && (
             <div>
+              {/* Carteira do personagem (T$) */}
+              <div className="row" style={{ alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                <span className="tag" style={{ fontSize: '.85rem' }}>💰 T$ {fmtEsp(p.dinheiro ?? 0)}</span>
+                {dinheiroEdit == null ? (
+                  <button className="ghost mini" title="Editar dinheiro" onClick={() => setDinheiroEdit(String(p.dinheiro ?? 0))}>✎</button>
+                ) : (
+                  <>
+                    <input type="number" min="0" step="0.5" value={dinheiroEdit} style={{ width: 110 }}
+                      onChange={(e) => setDinheiroEdit(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') { salvar({ dinheiro: Number(dinheiroEdit) || 0 }); setDinheiroEdit(null) } }} />
+                    <button className="mini" onClick={() => { salvar({ dinheiro: Number(dinheiroEdit) || 0 }); setDinheiroEdit(null) }}>Salvar</button>
+                    <button className="ghost mini" onClick={() => setDinheiroEdit(null)}>✕</button>
+                  </>
+                )}
+              </div>
               <div className="bar-label">Carga {fmtEsp(p.cargaAtual)}/{p.cargaMaxima} espaços</div>
               <div className={`bar ${p.cargaAtual > p.cargaMaxima ? 'energia' : 'vida'}`} style={{ marginBottom: 6 }}>
                 <span style={{ width: Math.min(100, p.cargaMaxima ? Math.round((p.cargaAtual / p.cargaMaxima) * 100) : 0) + '%' }} />
@@ -1323,6 +1513,46 @@ export default function Ficha() {
             <div className="row" style={{ marginTop: 12, gap: 8 }}>
               <button onClick={salvarEdicaoFeitico}>Salvar</button>
               <button className="ghost" onClick={() => setEditFeitico(null)}>Cancelar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {editBencao && (
+        <div className="modal" onClick={() => setEditBencao(null)}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 520 }}>
+            <div className="row">
+              <h2 style={{ margin: 0 }}>Editar bênção</h2>
+              <div className="spacer" />
+              <button className="ghost mini" onClick={() => setEditBencao(null)}>✕</button>
+            </div>
+            <label>Nome</label>
+            <input value={editBencao.nome || ''} onChange={(e) => setEditBencao((s) => ({ ...s, nome: e.target.value }))} />
+            <div className="row" style={{ gap: 8 }}>
+              <div style={{ flex: 1 }}>
+                <label>Divindade</label>
+                <input value={editBencao.divindade || ''}
+                  onChange={(e) => setEditBencao((s) => ({ ...s, divindade: e.target.value }))} />
+              </div>
+              <div style={{ width: 90 }}>
+                <label>Custo</label>
+                <input type="number" min="0" value={editBencao.custo ?? ''}
+                  onChange={(e) => setEditBencao((s) => ({ ...s, custo: e.target.value }))} />
+              </div>
+              <div style={{ width: 100 }}>
+                <label>Tipo custo</label>
+                <select value={editBencao.custoTipo || ''} onChange={(e) => setEditBencao((s) => ({ ...s, custoTipo: e.target.value }))}>
+                  <option value="">—</option>
+                  <option value="PE">PE</option>
+                  <option value="PM">PM</option>
+                </select>
+              </div>
+            </div>
+            <label>Efeito / Descrição</label>
+            <textarea value={editBencao.efeito || ''} onChange={(e) => setEditBencao((s) => ({ ...s, efeito: e.target.value }))} />
+            <div className="row" style={{ marginTop: 12, gap: 8 }}>
+              <button onClick={salvarEdicaoBencao}>Salvar</button>
+              <button className="ghost" onClick={() => setEditBencao(null)}>Cancelar</button>
             </div>
           </div>
         </div>

@@ -17,6 +17,9 @@ const fmtData = (iso) => {
 const ABAS = ['Agentes', 'Jogadores', 'Sessões', 'Combates']
 
 const d20 = () => 1 + Math.floor(Math.random() * 20)
+// Tamanho do grid do mapa tático (células).
+const MAPA_W = 14
+const MAPA_H = 9
 
 // Rastreador de iniciativa de um combate.
 function CombateTracker({ combate, personagens, onClose, onMudou }) {
@@ -29,6 +32,8 @@ function CombateTracker({ combate, personagens, onClose, onMudou }) {
   const [bestiario, setBestiario] = useState([])
   const [selBicho, setSelBicho] = useState('')
   const [condForm, setCondForm] = useState({ pid: null, nome: '', turnos: '' })
+  const [mapaAberto, setMapaAberto] = useState(false)
+  const [selToken, setSelToken] = useState(null)
 
   function recarregar() {
     api(`/api/combates/${cid}`).then(setC).catch(() => {})
@@ -136,17 +141,83 @@ function CombateTracker({ combate, personagens, onClose, onMudou }) {
     (cp) => !parts.some((p) => String(p.personagemId) === String(cp.personagemId)),
   )
 
+  // Mapa: clica num token pra selecionar; clica numa célula vazia pra mover o selecionado.
+  function clicarCelula(x, y, ocupante) {
+    if (ocupante) {
+      setSelToken(selToken === ocupante.id ? null : ocupante.id)
+      return
+    }
+    if (selToken != null) {
+      patchPart(selToken, { posX: x, posY: y })
+      setSelToken(null)
+    }
+  }
+
   return (
     <div className="card">
       <div className="row" style={{ alignItems: 'center', gap: 10 }}>
         <h2 style={{ margin: 0 }}>{c.nome}</h2>
         <span className="tag">Rodada {c.rodada}</span>
         <div className="spacer" />
+        <button className={`ghost mini${mapaAberto ? ' ativo' : ''}`} title="Mapa tático"
+          onClick={() => setMapaAberto((o) => !o)}>🗺 Mapa</button>
         <button className="mini" onClick={proximo}>▶ Próximo turno</button>
         <button className="ghost mini" onClick={reiniciar} title="Voltar para a rodada 1">↺</button>
         <button className="ghost mini" onClick={onClose}>Fechar</button>
       </div>
       {erro && <p className="error">{erro}</p>}
+
+      {mapaAberto && (
+        <div style={{ marginTop: 12, overflowX: 'auto' }}>
+          <div className="muted" style={{ fontSize: '.74rem', marginBottom: 6 }}>
+            Clique num participante (no mapa ou na lista abaixo) e depois numa célula para mover.
+            {selToken != null && <b> Selecionado: {parts.find((x) => x.id === selToken)?.nome}</b>}
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: `repeat(${MAPA_W}, 40px)`, gap: 2, width: 'max-content' }}>
+            {Array.from({ length: MAPA_W * MAPA_H }, (_, i) => {
+              const x = i % MAPA_W
+              const y = Math.floor(i / MAPA_W)
+              const ocupante = parts.find((pp) => pp.posX === x && pp.posY === y)
+              return (
+                <div key={i} onClick={() => clicarCelula(x, y, ocupante)}
+                  style={{
+                    width: 40, height: 40, borderRadius: 6, cursor: 'pointer',
+                    background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.08)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    outline: ocupante && selToken === ocupante.id ? '2px solid var(--gold, #e0b64a)' : 'none',
+                  }}>
+                  {ocupante && (
+                    <div title={ocupante.nome} style={{
+                      width: 34, height: 34, borderRadius: '50%', overflow: 'hidden',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontWeight: 700, fontSize: 13, color: '#fff',
+                      background: ocupante.inimigo ? '#8a2f2f' : '#2f4d8a',
+                      backgroundImage: ocupante.avatarAssetId ? `url(/api/assets/${ocupante.avatarAssetId}/conteudo)` : undefined,
+                      backgroundSize: 'cover', backgroundPosition: 'center',
+                    }}>
+                      {!ocupante.avatarAssetId && (ocupante.nome || '?').charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+          <div className="row" style={{ gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
+            {parts.filter((pp) => pp.posX == null || pp.posY == null).map((pp) => (
+              <button key={pp.id} className={`ghost mini${selToken === pp.id ? ' ativo' : ''}`}
+                onClick={() => setSelToken(selToken === pp.id ? null : pp.id)}>
+                {pp.inimigo ? '👹' : '🛡'} {pp.nome}
+              </button>
+            ))}
+            {selToken != null && (
+              <button className="ghost mini" title="Remove o selecionado do mapa"
+                onClick={() => { patchPart(selToken, { posX: null, posY: null }); setSelToken(null) }}>
+                ⏏ Tirar do mapa
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="combate-lista">
         {parts.map((p, i) => (
@@ -172,6 +243,14 @@ function CombateTracker({ combate, personagens, onClose, onMudou }) {
                 </div>
               )}
               {condForm.pid === p.id && (
+                <>
+                  {/* Condições comuns: 1 clique aplica */}
+                  <div className="row" style={{ gap: 4, marginTop: 5, flexWrap: 'wrap' }}>
+                    {['Envenenado', 'Atordoado', 'Sangrando', 'Caído', 'Agarrado', 'Cego', 'Amedrontado', 'Queimando'].map((c) => (
+                      <button key={c} className="ghost mini" style={{ fontSize: '.68rem', padding: '1px 6px' }}
+                        onClick={() => setCondForm((s) => ({ ...s, nome: c }))}>{c}</button>
+                    ))}
+                  </div>
                 <div className="row" style={{ gap: 4, marginTop: 5 }}>
                   <input autoFocus placeholder="Efeito" value={condForm.nome} style={{ flex: 1, minWidth: 0 }}
                     onChange={(e) => setCondForm((s) => ({ ...s, nome: e.target.value }))}
@@ -182,6 +261,7 @@ function CombateTracker({ combate, personagens, onClose, onMudou }) {
                   <button className="ghost mini" onClick={() => addCond(p)}>✓</button>
                   <button className="ghost mini" onClick={() => setCondForm({ pid: null, nome: '', turnos: '' })}>✕</button>
                 </div>
+                </>
               )}
             </div>
             <div className="row" style={{ gap: 4, alignItems: 'center' }}>
@@ -257,6 +337,10 @@ export default function Campanha() {
   const [combateAtivo, setCombateAtivo] = useState(null)
   const [anotacoesTxt, setAnotacoesTxt] = useState('')
   const [anotacoesSalvo, setAnotacoesSalvo] = useState(false)
+  const [mensagens, setMensagens] = useState([])
+  const [xpOpen, setXpOpen] = useState(false)
+  const [xpQtd, setXpQtd] = useState(100)
+  const [xpResultado, setXpResultado] = useState(null)
 
   function carregar() {
     api(`/api/campanhas/${id}`).then(setCampanha).catch((e) => setErro(e.message))
@@ -265,6 +349,7 @@ export default function Campanha() {
     api(`/api/campanhas/${id}/personagens`).then(setPersonagens).catch(() => {})
     api(`/api/campanhas/${id}/sessoes`).then(setSessoes).catch(() => {})
     api(`/api/campanhas/${id}/combates`).then(setCombates).catch(() => {})
+    api(`/api/campanhas/${id}/mensagens`).then(setMensagens).catch(() => {})
   }
 
   function flashToast(r) {
@@ -307,6 +392,30 @@ export default function Campanha() {
       }),
     [id],
   )
+
+  // Mensagens de texto em tempo real (dedupe por id).
+  useEffect(
+    () =>
+      inscrever(`/topic/campanhas/${id}/mensagens`, (m) =>
+        setMensagens((prev) => (prev.some((x) => x.id === m.id) ? prev : [m, ...prev]))),
+    [id],
+  )
+  // Envia mensagem de texto do painel de Resultados.
+  async function enviarMensagem(texto) {
+    const m = await api(`/api/campanhas/${id}/mensagens`, { method: 'POST', body: { texto } })
+    if (m && m.id != null) {
+      setMensagens((prev) => (prev.some((x) => x.id === m.id) ? prev : [m, ...prev]))
+    }
+  }
+  // XP em massa: o mestre dá XP pra todos os personagens da campanha.
+  async function darXpEmMassa() {
+    setErro(null)
+    try {
+      const r = await api(`/api/campanhas/${id}/xp`, { method: 'POST', body: { quantidade: Number(xpQtd) || 0 } })
+      setXpResultado(r)
+      api(`/api/campanhas/${id}/personagens`).then(setPersonagens).catch(() => {})
+    } catch (e) { setErro(e.message) }
+  }
 
   // Rolagem vinda do painel de Resultados (chat). privada => oculta (só o mestre vê o valor).
   async function rolarPainel(expressao, rot, privada) {
@@ -484,6 +593,7 @@ export default function Campanha() {
             <button className="act" onClick={criarConvite}>✉ Convidar Jogadores</button>
             <button className="act" onClick={abrirEdit}>✎ Editar Campanha</button>
             <button className="act" onClick={criarCombate}>⚔ Criar Combate</button>
+            <button className="act" onClick={() => { setXpResultado(null); setXpOpen(true) }}>🎖 Dar XP</button>
             <Link className="act" to={`/campanhas/${id}/escudo`}>🛡 Escudo do Mestre</Link>
             <button className="act danger" onClick={() => setConfirmarApagar(true)}>🗑 Apagar campanha</button>
           </>
@@ -743,7 +853,43 @@ export default function Campanha() {
         </div>
       )}
 
-      <ResultadosPanel rolagens={rolagens} onRolar={rolarPainel} ehMestre={ehMestre} />
+      {xpOpen && (
+        <div className="modal" onClick={() => setXpOpen(false)}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 420 }}>
+            <div className="row">
+              <h2 style={{ margin: 0 }}>🎖 Dar XP para todos</h2>
+              <div className="spacer" />
+              <button className="ghost mini" onClick={() => setXpOpen(false)}>✕</button>
+            </div>
+            <p className="muted" style={{ fontSize: '.82rem' }}>
+              Todos os personagens da campanha recebem o XP; quem atingir o necessário sobe de nível automaticamente.
+            </p>
+            <label>Quantidade de XP</label>
+            <input type="number" min="1" autoFocus value={xpQtd}
+              onChange={(e) => setXpQtd(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') darXpEmMassa() }} />
+            {xpResultado && (
+              <div className="lista-vert" style={{ marginTop: 10, maxHeight: 220, overflow: 'auto' }}>
+                {xpResultado.map((r) => (
+                  <div key={r.personagemId} className="row" style={{ gap: 8, fontSize: '.85rem' }}>
+                    <b>{r.nome}</b>
+                    <span className="muted">XP {r.xpAtual} · Nv {r.nivel}</span>
+                    {r.subiuNivel && <span className="tag gold">⬆ subiu de nível!</span>}
+                  </div>
+                ))}
+                {!xpResultado.length && <span className="muted">Nenhum personagem na campanha.</span>}
+              </div>
+            )}
+            <div className="row" style={{ marginTop: 12, gap: 8 }}>
+              <button onClick={darXpEmMassa}>Distribuir</button>
+              <button className="ghost" onClick={() => setXpOpen(false)}>Fechar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <ResultadosPanel rolagens={rolagens} mensagens={mensagens} onMensagem={enviarMensagem}
+        onRolar={rolarPainel} ehMestre={ehMestre} />
 
       {toast && (
         <div className={`roll-toast ${toast.critico ? 'crit' : toast.falhaCritica ? 'fumble' : ''}`}>

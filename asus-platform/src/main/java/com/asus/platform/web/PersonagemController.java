@@ -42,6 +42,7 @@ public class PersonagemController {
     private final ItemPersonagemRepository itemRepository;
     private final AtaqueRepository ataqueRepository;
     private final FeiticoPersonagemRepository feiticoRepository;
+    private final com.asus.platform.repository.BencaoPersonagemRepository bencaoRepository;
     private final HabilidadePersonagemRepository habilidadeRepository;
     private final PersonagemSnapshotRepository snapshotRepository;
     private final CampanhaPersonagemRepository campanhaPersonagemRepository;
@@ -53,6 +54,7 @@ public class PersonagemController {
                                 ItemPersonagemRepository itemRepository,
                                 AtaqueRepository ataqueRepository,
                                 FeiticoPersonagemRepository feiticoRepository,
+                                com.asus.platform.repository.BencaoPersonagemRepository bencaoRepository,
                                 HabilidadePersonagemRepository habilidadeRepository,
                                 PersonagemSnapshotRepository snapshotRepository,
                                 CampanhaPersonagemRepository campanhaPersonagemRepository,
@@ -63,6 +65,7 @@ public class PersonagemController {
         this.itemRepository = itemRepository;
         this.ataqueRepository = ataqueRepository;
         this.feiticoRepository = feiticoRepository;
+        this.bencaoRepository = bencaoRepository;
         this.habilidadeRepository = habilidadeRepository;
         this.snapshotRepository = snapshotRepository;
         this.campanhaPersonagemRepository = campanhaPersonagemRepository;
@@ -179,6 +182,7 @@ public class PersonagemController {
         itemRepository.deleteAll(itemRepository.findByPersonagemId(id));
         ataqueRepository.deleteAll(ataqueRepository.findByPersonagemId(id));
         feiticoRepository.deleteAll(feiticoRepository.findByPersonagemId(id));
+        bencaoRepository.deleteAll(bencaoRepository.findByPersonagemId(id));
         habilidadeRepository.deleteAll(habilidadeRepository.findByPersonagemId(id));
         snapshotRepository.deleteAll(snapshotRepository.findByPersonagemIdOrderByCriadoEmDesc(id));
         campanhaPersonagemRepository.deleteAll(campanhaPersonagemRepository.findByPersonagemId(id));
