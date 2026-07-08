@@ -12,6 +12,8 @@ import Bestiario from './pages/Bestiario.jsx'
 import Livros from './pages/Livros.jsx'
 import Overlay from './pages/Overlay.jsx'
 import OverlayFicha from './pages/OverlayFicha.jsx'
+import OverlayMesa from './pages/OverlayMesa.jsx'
+import FichaPublica from './pages/FichaPublica.jsx'
 import Notificacoes from './pages/Notificacoes.jsx'
 import Marketplace from './pages/Marketplace.jsx'
 import Templates from './pages/Templates.jsx'
@@ -27,9 +29,11 @@ export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
-      {/* Overlays OBS sao publicos (consomem WebSocket) */}
+      {/* Overlays OBS e ficha compartilhada sao publicos (consomem WebSocket) */}
       <Route path="/overlay/ficha/:personagemId" element={<OverlayFicha />} />
+      <Route path="/overlay/mesa/:campanhaId" element={<OverlayMesa />} />
       <Route path="/overlay/:campanhaId" element={<Overlay />} />
+      <Route path="/p/:token" element={<FichaPublica />} />
       <Route
         element={
           <Protected>

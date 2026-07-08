@@ -76,6 +76,10 @@ public class SecurityConfig {
                     reg.requestMatchers(HttpMethod.GET, "/api/assets/*/conteudo").permitAll();
                     // Info minima do overlay OBS por personagem (nome + retrato): pagina publica sem login.
                     reg.requestMatchers(HttpMethod.GET, "/api/personagens/*/overlay").permitAll();
+                    // Overlay da MESA inteira (retratos + barras + iniciativa) — pagina publica pro OBS.
+                    reg.requestMatchers(HttpMethod.GET, "/api/campanhas/*/overlay").permitAll();
+                    // Ficha compartilhada por link publico (read-only, token opaco).
+                    reg.requestMatchers(HttpMethod.GET, "/api/publico/**").permitAll();
                     if (enforce) {
                         reg.requestMatchers("/api/**").authenticated();
                     }

@@ -113,6 +113,9 @@ public class Personagem {
     /** Dinheiro do personagem em T$ (aceita meio tibar). */
     private Double dinheiro;
 
+    /** Token do link público da ficha (null = não compartilhada). */
+    private String shareToken;
+
     private boolean arquivado;
 
     @Column(nullable = false)

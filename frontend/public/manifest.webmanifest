@@ -1,0 +1,14 @@
+{
+  "name": "ASUS RPG Platform",
+  "short_name": "ASUS RPG",
+  "description": "Fichas, campanhas e mesa virtual do sistema ASUS.",
+  "lang": "pt-BR",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#14100c",
+  "theme_color": "#14100c",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

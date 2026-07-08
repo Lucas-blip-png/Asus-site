@@ -7,5 +7,6 @@ public record AtualizarCampanhaRequest(
         String nome,
         String descricao,
         String capaAssetId,
+        String discordWebhookUrl,
         Boolean arquivada,
         @Valid CampanhaConfigDto config) {}

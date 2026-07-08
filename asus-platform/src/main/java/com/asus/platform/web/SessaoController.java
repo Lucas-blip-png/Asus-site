@@ -28,17 +28,20 @@ public class SessaoController {
     private final CampanhaMembroRepository membroRepository;
     private final NotificacaoRepository notificacaoRepository;
     private final CampanhaService campanhaService;
+    private final com.asus.platform.service.DiscordNotifier discordNotifier;
 
     public SessaoController(SessaoRepository sessaoRepository,
                             PresencaSessaoRepository presencaRepository,
                             CampanhaMembroRepository membroRepository,
                             NotificacaoRepository notificacaoRepository,
-                            CampanhaService campanhaService) {
+                            CampanhaService campanhaService,
+                            com.asus.platform.service.DiscordNotifier discordNotifier) {
         this.sessaoRepository = sessaoRepository;
         this.presencaRepository = presencaRepository;
         this.membroRepository = membroRepository;
         this.notificacaoRepository = notificacaoRepository;
         this.campanhaService = campanhaService;
+        this.discordNotifier = discordNotifier;
     }
 
     /** Gerenciar sessoes (criar/apagar/notificar) exige o mestre — quando ha usuario autenticado. */
@@ -70,6 +73,9 @@ public class SessaoController {
         // Avisa todos os membros da campanha que uma sessao foi agendada.
         notificarMembros(id, "Nova sessão agendada",
                 "A sessão \"" + salva.getTitulo() + "\" foi agendada. Confirme sua presença.");
+        discordNotifier.enviar(campanhaService.carregar(id).getDiscordWebhookUrl(),
+                "📅 Sessão agendada: **" + salva.getTitulo() + "**"
+                        + (salva.getInicio() != null ? " — " + salva.getInicio() : "") + ". Confirmem presença!");
         return salva;
     }
 

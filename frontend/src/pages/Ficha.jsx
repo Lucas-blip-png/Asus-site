@@ -541,6 +541,25 @@ export default function Ficha() {
     }
   }
 
+  // Ficha pública: gera o link read-only e copia (POST é idempotente; DELETE revoga).
+  const [shareCopiado, setShareCopiado] = useState(false)
+  const [shareAtivo, setShareAtivo] = useState(false)
+  async function compartilharFicha() {
+    try {
+      const r = await api(`/api/personagens/${id}/compartilhar`, { method: 'POST' })
+      navigator.clipboard?.writeText(`${window.location.origin}${r.url}`)
+      setShareAtivo(true)
+      setShareCopiado(true)
+      setTimeout(() => setShareCopiado(false), 2500)
+    } catch (e) { setErro(e.message) }
+  }
+  async function revogarCompartilhamento() {
+    try {
+      await api(`/api/personagens/${id}/compartilhar`, { method: 'DELETE' })
+      setShareAtivo(false)
+    } catch (e) { setErro(e.message) }
+  }
+
   // Overlay OBS por personagem: abre a página pública e copia a URL pro Browser Source.
   const [overlayCopiado, setOverlayCopiado] = useState(false)
   function abrirOverlay() {
@@ -821,20 +840,58 @@ export default function Ficha() {
 
   return (
     <>
-      {levelUp && (
-        <div className="modal" onClick={() => setLevelUp(null)}>
-          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
-            <h2>⬆️ Subiu de nível!</h2>
-            {levelUp.map((g) => (
-              <div key={g.nivel} className="item-card">
-                <div className="t">Nível {g.nivel}</div>
-                <div className="s">{g.recompensa}{g.limiteAtributo ? ` · Teto de atributo: ${g.limiteAtributo}` : ''}</div>
+      {levelUp && (() => {
+        // Assistente de level-up: quanto sobrou pra distribuir e o que desbloqueou.
+        const niveisComPontos = Math.max(0, (p.nivel - 1) - Math.floor(p.nivel / 5))
+        const atrRestantes = (5 + 2 * niveisComPontos)
+          - ATRIBS.reduce((s, [k]) => s + (Number(p.atributosBase?.[k]) || 0), 0)
+        const perRestantes = (5 + 4 * niveisComPontos)
+          - Object.values(treino).reduce((s, v) => s + (Number(v) || 0), 0)
+        const novasHab = habDisp.filter((h) => !h.bloqueada).slice(0, 5)
+        return (
+          <div className="modal" onClick={() => setLevelUp(null)}>
+            <div className="modal-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 560 }}>
+              <h2>⬆️ Subiu de nível!</h2>
+              {levelUp.map((g) => (
+                <div key={g.nivel} className="item-card">
+                  <div className="t">Nível {g.nivel}</div>
+                  <div className="s">{g.recompensa}{g.limiteAtributo ? ` · Teto de atributo: ${g.limiteAtributo}` : ''}</div>
+                </div>
+              ))}
+              <div className="muted" style={{ textTransform: 'uppercase', fontSize: '.7rem', letterSpacing: 1, margin: '10px 0 4px' }}>
+                O que fazer agora
               </div>
-            ))}
-            <button style={{ marginTop: 10 }} onClick={() => setLevelUp(null)}>Fechar</button>
+              {atrRestantes > 0 && (
+                <div className="row" style={{ gap: 8, alignItems: 'center', marginBottom: 6 }}>
+                  <span>💪 Você tem <b>{atrRestantes}</b> ponto{atrRestantes > 1 ? 's' : ''} de atributo pra distribuir.</span>
+                  <div className="spacer" />
+                  <button className="mini" onClick={() => { setLevelUp(null); setEditandoAtr(true) }}>Distribuir</button>
+                </div>
+              )}
+              {perRestantes > 0 && (
+                <div style={{ marginBottom: 6 }}>
+                  📖 Você tem <b>{perRestantes}</b> ponto{perRestantes > 1 ? 's' : ''} de perícia pra distribuir (coluna Treino).
+                </div>
+              )}
+              {novasHab.length > 0 && (
+                <div style={{ marginBottom: 6 }}>
+                  ✦ Habilidades disponíveis pra pegar:
+                  <div className="row" style={{ gap: 6, marginTop: 5, flexWrap: 'wrap' }}>
+                    {novasHab.map((h) => (
+                      <button key={h.codigo} className="ghost mini" title={h.efeito || h.nome}
+                        onClick={() => addHab(h.codigo)}>+ {h.nome}</button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {atrRestantes <= 0 && perRestantes <= 0 && !novasHab.length && (
+                <div className="muted">Tudo distribuído — as passivas novas já entraram sozinhas. 👌</div>
+              )}
+              <button style={{ marginTop: 12 }} onClick={() => setLevelUp(null)}>Fechar</button>
+            </div>
           </div>
-        </div>
-      )}
+        )
+      })()}
 
       {editStatus && (
         <div className="modal" onClick={() => setEditStatus(null)}>
@@ -904,6 +961,12 @@ export default function Ficha() {
           <Link to={`/campanhas/${campanhaAtiva.id}`} className="tag">💬 Campanha: {campanhaAtiva.nome}</Link>
         )}
         <div className="spacer" />
+        <button className="ghost mini" title="Gera um link público read-only da ficha e copia" onClick={compartilharFicha}>
+          🔗 {shareCopiado ? 'Link copiado!' : 'Compartilhar'}
+        </button>
+        {shareAtivo && (
+          <button className="ghost mini" title="Revogar o link público" onClick={revogarCompartilhamento}>🚫</button>
+        )}
         <button className="ghost mini" title="Imprimir / salvar a ficha em PDF" onClick={() => window.print()}>
           🖨 PDF
         </button>

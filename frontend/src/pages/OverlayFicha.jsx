@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 import { api } from '../api.js'
 import { inscrever } from '../ws.js'
 
@@ -29,10 +29,18 @@ function BarraV({ rot, cor, atual = 0, max = 0 }) {
 // Página pública (sem login), pensada para ser Browser Source no OBS.
 export default function OverlayFicha() {
   const { personagemId } = useParams()
+  const [params] = useSearchParams()
   const [info, setInfo] = useState(null)
   const [status, setStatus] = useState(null)
   const [ultima, setUltima] = useState(null)
   const [fotoErro, setFotoErro] = useState(false)
+
+  // Personalização por URL: ?barras=0 ?dado=0 ?nome=0 ?escala=1.25 ?cor=e0b64a
+  const mostraBarras = params.get('barras') !== '0'
+  const mostraDado = params.get('dado') !== '0'
+  const mostraNome = params.get('nome') !== '0'
+  const escala = Math.max(0.5, Math.min(2.5, Number(params.get('escala')) || 1))
+  const corDestaque = /^[0-9a-fA-F]{6}$/.test(params.get('cor') || '') ? '#' + params.get('cor') : 'var(--gold, #e0b64a)'
 
   useEffect(() => {
     setFotoErro(false)
@@ -89,8 +97,9 @@ export default function OverlayFicha() {
         display: 'flex', width: 470,
         background: 'linear-gradient(180deg, rgba(24,20,30,.94), rgba(12,10,16,.96))',
         borderRadius: 16, border: '1px solid rgba(255,255,255,.14)',
-        borderLeft: '3px solid var(--gold, #e0b64a)',
+        borderLeft: `3px solid ${corDestaque}`,
         boxShadow: '0 16px 46px rgba(0,0,0,.6)', overflow: 'hidden', backdropFilter: 'blur(6px)',
+        transform: `scale(${escala})`, transformOrigin: 'bottom left',
       }}>
         {/* Retrato à esquerda (preenche a altura do card) */}
         <div style={{ position: 'relative', width: 158, flexShrink: 0, background: '#2a2a3a' }}>
@@ -108,14 +117,16 @@ export default function OverlayFicha() {
 
         {/* Conteúdo à direita */}
         <div style={{ flex: 1, minWidth: 0, padding: '12px 16px 12px' }}>
-          <div style={{
-            fontWeight: 800, fontSize: 20, color: '#fff', textShadow: '0 2px 6px #000',
-            lineHeight: 1.15, marginBottom: 9, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-          }}>
-            {info?.nome || 'Personagem'}
-          </div>
+          {mostraNome && (
+            <div style={{
+              fontWeight: 800, fontSize: 20, color: '#fff', textShadow: '0 2px 6px #000',
+              lineHeight: 1.15, marginBottom: 9, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+            }}>
+              {info?.nome || 'Personagem'}
+            </div>
+          )}
 
-          {status && (
+          {mostraBarras && status && (
             <>
               <BarraV rot="VIDA" cor="linear-gradient(90deg,#e0454e,#ff6b73)" atual={status.pvAtual} max={status.pvMax} />
               <BarraV rot="MANA" cor="linear-gradient(90deg,#5566e0,#8a97ff)" atual={status.pmAtual} max={status.pmMax} />
@@ -123,7 +134,7 @@ export default function OverlayFicha() {
             </>
           )}
 
-          <div style={{ borderTop: '1px solid rgba(255,255,255,.08)', marginTop: 8, paddingTop: 8 }}>
+          {mostraDado && <div style={{ borderTop: '1px solid rgba(255,255,255,.08)', marginTop: 8, paddingTop: 8 }}>
             {ultima?.tipo === 'ataque' ? (
               <div className="pop" key={ultima.id} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                 <div style={{ textAlign: 'center' }}>
@@ -164,7 +175,7 @@ export default function OverlayFicha() {
             ) : (
               <div className="muted" style={{ fontSize: '.78rem' }}>Aguardando rolagens…</div>
             )}
-          </div>
+          </div>}
         </div>
       </div>
     </div>

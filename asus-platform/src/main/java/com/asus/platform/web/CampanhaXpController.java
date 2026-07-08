@@ -22,15 +22,18 @@ public class CampanhaXpController {
     private final CampanhaPersonagemRepository campanhaPersonagemRepository;
     private final PersonagemRepository personagemRepository;
     private final PersonagemService personagemService;
+    private final com.asus.platform.service.DiscordNotifier discordNotifier;
 
     public CampanhaXpController(CampanhaService campanhaService,
                                 CampanhaPersonagemRepository campanhaPersonagemRepository,
                                 PersonagemRepository personagemRepository,
-                                PersonagemService personagemService) {
+                                PersonagemService personagemService,
+                                com.asus.platform.service.DiscordNotifier discordNotifier) {
         this.campanhaService = campanhaService;
         this.campanhaPersonagemRepository = campanhaPersonagemRepository;
         this.personagemRepository = personagemRepository;
         this.personagemService = personagemService;
+        this.discordNotifier = discordNotifier;
     }
 
     @PostMapping
@@ -46,17 +49,29 @@ public class CampanhaXpController {
             throw new IllegalArgumentException("quantidade de XP deve ser maior que zero");
         }
         List<Map<String, Object>> resultado = new ArrayList<>();
+        StringBuilder subiram = new StringBuilder();
         campanhaPersonagemRepository.findByCampanhaId(id).forEach(cp ->
                 personagemRepository.findById(cp.getPersonagemId()).ifPresent(p -> {
                     ProgressoResponse r = personagemService.atualizarProgresso(
                             p.getId(), p.getXpAtual() + quantidade, null);
+                    boolean subiu = !r.niveisGanhos().isEmpty();
+                    if (subiu) {
+                        if (subiram.length() > 0) {
+                            subiram.append(", ");
+                        }
+                        subiram.append("**").append(r.personagem().nome())
+                                .append("** (nível ").append(r.personagem().nivel()).append(")");
+                    }
                     resultado.add(Map.of(
                             "personagemId", p.getId(),
                             "nome", r.personagem().nome(),
                             "xpAtual", r.personagem().xpAtual(),
                             "nivel", r.personagem().nivel(),
-                            "subiuNivel", !r.niveisGanhos().isEmpty()));
+                            "subiuNivel", subiu));
                 }));
+        String webhook = campanhaService.carregar(id).getDiscordWebhookUrl();
+        discordNotifier.enviar(webhook, "🎖 O mestre distribuiu **" + quantidade + " XP** para o grupo!"
+                + (subiram.length() > 0 ? "\n🎉 Subiram de nível: " + subiram : ""));
         return resultado;
     }
 }

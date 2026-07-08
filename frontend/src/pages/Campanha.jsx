@@ -14,7 +14,7 @@ const fmtData = (iso) => {
   }
 }
 
-const ABAS = ['Agentes', 'Jogadores', 'Sessões', 'Combates']
+const ABAS = ['Agentes', 'Jogadores', 'Sessões', 'Combates', 'Handouts', 'Momentos']
 
 const d20 = () => 1 + Math.floor(Math.random() * 20)
 // Tamanho do grid do mapa tático (células).
@@ -22,7 +22,7 @@ const MAPA_W = 14
 const MAPA_H = 9
 
 // Rastreador de iniciativa de um combate.
-function CombateTracker({ combate, personagens, onClose, onMudou }) {
+function CombateTracker({ combate, personagens, orgId, ehMestre, onClose, onMudou }) {
   const cid = combate.id
   const [c, setC] = useState(combate)
   const [parts, setParts] = useState([])
@@ -34,6 +34,7 @@ function CombateTracker({ combate, personagens, onClose, onMudou }) {
   const [condForm, setCondForm] = useState({ pid: null, nome: '', turnos: '' })
   const [mapaAberto, setMapaAberto] = useState(false)
   const [selToken, setSelToken] = useState(null)
+  const [modoMapa, setModoMapa] = useState('mover') // 'mover' | 'revelar' (névoa)
 
   function recarregar() {
     api(`/api/combates/${cid}`).then(setC).catch(() => {})
@@ -141,8 +142,43 @@ function CombateTracker({ combate, personagens, onClose, onMudou }) {
     (cp) => !parts.some((p) => String(p.personagemId) === String(cp.personagemId)),
   )
 
+  // ----- mapa: fundo (imagem) e névoa de guerra -----
+  const fogAtivo = c.fogJson != null
+  const reveladas = (() => { try { return new Set(JSON.parse(c.fogJson || '[]')) } catch { return new Set() } })()
+  async function patchCombate(body) {
+    try { setC(await api(`/api/combates/${cid}`, { method: 'PUT', body })) } catch (e) { setErro(e.message) }
+  }
+  async function uploadFundo(file) {
+    if (!file) return
+    setErro(null)
+    try {
+      const form = new FormData()
+      form.append('file', file)
+      form.append('tipo', 'OUTRO')
+      const asset = await api(`/api/organizacoes/${orgId}/assets`, { method: 'POST', body: form })
+      await patchCombate({ mapaAssetId: asset.id })
+    } catch (e) { setErro(e.message) }
+  }
+  const toggleNevoa = () => {
+    // Ligar cobre tudo (nenhuma célula revelada); desligar mostra tudo.
+    patchCombate({ fogJson: fogAtivo ? null : '[]' })
+    setModoMapa(fogAtivo ? 'mover' : 'revelar')
+  }
+  function revelarCelula(idx) {
+    const novas = new Set(reveladas)
+    if (novas.has(idx)) novas.delete(idx)
+    else novas.add(idx)
+    patchCombate({ fogJson: JSON.stringify([...novas]) })
+  }
+
   // Mapa: clica num token pra selecionar; clica numa célula vazia pra mover o selecionado.
+  // No modo "revelar" (névoa), o clique alterna a célula entre coberta/revelada.
   function clicarCelula(x, y, ocupante) {
+    const idx = y * MAPA_W + x
+    if (fogAtivo && modoMapa === 'revelar') {
+      revelarCelula(idx)
+      return
+    }
     if (ocupante) {
       setSelToken(selToken === ocupante.id ? null : ocupante.id)
       return
@@ -169,28 +205,63 @@ function CombateTracker({ combate, personagens, onClose, onMudou }) {
 
       {mapaAberto && (
         <div style={{ marginTop: 12, overflowX: 'auto' }}>
-          <div className="muted" style={{ fontSize: '.74rem', marginBottom: 6 }}>
-            Clique num participante (no mapa ou na lista abaixo) e depois numa célula para mover.
-            {selToken != null && <b> Selecionado: {parts.find((x) => x.id === selToken)?.nome}</b>}
+          <div className="row" style={{ gap: 6, marginBottom: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+            <span className="muted" style={{ fontSize: '.74rem' }}>
+              {fogAtivo && modoMapa === 'revelar'
+                ? 'Modo névoa: clique nas células para revelar/cobrir.'
+                : 'Clique num participante e depois numa célula para mover.'}
+              {selToken != null && <b> Selecionado: {parts.find((x) => x.id === selToken)?.nome}</b>}
+            </span>
+            <div className="spacer" />
+            {ehMestre && (
+              <>
+                <label className="ghost mini" style={{ cursor: 'pointer' }} title="Imagem de fundo do mapa">
+                  🖼 Fundo
+                  <input type="file" accept="image/*" style={{ display: 'none' }}
+                    onChange={(e) => uploadFundo(e.target.files[0])} />
+                </label>
+                {c.mapaAssetId && (
+                  <button className="ghost mini" title="Remover fundo" onClick={() => patchCombate({ mapaAssetId: null })}>🖼✕</button>
+                )}
+                <button className={`ghost mini${fogAtivo ? ' ativo' : ''}`} title="Névoa de guerra" onClick={toggleNevoa}>🌫 Névoa</button>
+                {fogAtivo && (
+                  <>
+                    <button className={`ghost mini${modoMapa === 'mover' ? ' ativo' : ''}`} onClick={() => setModoMapa('mover')}>Mover</button>
+                    <button className={`ghost mini${modoMapa === 'revelar' ? ' ativo' : ''}`} onClick={() => setModoMapa('revelar')}>Revelar</button>
+                  </>
+                )}
+              </>
+            )}
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: `repeat(${MAPA_W}, 40px)`, gap: 2, width: 'max-content' }}>
+          <div style={{
+            display: 'grid', gridTemplateColumns: `repeat(${MAPA_W}, 40px)`, gap: 2, width: 'max-content',
+            padding: 4, borderRadius: 8,
+            backgroundImage: c.mapaAssetId ? `url(/api/assets/${c.mapaAssetId}/conteudo)` : undefined,
+            backgroundSize: 'cover', backgroundPosition: 'center',
+          }}>
             {Array.from({ length: MAPA_W * MAPA_H }, (_, i) => {
               const x = i % MAPA_W
               const y = Math.floor(i / MAPA_W)
               const ocupante = parts.find((pp) => pp.posX === x && pp.posY === y)
+              const coberta = fogAtivo && !reveladas.has(i)
+              // Mestre enxerga através da névoa (tinta translúcida); jogador vê coberto.
+              const fundoCelula = coberta
+                ? (ehMestre ? 'rgba(5,5,10,.55)' : 'rgba(8,8,14,.98)')
+                : (c.mapaAssetId ? 'rgba(255,255,255,.02)' : 'rgba(255,255,255,.04)')
               return (
                 <div key={i} onClick={() => clicarCelula(x, y, ocupante)}
                   style={{
                     width: 40, height: 40, borderRadius: 6, cursor: 'pointer',
-                    background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.08)',
+                    background: fundoCelula, border: '1px solid rgba(255,255,255,.08)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     outline: ocupante && selToken === ocupante.id ? '2px solid var(--gold, #e0b64a)' : 'none',
                   }}>
-                  {ocupante && (
+                  {ocupante && (!coberta || ehMestre) && (
                     <div title={ocupante.nome} style={{
                       width: 34, height: 34, borderRadius: '50%', overflow: 'hidden',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       fontWeight: 700, fontSize: 13, color: '#fff',
+                      opacity: coberta ? 0.45 : 1,
                       background: ocupante.inimigo ? '#8a2f2f' : '#2f4d8a',
                       backgroundImage: ocupante.avatarAssetId ? `url(/api/assets/${ocupante.avatarAssetId}/conteudo)` : undefined,
                       backgroundSize: 'cover', backgroundPosition: 'center',
@@ -341,6 +412,11 @@ export default function Campanha() {
   const [xpOpen, setXpOpen] = useState(false)
   const [xpQtd, setXpQtd] = useState(100)
   const [xpResultado, setXpResultado] = useState(null)
+  const [handouts, setHandouts] = useState([])
+  const [novoHandout, setNovoHandout] = useState({ titulo: '', texto: '' })
+  const [handoutImg, setHandoutImg] = useState(null)
+  const [momentos, setMomentos] = useState([])
+  const [recapCopiado, setRecapCopiado] = useState(false)
 
   function carregar() {
     api(`/api/campanhas/${id}`).then(setCampanha).catch((e) => setErro(e.message))
@@ -350,6 +426,8 @@ export default function Campanha() {
     api(`/api/campanhas/${id}/sessoes`).then(setSessoes).catch(() => {})
     api(`/api/campanhas/${id}/combates`).then(setCombates).catch(() => {})
     api(`/api/campanhas/${id}/mensagens`).then(setMensagens).catch(() => {})
+    api(`/api/campanhas/${id}/handouts`).then(setHandouts).catch(() => {})
+    api(`/api/campanhas/${id}/momentos`).then(setMomentos).catch(() => {})
   }
 
   function flashToast(r) {
@@ -400,6 +478,55 @@ export default function Campanha() {
         setMensagens((prev) => (prev.some((x) => x.id === m.id) ? prev : [m, ...prev]))),
     [id],
   )
+  // Handouts em tempo real: quando o mestre entrega, aparece pra todos na hora.
+  useEffect(
+    () =>
+      inscrever(`/topic/campanhas/${id}/handouts`, (h) =>
+        setHandouts((prev) => (prev.some((x) => x.id === h.id) ? prev : [h, ...prev]))),
+    [id],
+  )
+
+  // ----- handouts (mestre entrega imagem/nota) -----
+  async function criarHandout() {
+    if (!novoHandout.titulo.trim()) return
+    setErro(null)
+    try {
+      let assetId = null
+      if (handoutImg) {
+        const form = new FormData()
+        form.append('file', handoutImg)
+        form.append('tipo', 'OUTRO')
+        const asset = await api(`/api/organizacoes/${campanha.organizacaoId}/assets`, { method: 'POST', body: form })
+        assetId = asset.id
+      }
+      await api(`/api/campanhas/${id}/handouts`, {
+        method: 'POST',
+        body: { titulo: novoHandout.titulo.trim(), texto: novoHandout.texto || null, assetId },
+      })
+      setNovoHandout({ titulo: '', texto: '' })
+      setHandoutImg(null)
+      api(`/api/campanhas/${id}/handouts`).then(setHandouts).catch(() => {})
+    } catch (e) { setErro(e.message) }
+  }
+  async function apagarHandout(hid) {
+    try { await api(`/api/handouts/${hid}`, { method: 'DELETE' }); setHandouts((prev) => prev.filter((h) => h.id !== hid)) }
+    catch (e) { setErro(e.message) }
+  }
+
+  // ----- momentos: recap pra área de transferência -----
+  function copiarRecap() {
+    const linhas = momentos.map((m) => {
+      const quando = new Date(m.criadoEm).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+      const quem = m.personagemNome || 'Alguém'
+      return m.tipo === 'CRITICO'
+        ? `⭐ ${quem} tirou 20 natural em ${m.rotulo} (${quando})`
+        : `💀 ${quem} falhou criticamente em ${m.rotulo} (${quando})`
+    })
+    const recap = `📜 Momentos da sessão — ${campanha.nome}\n` + (linhas.length ? linhas.join('\n') : 'Sem momentos registrados.')
+    navigator.clipboard?.writeText(recap)
+    setRecapCopiado(true)
+    setTimeout(() => setRecapCopiado(false), 2500)
+  }
   // Envia mensagem de texto do painel de Resultados.
   async function enviarMensagem(texto) {
     const m = await api(`/api/campanhas/${id}/mensagens`, { method: 'POST', body: { texto } })
@@ -524,7 +651,7 @@ export default function Campanha() {
 
   // ----- editar campanha -----
   function abrirEdit() {
-    setEditForm({ nome: campanha.nome || '', descricao: campanha.descricao || '' })
+    setEditForm({ nome: campanha.nome || '', descricao: campanha.descricao || '', discordWebhookUrl: campanha.discordWebhookUrl || '' })
     setEditOpen(true)
   }
   async function salvarEdicao() {
@@ -532,7 +659,7 @@ export default function Campanha() {
     try {
       await api(`/api/campanhas/${id}`, {
         method: 'PUT',
-        body: { nome: editForm.nome, descricao: editForm.descricao },
+        body: { nome: editForm.nome, descricao: editForm.descricao, discordWebhookUrl: editForm.discordWebhookUrl ?? '' },
       })
       setEditOpen(false)
       api(`/api/campanhas/${id}`).then(setCampanha)
@@ -583,6 +710,7 @@ export default function Campanha() {
       <div className="camp-actions">
         <button className="act" onClick={abrirAddPerso}>＋ Adicionar Personagens</button>
         <Link className="act" to={`/overlay/${id}`}>📺 Overlay OBS</Link>
+        <Link className="act" to={`/overlay/mesa/${id}`} title="Retratos + barras do grupo e iniciativa, pro OBS">🖼 Overlay Mesa</Link>
         {ehMestre ? (
           <>
             <label className="act" title="Trocar a capa da campanha">
@@ -760,6 +888,8 @@ export default function Campanha() {
             <CombateTracker
               combate={combateAtivo}
               personagens={personagens}
+              orgId={campanha.organizacaoId}
+              ehMestre={ehMestre}
               onClose={() => { setCombateAtivo(null); recarregarCombates() }}
               onMudou={recarregarCombates}
             />
@@ -785,6 +915,71 @@ export default function Campanha() {
         </>
       )}
 
+      {aba === 'Handouts' && (
+        <div>
+          {ehMestre && (
+            <div className="card" style={{ marginBottom: 14 }}>
+              <h2 style={{ marginTop: 0 }}>Entregar handout</h2>
+              <div className="row" style={{ gap: 8, flexWrap: 'wrap' }}>
+                <input placeholder="Título (ex.: Carta misteriosa)" style={{ flex: '1 1 180px' }}
+                  value={novoHandout.titulo}
+                  onChange={(e) => setNovoHandout((s) => ({ ...s, titulo: e.target.value }))} />
+                <label className="ghost mini" style={{ alignSelf: 'center', cursor: 'pointer' }}>
+                  🖼 {handoutImg ? handoutImg.name.slice(0, 18) : 'Imagem (opcional)'}
+                  <input type="file" accept="image/*" style={{ display: 'none' }}
+                    onChange={(e) => setHandoutImg(e.target.files[0] || null)} />
+                </label>
+              </div>
+              <textarea placeholder="Texto (opcional)" value={novoHandout.texto}
+                onChange={(e) => setNovoHandout((s) => ({ ...s, texto: e.target.value }))} />
+              <button className="mini" style={{ marginTop: 8 }} onClick={criarHandout}>📨 Entregar aos jogadores</button>
+            </div>
+          )}
+          <div className="grid">
+            {handouts.map((h) => (
+              <div key={h.id} className="card">
+                <div className="row">
+                  <b>{h.titulo}</b>
+                  <div className="spacer" />
+                  {ehMestre && <button className="ghost mini" onClick={() => apagarHandout(h.id)}>✕</button>}
+                </div>
+                {h.assetId && (
+                  <img src={`/api/assets/${h.assetId}/conteudo`} alt={h.titulo}
+                    style={{ width: '100%', borderRadius: 8, marginTop: 8 }} />
+                )}
+                {h.texto && <p className="muted" style={{ marginTop: 8, whiteSpace: 'pre-wrap' }}>{h.texto}</p>}
+                <div className="muted" style={{ fontSize: '.7rem', marginTop: 6 }}>{dataHora(h.criadoEm)}</div>
+              </div>
+            ))}
+            {!handouts.length && <p className="muted">Nenhum handout entregue ainda.</p>}
+          </div>
+        </div>
+      )}
+
+      {aba === 'Momentos' && (
+        <div className="card">
+          <div className="row" style={{ alignItems: 'center' }}>
+            <h2 style={{ margin: 0 }}>📜 Momentos da sessão</h2>
+            <span className="muted" style={{ fontSize: '.78rem' }}>· críticos e falhas, automático</span>
+            <div className="spacer" />
+            <button className="mini" onClick={copiarRecap}>{recapCopiado ? 'Copiado! ✓' : '📋 Copiar recap'}</button>
+          </div>
+          <div className="lista-vert" style={{ marginTop: 10 }}>
+            {momentos.map((m, i) => (
+              <div key={i} className="sessao-row">
+                <span style={{ fontSize: '1.3rem' }}>{m.tipo === 'CRITICO' ? '⭐' : '💀'}</span>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <b>{m.personagemNome || 'Alguém'}</b>{' '}
+                  {m.tipo === 'CRITICO' ? 'tirou 20 natural' : 'falhou criticamente'} em <b>{m.rotulo}</b>
+                  {m.total != null && <span className="muted"> (total {m.total})</span>}
+                </div>
+                <span className="muted" style={{ fontSize: '.72rem', whiteSpace: 'nowrap' }}>{dataHora(m.criadoEm)}</span>
+              </div>
+            ))}
+            {!momentos.length && <span className="muted">Nenhum crítico ou falha registrado ainda. Rolem dados! 🎲</span>}
+          </div>
+        </div>
+      )}
 
       {addPersoOpen && (
         <div className="modal" onClick={() => setAddPersoOpen(false)}>
@@ -827,6 +1022,13 @@ export default function Campanha() {
             <label>Descrição</label>
             <textarea value={editForm.descricao}
               onChange={(e) => setEditForm((s) => ({ ...s, descricao: e.target.value }))} />
+            <label>Webhook do Discord (opcional)</label>
+            <input placeholder="https://discord.com/api/webhooks/…" value={editForm.discordWebhookUrl || ''}
+              onChange={(e) => setEditForm((s) => ({ ...s, discordWebhookUrl: e.target.value }))} />
+            <p className="muted" style={{ fontSize: '.75rem', marginTop: 2 }}>
+              Críticos, level-ups e sessões agendadas caem direto no canal do grupo.
+              (No Discord: Configurações do canal → Integrações → Webhooks.)
+            </p>
             <div className="row" style={{ marginTop: 12, gap: 8 }}>
               <button onClick={salvarEdicao}>Salvar</button>
               <button className="ghost" onClick={() => setEditOpen(false)}>Cancelar</button>
