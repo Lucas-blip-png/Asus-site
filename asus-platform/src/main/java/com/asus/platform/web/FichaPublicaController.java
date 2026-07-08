@@ -37,6 +37,7 @@ public class FichaPublicaController {
     private final FeiticoPersonagemRepository feiticoRepository;
     private final BencaoPersonagemRepository bencaoRepository;
     private final ItemPersonagemRepository inventarioRepository;
+    private final com.fasterxml.jackson.databind.ObjectMapper objectMapper;
 
     public FichaPublicaController(PersonagemRepository personagemRepository,
                                   PersonagemService personagemService,
@@ -46,7 +47,8 @@ public class FichaPublicaController {
                                   AtaqueRepository ataqueRepository,
                                   FeiticoPersonagemRepository feiticoRepository,
                                   BencaoPersonagemRepository bencaoRepository,
-                                  ItemPersonagemRepository inventarioRepository) {
+                                  ItemPersonagemRepository inventarioRepository,
+                                  com.fasterxml.jackson.databind.ObjectMapper objectMapper) {
         this.personagemRepository = personagemRepository;
         this.personagemService = personagemService;
         this.acessoService = acessoService;
@@ -56,6 +58,7 @@ public class FichaPublicaController {
         this.feiticoRepository = feiticoRepository;
         this.bencaoRepository = bencaoRepository;
         this.inventarioRepository = inventarioRepository;
+        this.objectMapper = objectMapper;
     }
 
     /** Gera (ou devolve) o token do link público. Só o dono. */
@@ -100,8 +103,14 @@ public class FichaPublicaController {
                 .filter(java.util.Objects::nonNull)
                 .toList();
 
+        // Remove as anotações pessoais do dono — o resto da ficha é o que se compartilha.
+        Map<String, Object> personagem = objectMapper.convertValue(
+                personagemService.buscar(p.getId()),
+                new com.fasterxml.jackson.core.type.TypeReference<Map<String, Object>>() {});
+        personagem.remove("anotacoes");
+
         Map<String, Object> resp = new HashMap<>();
-        resp.put("personagem", personagemService.buscar(p.getId()));
+        resp.put("personagem", personagem);
         resp.put("habilidades", habilidades);
         resp.put("ataques", ataqueRepository.findByPersonagemId(p.getId()));
         resp.put("feiticos", feiticoRepository.findByPersonagemId(p.getId()));

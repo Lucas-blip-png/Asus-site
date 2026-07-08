@@ -485,6 +485,12 @@ export default function Campanha() {
         setHandouts((prev) => (prev.some((x) => x.id === h.id) ? prev : [h, ...prev]))),
     [id],
   )
+  // Momentos/handouts mudam durante a sessão: recarrega ao abrir a aba.
+  useEffect(() => {
+    if (aba === 'Momentos') api(`/api/campanhas/${id}/momentos`).then(setMomentos).catch(() => {})
+    if (aba === 'Handouts') api(`/api/campanhas/${id}/handouts`).then(setHandouts).catch(() => {})
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [aba])
 
   // ----- handouts (mestre entrega imagem/nota) -----
   async function criarHandout() {

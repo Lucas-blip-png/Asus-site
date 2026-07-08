@@ -6,4 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface MensagemCampanhaRepository extends JpaRepository<MensagemCampanha, Long> {
     List<MensagemCampanha> findTop100ByCampanhaIdOrderByCriadoEmDescIdDesc(Long campanhaId);
+    List<MensagemCampanha> findByCampanhaId(Long campanhaId);
 }
