@@ -1,8 +1,10 @@
 package com.asus.platform.web;
 
 import com.asus.platform.domain.Ataque;
+import com.asus.platform.domain.BencaoPersonagem;
 import com.asus.platform.domain.FeiticoPersonagem;
 import com.asus.platform.repository.AtaqueRepository;
+import com.asus.platform.repository.BencaoPersonagemRepository;
 import com.asus.platform.repository.FeiticoPersonagemRepository;
 import com.asus.platform.security.UsuarioPrincipal;
 import com.asus.platform.service.AcessoService;
@@ -18,13 +20,16 @@ public class ConteudoPersonagemController {
 
     private final AtaqueRepository ataqueRepository;
     private final FeiticoPersonagemRepository feiticoRepository;
+    private final BencaoPersonagemRepository bencaoRepository;
     private final AcessoService acessoService;
 
     public ConteudoPersonagemController(AtaqueRepository ataqueRepository,
                                         FeiticoPersonagemRepository feiticoRepository,
+                                        BencaoPersonagemRepository bencaoRepository,
                                         AcessoService acessoService) {
         this.ataqueRepository = ataqueRepository;
         this.feiticoRepository = feiticoRepository;
+        this.bencaoRepository = bencaoRepository;
         this.acessoService = acessoService;
     }
 
@@ -115,6 +120,52 @@ public class ConteudoPersonagemController {
         feiticoRepository.findById(id).ifPresent((f) -> {
             acessoService.exigirDonoPersonagem(f.getPersonagemId(), principal);
             feiticoRepository.delete(f);
+        });
+    }
+
+    // ----- Bênçãos (aba Bênçãos; limite Sab/2 é informativo) -----
+
+    @GetMapping("/personagens/{id}/bencaos")
+    public List<BencaoPersonagem> bencaos(@PathVariable Long id) {
+        return bencaoRepository.findByPersonagemId(id);
+    }
+
+    @PostMapping("/personagens/{id}/bencaos")
+    @ResponseStatus(HttpStatus.CREATED)
+    public BencaoPersonagem criarBencao(@PathVariable Long id, @RequestBody BencaoPersonagem b,
+                                        @AuthenticationPrincipal UsuarioPrincipal principal) {
+        acessoService.exigirDonoPersonagem(id, principal);
+        if (b.getNome() == null || b.getNome().isBlank()) {
+            throw new IllegalArgumentException("nome da bencao e obrigatorio");
+        }
+        b.setId(null);
+        b.setPersonagemId(id);
+        return bencaoRepository.save(b);
+    }
+
+    @PutMapping("/bencaos/{id}")
+    public BencaoPersonagem atualizarBencao(@PathVariable Long id, @RequestBody BencaoPersonagem dados,
+                                            @AuthenticationPrincipal UsuarioPrincipal principal) {
+        BencaoPersonagem b = bencaoRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("bencao nao encontrada"));
+        acessoService.exigirDonoPersonagem(b.getPersonagemId(), principal);
+        if (dados.getNome() != null && !dados.getNome().isBlank()) {
+            b.setNome(dados.getNome());
+        }
+        b.setDivindade(dados.getDivindade());
+        b.setCusto(dados.getCusto());
+        b.setCustoTipo(dados.getCustoTipo());
+        b.setEfeito(dados.getEfeito());
+        return bencaoRepository.save(b);
+    }
+
+    @DeleteMapping("/bencaos/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void apagarBencao(@PathVariable Long id,
+                             @AuthenticationPrincipal UsuarioPrincipal principal) {
+        bencaoRepository.findById(id).ifPresent((b) -> {
+            acessoService.exigirDonoPersonagem(b.getPersonagemId(), principal);
+            bencaoRepository.delete(b);
         });
     }
 }

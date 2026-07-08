@@ -19,3 +19,10 @@ spring:
   h2:
     console:
       enabled: false
+
+# Producao: exige login em toda a API (rotas publicas continuam liberadas:
+# overlay, conteudo de imagem de assets, websocket e auth). Pode desligar
+# com ASUS_SECURITY_ENFORCE=false se algo der errado.
+asus:
+  security:
+    enforce: ${ASUS_SECURITY_ENFORCE:true}

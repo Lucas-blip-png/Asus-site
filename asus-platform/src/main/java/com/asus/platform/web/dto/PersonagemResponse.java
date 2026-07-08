@@ -42,6 +42,7 @@ public record PersonagemResponse(
         String personalidade,
         String historico,
         String objetivo,
+        Double dinheiro,
         boolean arquivado,
         LocalDateTime criadoEm,
         LocalDateTime atualizadoEm) {}

@@ -40,4 +40,8 @@ public class CombateParticipante {
     /** Condições/efeitos como JSON: [{"nome":"Envenenado","turnos":3}, ...]. */
     @Column(columnDefinition = "TEXT")
     private String condicoes;
+
+    /** Posição no mapa tático (célula do grid; null = fora do mapa). */
+    private Integer posX;
+    private Integer posY;
 }

@@ -110,6 +110,9 @@ public class Personagem {
     @Column(columnDefinition = "TEXT")
     private String jsonPericiasOutros;
 
+    /** Dinheiro do personagem em T$ (aceita meio tibar). */
+    private Double dinheiro;
+
     private boolean arquivado;
 
     @Column(nullable = false)

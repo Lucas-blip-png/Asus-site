@@ -85,8 +85,9 @@ public class RolagemService {
         ExpressaoDado expressao = ExpressaoDado.parse(req.expressao());
         ResultadoDado resultado = expressao.rolar(dado);
 
-        Integer naturalD20 = (expressao.quantidade() == 1 && expressao.faces() == 20)
-                ? resultado.dados().get(0) : null;
+        // d20 "efetivo": o unico rolado ou, com vantagem/desvantagem (2d20kh1/kl1), o mantido.
+        Integer naturalD20 = expressao.faces() == 20
+                ? expressao.dadoEfetivo(resultado.dados()) : null;
         boolean critico = naturalD20 != null && naturalD20 == AsusV1Engine.D20_CRITICO;
         boolean falhaCritica = naturalD20 != null && naturalD20 == AsusV1Engine.D20_FALHA_CRITICA;
 

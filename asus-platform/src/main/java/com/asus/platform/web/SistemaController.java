@@ -19,6 +19,7 @@ import com.asus.platform.repository.RacaRepository;
 import com.asus.platform.web.dto.AtributoInfo;
 import com.asus.platform.web.dto.FeiticoRegras;
 import java.util.List;
+import java.util.Map;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -120,6 +121,40 @@ public class SistemaController {
     @GetMapping("/asus/feiticos/regras")
     public FeiticoRegras feiticosRegras() {
         return FeiticoRegras.padrao();
+    }
+
+    /** Feiticos prontos (montados pelas regras de construcao) para adicionar com 1 clique. */
+    @GetMapping("/asus/feiticos/prontos")
+    public List<Map<String, Object>> feiticosProntos() {
+        return List.of(
+                feitico("Míssil Arcano", 1, 2, "9m", "Instantânea", "Projétil de energia que causa 1d6 de dano arcano em um alvo."),
+                feitico("Toque Curativo", 1, 2, "Toque", "Instantânea", "Cura 1d6 PV de uma criatura tocada."),
+                feitico("Luz", 1, 1, "Toque", "1 cena", "Um objeto tocado brilha como uma tocha."),
+                feitico("Armadura Arcana", 1, 2, "Pessoal", "1 cena", "+2 de Defesa enquanto durar."),
+                feitico("Susto", 1, 2, "9m", "Instantânea", "O alvo faz teste de Sabedoria ou fica Amedrontado por 1 rodada."),
+                feitico("Bola de Fogo", 2, 5, "18m", "Instantânea", "Explosão em área de 3m que causa 3d6 de dano de fogo."),
+                feitico("Cura Moderada", 2, 5, "Toque", "Instantânea", "Cura 3d6 PV de uma criatura tocada."),
+                feitico("Invisibilidade", 2, 6, "Pessoal", "1 cena ou até atacar", "Você fica invisível."),
+                feitico("Levitar", 2, 4, "Pessoal", "1 cena", "Você flutua a até 3m do chão, movendo-se lentamente."),
+                feitico("Relâmpago", 3, 8, "18m", "Instantânea", "Linha de raio que causa 5d6 de dano elétrico nos alvos na trajetória."),
+                feitico("Cura Superior", 3, 8, "Toque", "Instantânea", "Cura 5d6 PV de uma criatura tocada."),
+                feitico("Voo", 3, 9, "Pessoal", "1 cena", "Você voa com deslocamento igual ao seu andar."),
+                feitico("Muralha de Gelo", 3, 8, "12m", "1 cena", "Parede de gelo de 6m que bloqueia passagem e visão."),
+                feitico("Tempestade Flamejante", 4, 12, "18m", "Instantânea", "Área de 6m em chamas: 7d6 de dano de fogo."),
+                feitico("Reviver", 4, 14, "Toque", "Instantânea", "Estabiliza e devolve 1 PV a uma criatura que morreu nesta cena."),
+                feitico("Palavra do Poder", 5, 18, "9m", "Instantânea", "Uma palavra devastadora: 10d6 de dano em um único alvo."));
+    }
+
+    private static Map<String, Object> feitico(String nome, int circulo, int custoPm,
+                                               String alcance, String duracao, String efeito) {
+        Map<String, Object> m = new java.util.LinkedHashMap<>();
+        m.put("nome", nome);
+        m.put("circulo", circulo);
+        m.put("custoPm", custoPm);
+        m.put("alcance", alcance);
+        m.put("duracao", duracao);
+        m.put("efeito", efeito);
+        return m;
     }
 
     private GameSystem asusSystem() {

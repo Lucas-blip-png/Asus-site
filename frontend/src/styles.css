@@ -630,3 +630,31 @@ button.ghost.mini.ativo { background: var(--gold); color: #1a1206; border-color:
   background: var(--panel-2); border: 1px solid var(--border); border-left: 3px solid var(--gold);
   border-radius: var(--radius-sm); padding: 9px 12px; }
 .hab-opt:hover { border-color: var(--border-2); }
+
+/* --- Celular: refinos além do colapso da ficha (1040px) e da topbar (860px) --- */
+@media (max-width: 640px) {
+  .page-head { flex-wrap: wrap; gap: 8px; }
+  .camp-actions { flex-wrap: wrap; }
+  .abas { flex-wrap: wrap; }
+  .pericias { font-size: .82rem; }
+  .pericias .step { gap: 2px; }
+  .add-form { flex-wrap: wrap; }
+  .modal-card { max-width: 94vw !important; margin: 0 3vw; }
+  .resultados-panel { width: 94vw; right: 3vw; }
+  .atr-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* --- Impressão / salvar em PDF: só o conteúdo da ficha, fundo claro --- */
+@media print {
+  body { background: #fff !important; color: #111 !important; }
+  .topbar, .chat-fab, .resultados-panel, .roll-toast, .abas,
+  button, input[type="file"], .rec-step, .rec-edit, .d20-btn { display: none !important; }
+  .container { padding: 0 !important; }
+  .ficha { grid-template-columns: 1fr 1fr !important; gap: 12px; }
+  .card, .atr-edit, .cris-row, .pericia-card {
+    background: #fff !important; color: #111 !important;
+    border-color: #bbb !important; box-shadow: none !important;
+  }
+  .muted { color: #444 !important; }
+  * { text-shadow: none !important; }
+}

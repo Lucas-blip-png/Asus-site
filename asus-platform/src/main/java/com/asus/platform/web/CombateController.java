@@ -147,6 +147,13 @@ public class CombateController {
             Object cond = body.get("condicoes");
             p.setCondicoes(cond == null ? null : String.valueOf(cond));
         }
+        // Posição no mapa tático (null tira do mapa).
+        if (body.containsKey("posX")) {
+            p.setPosX(body.get("posX") == null ? null : inteiro(body.get("posX"), 0));
+        }
+        if (body.containsKey("posY")) {
+            p.setPosY(body.get("posY") == null ? null : inteiro(body.get("posY"), 0));
+        }
         return participanteRepository.save(p);
     }
 

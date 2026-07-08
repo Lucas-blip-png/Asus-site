@@ -250,6 +250,9 @@ public class PersonagemService {
         if (req.periciasCustom() != null) {
             p.setJsonPericiasCustom(serializarCustom(req.periciasCustom()));
         }
+        if (req.dinheiro() != null) {
+            p.setDinheiro(Math.max(0, req.dinheiro()));
+        }
 
         ResultadoCalculo r = calculoService.calcular(p);
         p.setAtributosFinais(r.atributosFinais());
@@ -708,6 +711,7 @@ public class PersonagemService {
                 p.getPersonalidade(),
                 p.getHistorico(),
                 p.getObjetivo(),
+                p.getDinheiro(),
                 p.isArquivado(),
                 p.getCriadoEm(),
                 p.getAtualizadoEm());
