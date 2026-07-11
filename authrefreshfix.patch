@@ -1,0 +1,73 @@
+From c3af1c6ebf7fb5843a01b3a1d030e41360755a75 Mon Sep 17 00:00:00 2001
+From: Lucas-blip-png <177052392+Lucas-blip-png@users.noreply.github.com>
+Date: Sat, 11 Jul 2026 23:24:44 +0000
+Subject: [PATCH] Auth: renova o access token de forma transparente no 401 (usa
+ o refresh token e repete a requisicao) em vez de deslogar; dedupe de refresh
+ e guarda anti-loop. Corrige o site deslogar sozinho apos ~15 min
+
+---
+ frontend/src/api.js | 41 +++++++++++++++++++++++++++++++++++++++--
+ 1 file changed, 39 insertions(+), 2 deletions(-)
+
+diff --git a/frontend/src/api.js b/frontend/src/api.js
+index 44bcd38..73f4ff0 100644
+--- a/frontend/src/api.js
++++ b/frontend/src/api.js
+@@ -10,7 +10,36 @@ export function getToken() {
+   return localStorage.getItem('accessToken')
+ }
+ 
+-export async function api(path, { method = 'GET', body, auth = true, headers = {} } = {}) {
++// Renovacao transparente do access token (dura 15 min) usando o refresh token (7 dias).
++// Dedupe: varias requisicoes que caem em 401 ao mesmo tempo compartilham UM unico refresh.
++let refreshPromise = null
++async function tentarRefresh() {
++  const rt = localStorage.getItem('refreshToken')
++  if (!rt) return false
++  if (!refreshPromise) {
++    refreshPromise = fetch(BASE + '/api/auth/refresh', {
++      method: 'POST',
++      headers: { 'Content-Type': 'application/json' },
++      body: JSON.stringify({ refreshToken: rt }),
++    })
++      .then(async (r) => {
++        if (!r.ok) return false
++        const d = await r.json().catch(() => null)
++        if (d && d.accessToken) {
++          localStorage.setItem('accessToken', d.accessToken)
++          if (d.refreshToken) localStorage.setItem('refreshToken', d.refreshToken)
++          return true
++        }
++        return false
++      })
++      .catch(() => false)
++      .finally(() => { refreshPromise = null })
++  }
++  return refreshPromise
++}
++
++export async function api(path, opts = {}) {
++  const { method = 'GET', body, auth = true, headers = {}, _retry = false } = opts
+   const h = { ...headers }
+   const isForm = body instanceof FormData
+   if (body !== undefined && !isForm) h['Content-Type'] = 'application/json'
+@@ -22,7 +51,15 @@ export async function api(path, { method = 'GET', body, auth = true, headers = {
+     body: body === undefined ? undefined : isForm ? body : JSON.stringify(body),
+   })
+ 
+-  if (res.status === 401 && onUnauthorized) onUnauthorized()
++  // Token expirado: tenta renovar (uma vez) e repete a requisicao; so desloga se o refresh falhar.
++  if (res.status === 401 && auth && !_retry) {
++    if (await tentarRefresh()) {
++      return api(path, { ...opts, _retry: true })
++    }
++    if (onUnauthorized) onUnauthorized()
++  } else if (res.status === 401 && onUnauthorized) {
++    onUnauthorized()
++  }
+ 
+   const text = await res.text()
+   let data = null
+-- 
+2.43.0
+
