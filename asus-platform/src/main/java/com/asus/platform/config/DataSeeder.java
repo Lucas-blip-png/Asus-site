@@ -444,9 +444,9 @@ public class DataSeeder implements CommandLineRunner {
                 "Feitiçaria de 1° Grau & Nível 10", "Com maior controle arcano, o conjurador lança magias mais poderosas e começa a manipular forças que exigem concentração e preparo superiores. A partir deste conhecimento, o personagem é capaz de conjurar feitiços de 2º Grau normalmente. Além disso, demonstra uma compreensão precoce que permite o uso de feitiços de 3º Grau. No entanto, os feitiços de 3º Grau possuem o custo triplicado em relação ao valor original, e esse custo não pode ser reduzido sem a aquisição da habilidade \"Feitiçaria de 3º Grau”.");
         hab("FEITICARIA_DE_3_GRAU", "Feitiçaria de 3° Grau", "GERAL", "PASSIVA", 0, null,
                 "Feitiçaria de 2° Grau & Nível 20", "O mago alcança um patamar elevado de entendimento mágico, moldando energias arcanas complexas e flertando com feitiços de grande impacto. A partir deste conhecimento, o personagem é capaz de conjurar feitiços de 3º Grau normalmente. Além disso, demonstra uma compreensão precoce que permite o uso de feitiços de 4º Grau. No entanto, os feitiços de 4º Grau possuem o custo triplicado em relação ao valor original, e esse custo não pode ser reduzido sem a aquisição da habilidade \"Feitiçaria de 4º Grau”.");
-        hab("FEITICARIA_DE_4_GRAUEFEITO", "Feitiçaria de 4° GrauEfeito:", "BRUXO,CARTOMANTE,DRUIDA,MAGO,QUIMICO_ARCANO", "PASSIVA", 0, null,
-                "Mago; Bruxo; Druida; Químico Arcano; Cartomante & (Feitiçaria de 3° Grau & Nível 40", "A partir deste conhecimento, o personagem é capaz de conjurar feitiços de 4º Grau normalmente.");
-        hab("ESTOURAR_SANGRAMENTO", "]Estourar Sangramento", "ESPADACHIM,SICARIO", "ATIVA", 2, "PE",
+        hab("FEITICARIA_DE_4_GRAUEFEITO", "Feitiçaria de 4° Grau", "BRUXO,CARTOMANTE,DRUIDA,MAGO,QUIMICO_ARCANO", "PASSIVA", 0, null,
+                "Mago; Bruxo; Druida; Químico Arcano; Cartomante & (Feitiçaria de 3° Grau & Nível 40)", "A partir deste conhecimento, o personagem é capaz de conjurar feitiços de 4º Grau normalmente.");
+        hab("ESTOURAR_SANGRAMENTO", "Estourar Sangramento", "ESPADACHIM,SICARIO", "ATIVA", 2, "PE",
                 "Sicário, ou Espadachim", "Ao atacar alguém que está sangrando, você pode optar por estourar o “Sangramento” o que triplicará o dano de sangramento que o alvo receberá naquele turno, removendo todos os acúmulos no processo.");
         hab("INVESTIDA", "Investida", "GERAL", "ATIVA", 2, "PE",
                 "Arma Perfurante", "Segure sua arma com ambas as mãos e avance contra um inimigo distante para empalá-lo, ao avançar unicamente em uma linha reta, receberá metade do valor de “Deslocamento” atual no seu total, e causará seu “Deslocamento” total a mais de dano.");
@@ -484,10 +484,16 @@ public class DataSeeder implements CommandLineRunner {
                 "Bárbaro, Druida, Caçador", "Ao perseguir um alvo que tenha lhe causado dano no turno anterior, poderá movimentar-se sem gastar sua “Ação Secundária”.");
         hab("FURIA_INCANSAVEL", "Fúria Incansável", "BARBARO", "PASSIVA", 0, null,
                 "Bárbaro", "Após o término da habilidade “Estado de Fúria”, o usuário ainda permanecerá com metade dos acúmulos de fúria gastos. (Passivo)");
-        hab("CORPO_SAUDAVEL", "Corpo Saudável", "BARBARO", "ATIVA", 8, "PE",
-                "Bárbaro", "O usuário terá sua armadura natural dobrada para o primeiro ataque que receber no dia. (Passiva)Força ImparávelO usuário torna-se irracional atacando qualquer coisa em sua frente, assim dobrando os efeitos de “Estado de Fúria” e dobrando sua armadura natural, porém é necessário atacar um alvo todos os turnos, até acabar.");
-        hab("ESCOLHA_DIVINA", "Escolha Divina", "CLERIGO", "ATIVA", 3, "PE",
-                "Clérigo", "Escolha um Deus. Sua armadura natural dobra e você tem “Vantagem” em testes de resistência a efeitos negativos contra “Bênçãos” do seu Deus escolhido. Você pode pegar essa habilidade várias vezes, porém somente 2 vezes para o mesmo Deus. (Passivo)Prece DivinaEscolha entre receber uma nova bênção de sua Divindade ou aumentar a categoria de uma bênção que já possuí. Você pode escolher essa habilidade várias vezes, porém a cada 5 níveis do Personagem. (Passivo)ConversãoDurante um combate ao escolher uma Divindade qualquer, todas as bênçãos utiliza");
+        hab("CORPO_SAUDAVEL", "Corpo Saudável", "BARBARO", "PASSIVA", 0, null,
+                "Bárbaro", "O usuário terá sua armadura natural dobrada para o primeiro ataque que receber no dia.");
+        hab("FORCA_IMPARAVEL", "Força Imparável", "BARBARO", "ATIVA", 8, "PE",
+                "Bárbaro", "O usuário torna-se irracional atacando qualquer coisa em sua frente, assim dobrando os efeitos de “Estado de Fúria” e dobrando sua armadura natural, porém é necessário atacar um alvo todos os turnos, até acabar.");
+        hab("ESCOLHA_DIVINA", "Escolha Divina", "CLERIGO", "PASSIVA", 0, null,
+                "Clérigo", "Escolha um Deus. Sua armadura natural dobra e você tem “Vantagem” em testes de resistência a efeitos negativos contra “Bênçãos” do seu Deus escolhido. Você pode pegar essa habilidade várias vezes, porém somente 2 vezes para o mesmo Deus.");
+        hab("PRECE_DIVINA", "Prece Divina", "CLERIGO", "PASSIVA", 0, null,
+                "Clérigo", "Escolha entre receber uma nova bênção de sua Divindade ou aumentar a categoria de uma bênção que já possuí. Você pode escolher essa habilidade várias vezes, porém a cada 5 níveis do Personagem.");
+        hab("CONVERSAO", "Conversão", "CLERIGO", "ATIVA", 3, "PE",
+                "Clérigo", "Durante um combate ao escolher uma Divindade qualquer, todas as bênçãos utilizadas daquela Divindade terão seu dano reduzido em um passo e todos presentes terão +10 de Armadura contra bênçãos de tal Divindade.");
         hab("MIMETIZACAO_DIVINA", "Mimetização Divina", "CLERIGO,LADRAO", "ATIVA", 6, "PE",
                 "Clérigo, Ladrão", "Uma vez por cena o usuário é capaz de tomar para sí a bênção de alguém com a mesma Divindade que sí, a bênção é aleatória e a cada uso seu gasto aumenta em 2 PE.");
         hab("MORTE_AOS_HEREGES", "Morte aos Hereges", "CLERIGO", "ATIVA", 5, "PE",
