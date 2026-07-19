@@ -14,6 +14,8 @@ import Overlay from './pages/Overlay.jsx'
 import OverlayFicha from './pages/OverlayFicha.jsx'
 import OverlayMesa from './pages/OverlayMesa.jsx'
 import FichaPublica from './pages/FichaPublica.jsx'
+import RedefinirSenha from './pages/RedefinirSenha.jsx'
+import VerificarEmail from './pages/VerificarEmail.jsx'
 import Notificacoes from './pages/Notificacoes.jsx'
 import Marketplace from './pages/Marketplace.jsx'
 import Templates from './pages/Templates.jsx'
@@ -34,6 +36,8 @@ export default function App() {
       <Route path="/overlay/mesa/:campanhaId" element={<OverlayMesa />} />
       <Route path="/overlay/:campanhaId" element={<Overlay />} />
       <Route path="/p/:token" element={<FichaPublica />} />
+      <Route path="/redefinir-senha" element={<RedefinirSenha />} />
+      <Route path="/verificar-email" element={<VerificarEmail />} />
       <Route
         element={
           <Protected>

@@ -28,6 +28,17 @@ spring:
       max-file-size: 30MB
       max-request-size: 32MB
 
+  # E-mail: NAO define host aqui de proposito — o envio so liga quando SPRING_MAIL_HOST
+  # (e SPRING_MAIL_USERNAME/PASSWORD) forem definidos no ambiente. Sem isso, o app
+  # apenas registra o link de verificacao no log. Estas props valem quando o host existir.
+  mail:
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
 server:
   # Railway/Render injetam a porta via $PORT; cai para 8080 em local.
   port: ${PORT:8080}
@@ -41,6 +52,12 @@ asus:
   # Fase 11: diretorio de uploads (storage local no MVP; trocar por S3/R2/GCS em producao).
   # Em producao aponte ASUS_UPLOADS_DIR para um volume persistente (ex.: /app/uploads).
   uploads-dir: ${ASUS_UPLOADS_DIR:uploads}
+  # URL publica do site (para montar o link de verificacao de e-mail).
+  app:
+    base-url: ${ASUS_APP_BASE_URL:http://localhost:8080}
+  # Remetente dos e-mails (verificacao). Use um endereco do seu dominio/provedor SMTP.
+  mail:
+    from: ${ASUS_MAIL_FROM:no-reply@asus-rpg.local}
   # Fase 7: seguranca / JWT (defina ASUS_JWT_SECRET em producao com >= 32 bytes)
   jwt:
     secret: ${ASUS_JWT_SECRET:troque-este-segredo-em-producao-asus-rpg-platform-0123456789}
