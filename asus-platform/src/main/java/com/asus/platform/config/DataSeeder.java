@@ -145,6 +145,7 @@ public class DataSeeder implements CommandLineRunner {
                     .nome(adminNome == null || adminNome.isBlank() ? adminEmail : adminNome)
                     .email(adminEmail)
                     .senhaHash(passwordEncoder.encode(adminSenha))
+                    .emailVerificado(true)
                     .build());
             log.info("Conta de dono '{}' criada.", adminEmail);
         }
@@ -250,7 +251,7 @@ public class DataSeeder implements CommandLineRunner {
         protecao("ESCUDO_PESADO", "Escudo pesado", "ESCUDO", "Escudos", "15", 2, null, 2);
 
         // ===== ITENS GERAIS =====
-        item("MOCHILA", "Mochila", "ITEM_GERAL", "Equipamentos", "10", 1);
+        item("MOCHILA", "Mochila", "ITEM_GERAL", "Equipamentos", "10", -2); // alivia 2 de carga (nao ocupa)
         item("CORDA", "Corda", "ITEM_GERAL", "Equipamentos", "10", 1);
         item("LAMPIAO", "Lampião", "ITEM_GERAL", "Equipamentos", "10", 1);
         item("ESPELHO", "Espelho", "ITEM_GERAL", "Equipamentos", "10", 1);

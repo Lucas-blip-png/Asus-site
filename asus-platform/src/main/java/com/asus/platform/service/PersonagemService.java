@@ -622,8 +622,14 @@ public class PersonagemService {
         for (ItemPersonagem it : itemPersonagemRepository.findByPersonagemId(p.getId())) {
             double esp = it.getEspacos() == null ? 0 : it.getEspacos();
             int qtd = it.getQuantidade() == null ? 1 : it.getQuantidade();
+            // A Mochila nao ocupa espaco: ela ALIVIA a carga em 2 (guarda os itens). Aplicado pelo
+            // codigo do catalogo para valer mesmo em fichas antigas e resistir ao clamp de edicao (>=0).
+            if ("MOCHILA".equals(it.getItemJogoCodigo())) {
+                esp = -2;
+            }
             cargaAtual += esp * qtd;
         }
+        cargaAtual = Math.max(0, cargaAtual); // carga nunca fica negativa (ex.: so a mochila no inventario)
         // Sobrecarga: cada PONTO INTEIRO acima da carga maxima tira 1 de Agilidade (recalcula tudo).
         int excessoCarga = (int) Math.floor(Math.max(0, cargaAtual - r.cargaMaxima()));
         ResultadoCalculo rEf = excessoCarga > 0 ? calculoService.calcular(p, excessoCarga) : r;

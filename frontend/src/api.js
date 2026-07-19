@@ -10,7 +10,36 @@ export function getToken() {
   return localStorage.getItem('accessToken')
 }
 
-export async function api(path, { method = 'GET', body, auth = true, headers = {} } = {}) {
+// Renovacao transparente do access token (dura 15 min) usando o refresh token (7 dias).
+// Dedupe: varias requisicoes que caem em 401 ao mesmo tempo compartilham UM unico refresh.
+let refreshPromise = null
+async function tentarRefresh() {
+  const rt = localStorage.getItem('refreshToken')
+  if (!rt) return false
+  if (!refreshPromise) {
+    refreshPromise = fetch(BASE + '/api/auth/refresh', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken: rt }),
+    })
+      .then(async (r) => {
+        if (!r.ok) return false
+        const d = await r.json().catch(() => null)
+        if (d && d.accessToken) {
+          localStorage.setItem('accessToken', d.accessToken)
+          if (d.refreshToken) localStorage.setItem('refreshToken', d.refreshToken)
+          return true
+        }
+        return false
+      })
+      .catch(() => false)
+      .finally(() => { refreshPromise = null })
+  }
+  return refreshPromise
+}
+
+export async function api(path, opts = {}) {
+  const { method = 'GET', body, auth = true, headers = {}, _retry = false } = opts
   const h = { ...headers }
   const isForm = body instanceof FormData
   if (body !== undefined && !isForm) h['Content-Type'] = 'application/json'
@@ -22,7 +51,15 @@ export async function api(path, { method = 'GET', body, auth = true, headers = {
     body: body === undefined ? undefined : isForm ? body : JSON.stringify(body),
   })
 
-  if (res.status === 401 && onUnauthorized) onUnauthorized()
+  // Token expirado: tenta renovar (uma vez) e repete a requisicao; so desloga se o refresh falhar.
+  if (res.status === 401 && auth && !_retry) {
+    if (await tentarRefresh()) {
+      return api(path, { ...opts, _retry: true })
+    }
+    if (onUnauthorized) onUnauthorized()
+  } else if (res.status === 401 && onUnauthorized) {
+    onUnauthorized()
+  }
 
   const text = await res.text()
   let data = null

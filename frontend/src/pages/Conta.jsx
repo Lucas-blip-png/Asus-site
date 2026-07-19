@@ -14,6 +14,10 @@ export default function Conta() {
   const [confirmarExclusao, setConfirmarExclusao] = useState(false)
   const [msg, setMsg] = useState(null)
   const [erro, setErro] = useState(null)
+  const [resetEmail, setResetEmail] = useState('')
+  const [resetSenha, setResetSenha] = useState('')
+  const [senhaAtual, setSenhaAtual] = useState('')
+  const [minhaNovaSenha, setMinhaNovaSenha] = useState('')
 
   async function carregar(oid) {
     setMembros(await api(`/api/organizacoes/${oid}/membros`))
@@ -73,6 +77,32 @@ export default function Conta() {
       logout(); nav('/login')
     } catch (e) { setErro(e.message); setConfirmarExclusao(false) }
   }
+  // Dono: redefine a senha de um usuário que esqueceu (senhas são hash, não dá pra ver a antiga).
+  async function redefinirSenhaUsuario() {
+    setErro(null); setMsg(null)
+    if (!resetEmail.trim() || resetSenha.length < 6) {
+      setErro('Informe o e-mail e uma nova senha de ao menos 6 caracteres.'); return
+    }
+    try {
+      const u = await api('/api/auth/admin/redefinir-senha', {
+        method: 'POST', body: { email: resetEmail.trim(), novaSenha: resetSenha },
+      })
+      setMsg(`Senha de ${u?.email || resetEmail.trim()} redefinida. Passe a nova senha para a pessoa.`)
+      setResetEmail(''); setResetSenha('')
+    } catch (e) { setErro(e.message) }
+  }
+  // Qualquer usuário troca a própria senha, provando que sabe a atual.
+  async function trocarMinhaSenha() {
+    setErro(null); setMsg(null)
+    if (!senhaAtual || minhaNovaSenha.length < 6) {
+      setErro('Informe a senha atual e uma nova de ao menos 6 caracteres.'); return
+    }
+    try {
+      await api('/api/auth/trocar-senha', { method: 'POST', body: { senhaAtual, novaSenha: minhaNovaSenha } })
+      setMsg('Senha alterada com sucesso.')
+      setSenhaAtual(''); setMinhaNovaSenha('')
+    } catch (e) { setErro(e.message) }
+  }
 
   return (
     <>
@@ -85,6 +115,17 @@ export default function Conta() {
         <div className="kv"><b>Nome</b><span>{user?.nome}</span></div>
         <div className="kv"><b>E-mail</b><span>{user?.email || '—'}</span></div>
         <div className="kv"><b>ID</b><span>#{user?.id}</span></div>
+      </div>
+
+      <div className="card">
+        <h2>🔒 Trocar minha senha</h2>
+        <div className="row" style={{ gap: 8, flexWrap: 'wrap' }}>
+          <input type="password" placeholder="Senha atual" style={{ minWidth: 160 }} value={senhaAtual}
+            onChange={(e) => setSenhaAtual(e.target.value)} />
+          <input type="password" placeholder="Nova senha (mín. 6)" style={{ minWidth: 180 }} value={minhaNovaSenha}
+            onChange={(e) => setMinhaNovaSenha(e.target.value)} />
+          <button className="mini" onClick={trocarMinhaSenha}>Salvar</button>
+        </div>
       </div>
 
       <div className="card">
@@ -112,6 +153,22 @@ export default function Conta() {
           <button className="mini" onClick={addMembro}>Adicionar</button>
         </div>
       </div>
+
+      {user?.dono && (
+        <div className="card">
+          <h2>🔑 Redefinir senha de um usuário</h2>
+          <p className="muted" style={{ marginTop: -4, fontSize: '.84rem' }}>
+            Só o dono. Use quando alguém esquecer a senha — define uma nova (a antiga não pode ser vista, é hash).
+          </p>
+          <div className="row" style={{ gap: 8, flexWrap: 'wrap' }}>
+            <input placeholder="E-mail do usuário" style={{ minWidth: 220 }} value={resetEmail}
+              onChange={(e) => setResetEmail(e.target.value)} />
+            <input type="password" placeholder="Nova senha (mín. 6)" style={{ minWidth: 180 }} value={resetSenha}
+              onChange={(e) => setResetSenha(e.target.value)} />
+            <button className="mini" onClick={redefinirSenhaUsuario}>Redefinir</button>
+          </div>
+        </div>
+      )}
 
       <div className="card">
         <h2>Privacidade & dados (LGPD)</h2>

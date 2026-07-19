@@ -6,11 +6,12 @@ import { api } from '../api.js'
 export default function Login() {
   const { login, registrar } = useAuth()
   const nav = useNavigate()
-  const [modo, setModo] = useState('login')
+  const [modo, setModo] = useState('login') // 'login' | 'registro' | 'esqueci'
   const [nome, setNome] = useState('')
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
   const [erro, setErro] = useState(null)
+  const [msg, setMsg] = useState(null)
   const [carregando, setCarregando] = useState(false)
   const [googleOn, setGoogleOn] = useState(false)
 
@@ -30,20 +31,30 @@ export default function Login() {
     api('/api/auth/config', { auth: false }).then((c) => setGoogleOn(!!c?.googleOAuth)).catch(() => {})
   }, [])
 
+  function trocarModo(novo) {
+    setModo(novo); setErro(null); setMsg(null)
+  }
+
   async function submit(e) {
     e.preventDefault()
-    setErro(null)
+    setErro(null); setMsg(null)
     setCarregando(true)
     try {
-      if (modo === 'login') await login(email, senha)
-      else await registrar(nome, email, senha)
-      nav('/')
+      if (modo === 'login') { await login(email, senha); nav('/') }
+      else if (modo === 'registro') { await registrar(nome, email, senha); nav('/') }
+      else {
+        // esqueci a senha: dispara o link (resposta é sempre igual, não revela se o e-mail existe)
+        const r = await api('/api/auth/esqueci-senha', { method: 'POST', auth: false, body: { email } })
+        setMsg(r?.status || 'Se o e-mail existir, enviamos um link para redefinir a senha.')
+      }
     } catch (ex) {
       setErro(ex.message)
     } finally {
       setCarregando(false)
     }
   }
+
+  const titulo = modo === 'login' ? 'Entrar' : modo === 'registro' ? 'Criar conta' : 'Recuperar senha'
 
   return (
     <div className="container" style={{ maxWidth: 380 }}>
@@ -52,7 +63,12 @@ export default function Login() {
         Plataforma de RPG de mesa
       </p>
       <div className="card">
-        <h2>{modo === 'login' ? 'Entrar' : 'Criar conta'}</h2>
+        <h2>{titulo}</h2>
+        {modo === 'esqueci' && (
+          <p className="muted" style={{ marginTop: -4, fontSize: '.86rem' }}>
+            Informe seu e-mail e enviaremos um link para criar uma nova senha.
+          </p>
+        )}
         <form onSubmit={submit}>
           {modo === 'registro' && (
             <>
@@ -62,23 +78,35 @@ export default function Login() {
           )}
           <label>E-mail</label>
           <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-          <label>Senha</label>
-          <input type="password" value={senha} onChange={(e) => setSenha(e.target.value)} required />
+          {modo !== 'esqueci' && (
+            <>
+              <label>Senha</label>
+              <input type="password" value={senha} onChange={(e) => setSenha(e.target.value)} required />
+            </>
+          )}
           {erro && <p className="error">{erro}</p>}
+          {msg && <p className="ok">{msg}</p>}
           <div className="row" style={{ marginTop: 14 }}>
             <button disabled={carregando} type="submit">
-              {modo === 'login' ? 'Entrar' : 'Registrar'}
+              {modo === 'login' ? 'Entrar' : modo === 'registro' ? 'Registrar' : 'Enviar link'}
             </button>
-            <button
-              type="button"
-              className="ghost"
-              onClick={() => setModo(modo === 'login' ? 'registro' : 'login')}
-            >
-              {modo === 'login' ? 'Criar conta' : 'Já tenho conta'}
-            </button>
+            {modo === 'esqueci' ? (
+              <button type="button" className="ghost" onClick={() => trocarModo('login')}>Voltar</button>
+            ) : (
+              <button type="button" className="ghost" onClick={() => trocarModo(modo === 'login' ? 'registro' : 'login')}>
+                {modo === 'login' ? 'Criar conta' : 'Já tenho conta'}
+              </button>
+            )}
           </div>
         </form>
-        {googleOn && (
+        {modo === 'login' && (
+          <button type="button" onClick={() => trocarModo('esqueci')}
+            style={{ marginTop: 10, background: 'none', border: 'none', padding: 0, cursor: 'pointer',
+              color: 'var(--gold, #e0b64a)', textDecoration: 'underline', fontSize: '.84rem' }}>
+            Esqueci minha senha
+          </button>
+        )}
+        {googleOn && modo !== 'esqueci' && (
           <>
             <div className="ou-sep"><span>ou</span></div>
             <a className="btn-google" href="/oauth2/authorization/google">

@@ -9,6 +9,7 @@ public record UsuarioResponse(
         String email,
         boolean dono,
         boolean anonimizado,
+        boolean emailVerificado,
         LocalDateTime criadoEm) {
 
     public static UsuarioResponse de(Usuario u) {
@@ -17,6 +18,6 @@ public record UsuarioResponse(
 
     public static UsuarioResponse de(Usuario u, boolean dono) {
         return new UsuarioResponse(u.getId(), u.getNome(), u.getEmail(), dono,
-                u.isAnonimizado(), u.getCriadoEm());
+                u.isAnonimizado(), u.isEmailVerificado(), u.getCriadoEm());
     }
 }
