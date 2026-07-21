@@ -74,35 +74,4 @@ public class AuthController {
         }
         service.trocarPropriaSenha(principal.id(), body.get("senhaAtual"), body.get("novaSenha"));
     }
-
-    /** Confirma o e-mail pelo token do link (publico). */
-    @PostMapping("/verificar-email")
-    public Map<String, String> verificarEmail(@RequestBody Map<String, String> body) {
-        service.verificarEmail(body.get("token"));
-        return Map.of("status", "verificado");
-    }
-
-    /** Reenvia o e-mail de verificacao para o usuario logado. */
-    @PostMapping("/reenviar-verificacao")
-    public Map<String, String> reenviarVerificacao(@AuthenticationPrincipal UsuarioPrincipal principal) {
-        if (principal == null) {
-            throw new UnauthorizedException("Nao autenticado");
-        }
-        service.reenviarVerificacao(principal.id());
-        return Map.of("status", "enviado");
-    }
-
-    /** "Esqueci minha senha" (publico): envia o link de redefinicao. Resposta sempre igual. */
-    @PostMapping("/esqueci-senha")
-    public Map<String, String> esqueciSenha(@RequestBody Map<String, String> body) {
-        service.esqueciSenha(body.get("email"));
-        return Map.of("status", "Se o e-mail existir, enviamos um link para redefinir a senha.");
-    }
-
-    /** Conclui o "esqueci minha senha" pelo token do link (publico, sem login). */
-    @PostMapping("/redefinir-senha")
-    public Map<String, String> redefinirSenhaComToken(@RequestBody Map<String, String> body) {
-        service.redefinirSenhaComToken(body.get("token"), body.get("novaSenha"));
-        return Map.of("status", "Senha redefinida. Ja pode entrar com a nova senha.");
-    }
 }

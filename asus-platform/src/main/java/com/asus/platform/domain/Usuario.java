@@ -33,9 +33,6 @@ public class Usuario {
     /** Marca conta cujos dados pessoais foram anonimizados (LGPD, Fase 13). */
     private boolean anonimizado;
 
-    /** E-mail confirmado via link de verificacao. Contas OAuth ja entram verificadas. */
-    private boolean emailVerificado;
-
     @PrePersist
     void prePersist() {
         if (criadoEm == null) {

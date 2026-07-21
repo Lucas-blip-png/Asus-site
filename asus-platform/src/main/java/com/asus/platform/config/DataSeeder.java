@@ -145,7 +145,6 @@ public class DataSeeder implements CommandLineRunner {
                     .nome(adminNome == null || adminNome.isBlank() ? adminEmail : adminNome)
                     .email(adminEmail)
                     .senhaHash(passwordEncoder.encode(adminSenha))
-                    .emailVerificado(true)
                     .build());
             log.info("Conta de dono '{}' criada.", adminEmail);
         }

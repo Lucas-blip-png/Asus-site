@@ -41,16 +41,6 @@ public class JwtService {
         return gerar(usuarioId, email, "refresh", refreshTtlMs);
     }
 
-    /** Token para confirmar o e-mail (link enviado por e-mail). Vale 3 dias. */
-    public String gerarVerificacaoEmail(Long usuarioId, String email) {
-        return gerar(usuarioId, email, "verificacao", 3L * 24L * 60L * 60L * 1000L);
-    }
-
-    /** Token para redefinir a senha ("esqueci minha senha"). Vale 1 hora. */
-    public String gerarResetSenha(Long usuarioId, String email) {
-        return gerar(usuarioId, email, "reset-senha", 60L * 60L * 1000L);
-    }
-
     public long accessTtlSegundos() {
         return accessTtlMs / 1000L;
     }
