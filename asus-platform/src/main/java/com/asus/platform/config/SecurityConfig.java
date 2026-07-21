@@ -64,9 +64,7 @@ public class SecurityConfig {
                 .headers(h -> h.frameOptions(f -> f.disable())) // H2 console
                 .authorizeHttpRequests(reg -> {
                     reg.requestMatchers("/api/auth/login", "/api/auth/register",
-                            "/api/auth/refresh", "/api/auth/config",
-                            "/api/auth/verificar-email", "/api/auth/esqueci-senha",
-                            "/api/auth/redefinir-senha").permitAll();
+                            "/api/auth/refresh", "/api/auth/config").permitAll();
                     reg.requestMatchers("/api/auth/me").authenticated();
                     reg.requestMatchers("/api/legal/**", "/api/sistemas/**").permitAll();
                     // Webhooks (ex.: Stripe) e o fluxo OAuth2 do Google sao publicos.

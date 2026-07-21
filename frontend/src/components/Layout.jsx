@@ -8,16 +8,6 @@ export default function Layout() {
   const nav = useNavigate()
   const cls = ({ isActive }) => (isActive ? 'ativo' : undefined)
   const [naoLidas, setNaoLidas] = useState(0)
-  const [emailMsg, setEmailMsg] = useState(null)
-  const [ocultarAviso, setOcultarAviso] = useState(false)
-
-  async function reenviarVerificacao() {
-    setEmailMsg(null)
-    try {
-      await api('/api/auth/reenviar-verificacao', { method: 'POST' })
-      setEmailMsg('E-mail de confirmação reenviado — confira sua caixa de entrada.')
-    } catch (e) { setEmailMsg(e.message) }
-  }
 
   useEffect(() => {
     if (!user?.id) return undefined
@@ -59,18 +49,6 @@ export default function Layout() {
           <button className="ghost mini" title="Sair" onClick={() => { logout(); nav('/login') }}>Sair</button>
         </div>
       </header>
-      {user && !user.emailVerificado && !ocultarAviso && (
-        <div style={{
-          background: 'rgba(224,166,74,.14)', borderBottom: '1px solid rgba(224,166,74,.3)',
-          padding: '8px 16px', display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap',
-        }}>
-          <span style={{ fontSize: '.88rem' }}>✉️ Confirme seu e-mail para proteger sua conta.</span>
-          {emailMsg && <span className="muted" style={{ fontSize: '.82rem' }}>{emailMsg}</span>}
-          <div style={{ flex: 1 }} />
-          <button className="ghost mini" onClick={reenviarVerificacao}>Reenviar e-mail</button>
-          <button className="ghost mini" onClick={() => setOcultarAviso(true)}>Agora não</button>
-        </div>
-      )}
       <main className="container">
         <Outlet />
       </main>

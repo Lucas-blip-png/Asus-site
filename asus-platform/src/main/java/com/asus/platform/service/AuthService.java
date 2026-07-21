@@ -24,25 +24,19 @@ public class AuthService {
     private final RateLimiter rateLimiter;
     private final AuditoriaService auditoriaService;
     private final DonoService donoService;
-    private final EmailService emailService;
-
-    @org.springframework.beans.factory.annotation.Value("${asus.app.base-url:http://localhost:8080}")
-    private String appBaseUrl;
 
     public AuthService(UsuarioRepository usuarioRepository,
                        PasswordEncoder passwordEncoder,
                        JwtService jwtService,
                        RateLimiter rateLimiter,
                        AuditoriaService auditoriaService,
-                       DonoService donoService,
-                       EmailService emailService) {
+                       DonoService donoService) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.rateLimiter = rateLimiter;
         this.auditoriaService = auditoriaService;
         this.donoService = donoService;
-        this.emailService = emailService;
     }
 
     @Transactional
@@ -57,90 +51,7 @@ public class AuthService {
                 .build());
         auditoriaService.registrar(null, usuario.getId(), "USUARIO_REGISTRADO",
                 "Usuario", usuario.getId(), null, null, email);
-        enviarVerificacao(usuario);
         return tokensPara(usuario);
-    }
-
-    /** Monta o link e dispara o e-mail de verificacao (ou loga, se sem SMTP). */
-    private void enviarVerificacao(Usuario usuario) {
-        String token = jwtService.gerarVerificacaoEmail(usuario.getId(), usuario.getEmail());
-        String base = appBaseUrl == null ? "" : appBaseUrl.replaceAll("/+$", "");
-        String link = base + "/verificar-email?token=" + token;
-        emailService.enviar(usuario.getEmail(), "Confirme seu e-mail — ASUS RPG",
-                "Ola, " + usuario.getNome() + "!\n\n"
-                + "Confirme seu e-mail clicando no link abaixo:\n" + link + "\n\n"
-                + "O link vale 3 dias. Se voce nao criou esta conta, ignore este e-mail.");
-    }
-
-    /** Confirma o e-mail a partir do token do link. */
-    @Transactional
-    public void verificarEmail(String token) {
-        Claims claims;
-        try {
-            claims = jwtService.validar(token, "verificacao");
-        } catch (JwtException | NumberFormatException e) {
-            throw new IllegalArgumentException("Link de verificacao invalido ou expirado");
-        }
-        Usuario u = usuarioRepository.findById(Long.valueOf(claims.getSubject()))
-                .orElseThrow(() -> new IllegalArgumentException("Usuario do link nao existe"));
-        if (!u.isEmailVerificado()) {
-            u.setEmailVerificado(true);
-            usuarioRepository.save(u);
-            auditoriaService.registrar(null, u.getId(), "EMAIL_VERIFICADO",
-                    "Usuario", u.getId(), null, null, u.getEmail());
-        }
-    }
-
-    /** Reenvia o e-mail de verificacao para o proprio usuario logado. */
-    public void reenviarVerificacao(Long usuarioId) {
-        Usuario u = usuarioRepository.findById(usuarioId)
-                .orElseThrow(() -> new UnauthorizedException("Usuario nao encontrado"));
-        if (u.isEmailVerificado()) {
-            throw new IllegalArgumentException("Seu e-mail ja esta confirmado");
-        }
-        enviarVerificacao(u);
-    }
-
-    /**
-     * "Esqueci minha senha" (tela de login): envia (ou loga) um link de redefinicao.
-     * Responde sempre igual — nao revela se o e-mail existe (evita enumeracao de contas).
-     */
-    public void esqueciSenha(String email) {
-        if (email == null || email.isBlank()) {
-            return;
-        }
-        usuarioRepository.findByEmail(email.trim()).ifPresent(u -> {
-            if (u.getSenhaHash() == null || u.getSenhaHash().isBlank()) {
-                return; // conta de login social nao tem senha para redefinir
-            }
-            String token = jwtService.gerarResetSenha(u.getId(), u.getEmail());
-            String base = appBaseUrl == null ? "" : appBaseUrl.replaceAll("/+$", "");
-            String link = base + "/redefinir-senha?token=" + token;
-            emailService.enviar(u.getEmail(), "Redefinir senha — ASUS RPG",
-                    "Ola, " + u.getNome() + "!\n\nRecebemos um pedido para redefinir sua senha.\n"
-                    + "Crie uma nova senha pelo link abaixo (vale 1 hora):\n" + link + "\n\n"
-                    + "Se nao foi voce, ignore este e-mail — sua senha atual continua valendo.");
-        });
-    }
-
-    /** Conclui o "esqueci minha senha" a partir do token do link (sem login). */
-    @Transactional
-    public void redefinirSenhaComToken(String token, String novaSenha) {
-        Claims claims;
-        try {
-            claims = jwtService.validar(token, "reset-senha");
-        } catch (JwtException | NumberFormatException e) {
-            throw new IllegalArgumentException("Link de redefinicao invalido ou expirado");
-        }
-        if (novaSenha == null || novaSenha.length() < 6) {
-            throw new IllegalArgumentException("A nova senha deve ter ao menos 6 caracteres");
-        }
-        Usuario u = usuarioRepository.findById(Long.valueOf(claims.getSubject()))
-                .orElseThrow(() -> new IllegalArgumentException("Usuario do link nao existe"));
-        u.setSenhaHash(passwordEncoder.encode(novaSenha));
-        usuarioRepository.save(u);
-        auditoriaService.registrar(null, u.getId(), "SENHA_REDEFINIDA_LINK",
-                "Usuario", u.getId(), null, null, u.getEmail());
     }
 
     public AuthResponse login(String email, String senha) {
@@ -227,7 +138,6 @@ public class AuthService {
             Usuario novo = usuarioRepository.save(Usuario.builder()
                     .nome(nome == null || nome.isBlank() ? email : nome)
                     .email(email)
-                    .emailVerificado(true) // Google ja confirmou o e-mail
                     .build());
             auditoriaService.registrar(null, novo.getId(), "USUARIO_REGISTRADO_OAUTH",
                     "Usuario", novo.getId(), null, null, email);
