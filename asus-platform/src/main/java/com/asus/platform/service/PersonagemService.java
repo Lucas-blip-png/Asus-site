@@ -250,6 +250,12 @@ public class PersonagemService {
         if (req.periciasCustom() != null) {
             p.setJsonPericiasCustom(serializarCustom(req.periciasCustom()));
         }
+        if (req.armaduraFisica() != null) {
+            p.setArmaduraFisica(Math.max(0, req.armaduraFisica()));
+        }
+        if (req.armaduraMagica() != null) {
+            p.setArmaduraMagica(Math.max(0, req.armaduraMagica()));
+        }
         if (req.dinheiro() != null) {
             p.setDinheiro(Math.max(0, req.dinheiro()));
         }
@@ -619,7 +625,11 @@ public class PersonagemService {
 
         // Carga atual = soma de espacos x quantidade do inventario (max = Forca x 2). Aceita meio-espaco.
         double cargaAtual = 0;
+        int armaduraItens = 0;
         for (ItemPersonagem it : itemPersonagemRepository.findByPersonagemId(p.getId())) {
+            if (it.isEquipado() && it.getBonusDefesa() != null) {
+                armaduraItens += it.getBonusDefesa();
+            }
             double esp = it.getEspacos() == null ? 0 : it.getEspacos();
             int qtd = it.getQuantidade() == null ? 1 : it.getQuantidade();
             // A Mochila nao ocupa espaco: ela ALIVIA a carga em 2 (guarda os itens). Aplicado pelo
@@ -718,6 +728,9 @@ public class PersonagemService {
                 p.getHistorico(),
                 p.getObjetivo(),
                 p.getDinheiro(),
+                p.getArmaduraFisica(),
+                p.getArmaduraMagica(),
+                armaduraItens,
                 p.isArquivado(),
                 p.getCriadoEm(),
                 p.getAtualizadoEm());

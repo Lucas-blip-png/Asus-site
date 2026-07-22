@@ -260,6 +260,7 @@ export default function Ficha() {
   const [criarHabOpen, setCriarHabOpen] = useState(false)
   const [novaHab, setNovaHab] = useState({ nome: '', tipo: 'PASSIVA', custo: 0, custoTipo: 'PE', efeito: '' })
   const [dinheiroEdit, setDinheiroEdit] = useState(null)
+  const [armEdit, setArmEdit] = useState(null)
   const [bencaos, setBencaos] = useState([])
   const [novaBencao, setNovaBencao] = useState({ nome: '', divindade: '', custo: 0, custoTipo: 'PE', efeito: '' })
   const [editBencao, setEditBencao] = useState(null)
@@ -1132,6 +1133,50 @@ export default function Ficha() {
               </div>
             )
           })}
+
+          {/* Armadura Física e Mágica (base editável + bônus dos itens equipados) */}
+          <div className="atr-edit" style={{ marginTop: 10 }}>
+            <div className="row" style={{ alignItems: 'center' }}>
+              <b>Armadura</b>
+              <div className="spacer" />
+              {armEdit == null ? (
+                <button className="ghost mini" title="Editar armadura base"
+                  onClick={() => setArmEdit({ f: String(p.armaduraFisica ?? 0), m: String(p.armaduraMagica ?? 0) })}>✎</button>
+              ) : (
+                <>
+                  <button className="mini" onClick={() => {
+                    salvar({ armaduraFisica: Number(armEdit.f) || 0, armaduraMagica: Number(armEdit.m) || 0 }); setArmEdit(null)
+                  }}>Salvar</button>
+                  <button className="ghost mini" onClick={() => setArmEdit(null)}>✕</button>
+                </>
+              )}
+            </div>
+            <div className="atr-grid" style={{ marginTop: 6 }}>
+              <div className="atr-cell" title="Física base + bônus de itens equipados">
+                <span className="muted">🛡 Física</span>
+                {armEdit == null ? (
+                  <b className="stat" style={{ fontSize: '1.1rem' }}>
+                    {(p.armaduraFisica ?? 0) + (p.armaduraItens ?? 0)}
+                    {p.armaduraItens > 0 && (
+                      <small className="muted" style={{ fontWeight: 400 }}> ({p.armaduraFisica ?? 0}+{p.armaduraItens})</small>
+                    )}
+                  </b>
+                ) : (
+                  <input type="number" min="0" value={armEdit.f} style={{ width: 64 }}
+                    onChange={(e) => setArmEdit((s) => ({ ...s, f: e.target.value }))} />
+                )}
+              </div>
+              <div className="atr-cell" title="Armadura mágica">
+                <span className="muted">✨ Mágica</span>
+                {armEdit == null ? (
+                  <b className="stat" style={{ fontSize: '1.1rem' }}>{p.armaduraMagica ?? 0}</b>
+                ) : (
+                  <input type="number" min="0" value={armEdit.m} style={{ width: 64 }}
+                    onChange={(e) => setArmEdit((s) => ({ ...s, m: e.target.value }))} />
+                )}
+              </div>
+            </div>
+          </div>
 
           <button className="ghost mini" style={{ marginTop: 10, width: '100%' }}
             title="Restaura Vida, Mana e Energia ao máximo" onClick={descansoLongo}>
