@@ -93,6 +93,7 @@ public class DataSeeder implements CommandLineRunner {
             safeRefresh("admin", this::ensureAdmin);
             safeRefresh("bestiario", this::refreshBestiario);
             safeRefresh("classes", this::refreshClasses);
+            safeRefresh("progressao", this::refreshProgressao);
             safeRefresh("pericias", this::refreshPericias);
             safeRefresh("itens", this::refreshItens);
             safeRefresh("habilidades", this::refreshHabilidades);
@@ -184,17 +185,31 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private String focoDoNivel(int n) {
-        if (n <= 10) return "Classe Primaria";
-        if (n <= 20) return "Trilha Primaria";
-        if (n <= 30) return "Classe Secundaria";
-        if (n <= 40) return "Trilha Secundaria";
-        return "Maestria";
+        if (n == 10) return "Classe Primária (MAX)";
+        if (n <= 10) return "Classe Primária";
+        if (n <= 20) return "Trilha Primária";
+        if (n == 30) return "Classe Secundária (MAX)";
+        if (n <= 30) return "Classe Secundária";
+        if (n <= 40) return "Trilha Secundária";
+        return "Nível de Maestria";
     }
 
+    /** Recompensa principal de cada marco (texto exato da planilha Sistema de Nivel). */
     private String recompensaDoNivel(int n) {
-        if (n == 1) return "Classe, Bonus e Atributos";
-        if (n % 5 == 0) return "Bonus de Classe/Trilha e Raca";
-        return "Atributos (2 pontos)";
+        switch (n) {
+            case 1:  return "Classe, Bônus e Atributos";
+            case 5:  return "Bônus de Classe e Raça";
+            case 10: return "Bônus final de Classe primária";
+            case 15: return "Bônus de trilha e Raça";
+            case 20: return "Bônus de trilha (especialização)";
+            case 25: return "Bônus de Classe secundária e Raça";
+            case 30: return "Bônus final de Classe secundária";
+            case 35: return "Bônus de trilha secundária e Raça";
+            case 40: return "Bônus de trilha (especialização)";
+            case 45: return "Bônus de Classe Pri + Sec e Raça";
+            case 50: return "Bônus de Classe Pri + Sec";
+            default: return "Atributos (2 pontos)";
+        }
     }
 
     // ---------------- Itens (catalogo representativo, moeda T$) ----------------
@@ -1135,6 +1150,15 @@ public class DataSeeder implements CommandLineRunner {
             sid = gs.getId();
             habilidadeRepository.deleteAll(habilidadeRepository.findByGameSystemIdAndOficialTrue(sid));
             seedHabilidades();
+        });
+    }
+
+    /** Reaplica a tabela de progressao (XP/foco/recompensa/limite) numa base ja semeada. */
+    void refreshProgressao() {
+        gameSystemRepository.findByCodigo(AsusV1Engine.SYSTEM_ID).ifPresent(gs -> {
+            sid = gs.getId();
+            progressaoNivelRepository.deleteAll(progressaoNivelRepository.findByGameSystemIdOrderByNivel(sid));
+            seedProgressao();
         });
     }
 
