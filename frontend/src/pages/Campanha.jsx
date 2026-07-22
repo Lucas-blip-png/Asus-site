@@ -929,7 +929,7 @@ export default function Campanha() {
             {ehMestre ? 'Monte o mapa (fundo, névoa e tokens) e ative a cena para os jogadores verem ao vivo.'
               : 'A cena que o mestre está apresentando aparece aqui em tempo real.'}
           </p>
-          <CenaMapa campanhaId={id} orgId={campanha.organizacaoId} ehMestre={ehMestre} />
+          <CenaMapa campanhaId={id} orgId={campanha.organizacaoId} ehMestre={ehMestre} personagens={personagens} />
         </div>
       )}
 
