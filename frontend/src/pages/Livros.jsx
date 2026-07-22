@@ -311,7 +311,7 @@ export default function Livros() {
 
       {aba === 'Perícias' && (
         <div className="pericia-grid">
-          {(d.pericias || []).map((p) => <PericiaCard key={p.codigo} p={p} />)}
+          {(d.pericias || []).slice().sort((a, b) => (a.nome || '').localeCompare(b.nome || '', 'pt-BR')).map((p) => <PericiaCard key={p.codigo} p={p} />)}
         </div>
       )}
 

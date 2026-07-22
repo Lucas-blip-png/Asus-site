@@ -860,7 +860,6 @@ export default function Ficha() {
           - ATRIBS.reduce((s, [k]) => s + (Number(p.atributosBase?.[k]) || 0), 0)
         const perRestantes = (5 + 4 * niveisComPontos)
           - Object.values(treino).reduce((s, v) => s + (Number(v) || 0), 0)
-        const novasHab = habDisp.filter((h) => !h.bloqueada).slice(0, 5)
         return (
           <div className="modal" onClick={() => setLevelUp(null)}>
             <div className="modal-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 560 }}>
@@ -886,18 +885,7 @@ export default function Ficha() {
                   📖 Você tem <b>{perRestantes}</b> ponto{perRestantes > 1 ? 's' : ''} de perícia pra distribuir (coluna Treino).
                 </div>
               )}
-              {novasHab.length > 0 && (
-                <div style={{ marginBottom: 6 }}>
-                  ✦ Habilidades disponíveis pra pegar:
-                  <div className="row" style={{ gap: 6, marginTop: 5, flexWrap: 'wrap' }}>
-                    {novasHab.map((h) => (
-                      <button key={h.codigo} className="ghost mini" title={h.efeito || h.nome}
-                        onClick={() => addHab(h.codigo)}>+ {h.nome}</button>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {atrRestantes <= 0 && perRestantes <= 0 && !novasHab.length && (
+              {atrRestantes <= 0 && perRestantes <= 0 && (
                 <div className="muted">Tudo distribuído — as passivas novas já entraram sozinhas. 👌</div>
               )}
               <button style={{ marginTop: 12 }} onClick={() => setLevelUp(null)}>Fechar</button>
@@ -1209,7 +1197,9 @@ export default function Ficha() {
           <table className="pericias">
             <thead><tr><th>Perícia</th><th>Atr</th><th>Treino</th><th>Outros</th><th>Teto</th></tr></thead>
             <tbody>
-              {p.pericias.filter((pe) => !pe.custom).map((pe) => {
+              {p.pericias.filter((pe) => !pe.custom)
+                .sort((a, b) => (a.nome || '').localeCompare(b.nome || '', 'pt-BR'))
+                .map((pe) => {
                 const bonusClasse = pe.bonus || 0
                 const mod = (treino[pe.codigo] ?? 0) + bonusClasse + (outrosBonus[pe.codigo] ?? 0)
                 return (
