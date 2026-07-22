@@ -13,7 +13,7 @@ const parseTokens = (c) => { try { const t = JSON.parse(c?.tokensJson || '[]'); 
  * Mapa 2D de cena/seção. O mestre monta (fundo, névoa, tokens) e ativa a cena;
  * os jogadores enxergam a cena ATIVA da campanha em tempo real.
  */
-export default function CenaMapa({ campanhaId, orgId, ehMestre }) {
+export default function CenaMapa({ campanhaId, orgId, ehMestre, personagens = [] }) {
   const [cenas, setCenas] = useState([])
   const [selId, setSelId] = useState(null)      // cena que o mestre está editando
   const [modo, setModo] = useState('mover')      // 'mover' | 'revelar'
@@ -80,6 +80,16 @@ export default function CenaMapa({ campanhaId, orgId, ehMestre }) {
     setNovoToken({ nome: '', cor: novoToken.cor })
   }
   const removerToken = (id) => salvarTokens(tokens.filter((t) => t.id !== id))
+  function addPersonagemToken(cp) {
+    if (!cp) return
+    if (tokens.some((t) => String(t.personagemId) === String(cp.personagemId))) return // já está no mapa
+    let x = 0, y = 0
+    for (let i = 0; i < MAPA_W * MAPA_H; i++) { const cx = i % MAPA_W, cy = Math.floor(i / MAPA_W); if (!tokens.some((t) => t.x === cx && t.y === cy)) { x = cx; y = cy; break } }
+    salvarTokens([...tokens, {
+      id: Date.now() + Math.floor(Math.random() * 1000), personagemId: cp.personagemId,
+      nome: cp.personagemNome || 'Personagem', avatarAssetId: cp.avatarAssetId || null, cor: '#3aa76d', x, y,
+    }])
+  }
 
   function clicarCelula(x, y, ocupante) {
     if (!ehMestre) return
@@ -142,6 +152,22 @@ export default function CenaMapa({ campanhaId, orgId, ehMestre }) {
         </div>
       )}
 
+      {cena && ehMestre && personagens.length > 0 && (
+        <div className="row" style={{ gap: 6, flexWrap: 'wrap', alignItems: 'center', marginBottom: 8 }}>
+          <span className="muted" style={{ fontSize: '.76rem' }}>Personagens da mesa:</span>
+          {personagens.map((cp) => {
+            const noMapa = tokens.some((t) => String(t.personagemId) === String(cp.personagemId))
+            return (
+              <button key={cp.personagemId} className={`ghost mini${noMapa ? ' ativo' : ''}`}
+                disabled={noMapa} title={noMapa ? 'já está no mapa' : 'adicionar ao mapa'}
+                onClick={() => addPersonagemToken(cp)}>
+                {noMapa ? '✓ ' : '+ '}{cp.personagemNome}
+              </button>
+            )
+          })}
+        </div>
+      )}
+
       {ehMestre && (
         <p className="muted" style={{ fontSize: '.74rem', margin: '0 0 6px' }}>
           {fogAtivo && modo === 'revelar' ? 'Modo névoa: clique nas células para revelar/cobrir.'
@@ -173,10 +199,11 @@ export default function CenaMapa({ campanhaId, orgId, ehMestre }) {
                 }}>
                   {ocupante && (!coberta || ehMestre) && (
                     <div title={ocupante.nome} style={{
-                      width: 32, height: 32, borderRadius: '50%', background: ocupante.cor, opacity: coberta ? 0.45 : 1,
+                      width: 32, height: 32, borderRadius: '50%', opacity: coberta ? 0.45 : 1,
                       display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 13,
-                      color: '#fff', textShadow: '0 1px 2px #000', border: '2px solid rgba(255,255,255,.7)',
-                    }}>{(ocupante.nome || '?').charAt(0).toUpperCase()}</div>
+                      color: '#fff', textShadow: '0 1px 2px #000', border: `2px solid ${ocupante.avatarAssetId ? 'rgba(255,255,255,.85)' : 'rgba(255,255,255,.7)'}`,
+                      background: ocupante.avatarAssetId ? `#2a2a3a url(/api/assets/${ocupante.avatarAssetId}/conteudo) center/cover` : ocupante.cor,
+                    }}>{!ocupante.avatarAssetId && (ocupante.nome || '?').charAt(0).toUpperCase()}</div>
                   )}
                 </div>
               )
