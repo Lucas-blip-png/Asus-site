@@ -44,8 +44,10 @@ asus:
   # Fase 7: seguranca / JWT (defina ASUS_JWT_SECRET em producao com >= 32 bytes)
   jwt:
     secret: ${ASUS_JWT_SECRET:troque-este-segredo-em-producao-asus-rpg-platform-0123456789}
-    access-ttl-min: 15
-    refresh-ttl-days: 7
+    access-ttl-min: ${ASUS_JWT_ACCESS_MIN:15}
+    # Enquanto o site for aberto ao menos 1x nesse prazo, o refresh rola e voce
+    # segue logado. 30 dias reduz o "deslogar sozinho" por inatividade (era 7).
+    refresh-ttl-days: ${ASUS_JWT_REFRESH_DAYS:30}
   cors:
     allowed-origins: ${ASUS_CORS_ORIGINS:*}
   security:
