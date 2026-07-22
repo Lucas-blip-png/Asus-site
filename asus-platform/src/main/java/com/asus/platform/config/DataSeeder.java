@@ -722,6 +722,408 @@ public class DataSeeder implements CommandLineRunner {
                 "Escudeiro & Escudo", "O usuário bate ou arranha seu escudo para provocar todos os inimigos em alcance médio, que devem realizar um teste de “Virtude” contra quaisquer perícia de Carisma que o usuário queira utilizar, caso falhem, recebem “Desvantagem” para atacar qualquer um que não seja o usuário.");
         hab("ESCUDO_BRILHANTE", "Escudo Brilhante", "COMANDANTE,ESCUDEIRO", "ATIVA", 3, "PE",
                 "Escudeiro, Comandante", "Ao utilizar um escudo leve, o usuário pode gastar sua reação contra um projétil para rebate-lo de volta ao seu atacante, rodando um teste de “Bloqueio”, o atacante reage ao valor do teste de “Bloqueio” / Pode mudar o alvo do projétil rebatido para qualquer um em seu campo de visão.");
+
+        // ---- Habilidades por classe/trilha (secoes do docx, importadas automaticamente) ----
+        hab("ESCUDO_DE_BALUARTE", "Escudo de Baluarte", "CAVALEIRO", "ATIVA", 4, "PE",
+                null, "O usuário se fixa no chão, aumentando sua Armadura em +2 para cada 5 pontos de Vigor. Enquanto ativa, o deslocamento é reduzido a zero.");
+        hab("GRITO_DE_ORDEM", "Grito de Ordem", "CAVALEIRO,COMANDANTE", "ATIVA", 5, "PE",
+                "Trilha Comandante", "O Cavaleiro inspira aliados em alcance médio, concedendo um bônus de +2 (a cada 5 niveis) em testes de Iniciativa e Ataque por 2 rodadas.");
+        hab("GOLPE_DE_CONVICCAO", "Golpe de Convicção", "CAMPEAO,CAVALEIRO,COMANDANTE", "ATIVA", 3, "PE",
+                "Trilha Comandante, campeão", "Adicione metade do valor de carisma ao dano de um ataque físico, representando a força de seus ideais.");
+        hab("RESISTENCIA_BLINDADA", "Resistência Blindada", "CAVALEIRO,MONGE", "PASSIVA", 0, null,
+                "cavaleiro, monge", "Passivamente, o Cavaleiro reduz o dano de ataques críticos recebidos em um passo de dado.");
+        hab("LAMINA_FANTASMAGORICA", "Lâmina Fantasmagórica", "ASSASSINO", "ATIVA", 4, "PE",
+                null, "O ataque ignora qualquer Cobertura Parcial do alvo e adiciona +2 de dano por cada 5 pontos de Furtividade.");
+        hab("PASSO_DE_SOMBRA", "Passo de Sombra", "ASSASSINO,SOMBRA", "ATIVA", 3, "PE",
+                "Sombra", "Permite que o usuário se mova até seu Deslocamento total sem provocar ataques de oportunidade enquanto estiver em sombras.");
+        hab("ANALISE_DE_PONTO_CEGO", "Análise de Ponto Cego", "ARQUEIRO,ASSASSINO", "PASSIVA", 0, null,
+                "ARQUEIRO, Assassino", "Se o Assassino estiver em um nível superior (terreno alto), sua margem de crítico aumenta em +2.");
+        hab("EXECUCAO_SILENCIOSA", "Execução Silenciosa", "ASSASSINO", "ATIVA", 15, "PE",
+                null, "Se o alvo estiver com o dobro de sua constituição, o Assassino pode gastar toda sua energia para tentar um golpe fatal (DT de Vigor do alvo).");
+        hab("SALTO_ESMAGADOR", "Salto Esmagador", "BARBARO", "ATIVA", 6, "PE",
+                null, "O Bárbaro salta em direção a um alvo devendo ter que fazer um teste de atletismo; o dano aumenta em +1 dado para cada 3 metros de altura/distância saltados.");
+        hab("ARREMESSO_BRUTAL", "Arremesso Brutal", "BARBARO", "ATIVA", 5, "PE",
+                null, "Permite arremessar armas de duas mãos ou objetos pesados usando a perícia Atletismo em vez de Pontaria.");
+        hab("RUGIDO_DE_PAVOR", "Rugido de Pavor", "BARBARO", "ATIVA", 4, "PE",
+                null, "fazendo um teste de intimidação Força todos os inimigos em alcance curto a realizarem um teste de Virtude; se falharem, ficam intimidados.");
+        hab("LUZ_DE_PURIFICACAO", "Luz de Purificação", "CLERIGO", "ATIVA", 4, "PM",
+                "Curandeiro tbm", "Remove um efeito de status negativo (Sangramento, Envenenamento ou Confusão) de até dois aliados próximos.");
+        hab("MARTELO_DIVINO", "Martelo Divino", "CLERIGO,PALADINO", "ATIVA", 8, "PE",
+                "Trilha Paladino", "Impregna a arma própria com fé, causando dano mágico adicional baseado na perícia Fé, este dano impregna a arma com a mana de sua divindade.");
+        hab("AURA_DE_SANTIDADE", "Aura de Santidade", "CLERIGO,SANTO", "PASSIVA", 0, null,
+                "Trilha Santo", "Aliados em alcance curto recebem um bônus de +2 a cada 5 níveis em todos os testes de resistência contra feitiços.");
+        hab("VINCULO_ESPIRITUAL_CURANDEIRO_L", "Vínculo Espiritual (CURANDEIRO)l", "CLERIGO", "ATIVA", 5, "PM",
+                null, "O Clérigo escolhe um aliado; metade da cura recebida pelo Clérigo é transferida para esse aliado.");
+        hab("SENTENCA_CELESTIAL", "Sentença Celestial", "CLERIGO", "ATIVA", 4, "PM",
+                null, "Marca um inimigo como \"Herege\"; ataques contra este alvo ignoram 2 (a cada 5 níveis) pontos de armadura.");
+        hab("FORMA_DE_CARVALHO", "Forma de Carvalho", "DRUIDA", "ATIVA", 6, "PE",
+                null, "Aumenta a Constituição em +2 (a cada 5 niveis) e concede 5 (a cada 10 niveis) de armadura verdadeira enquanto estiver em ambiente de floresta.");
+        hab("ESPINHOS_APRISIONADORES", "Espinhos Aprisionadores", "DRUIDA", "ATIVA", 6, "PM",
+                "feitiço; Trilha Arauto", "Cria raízes que surgem do solo, deixando os alvos na área com o estado Paralisado (Teste de Esquiva para evitar).");
+        hab("COMANDO_DA_MATILHA", "Comando da Matilha", "DRUIDA", "ATIVA", 6, "PE",
+                "Trilha Domador", "Concede uma ação padrão extra para seu companheiro animal sendo um gasto para cada animal neste turno.");
+        hab("SIMBIOSE_NATURAL", "Simbiose Natural", "DRUIDA", "ATIVA", 8, "PE",
+                null, "O Druida pode transferir metade do dano recebido para uma planta ou árvore próxima(nível 20).");
+        hab("PALMA_DE_VACUO", "Palma de Vácuo", "MONGE", "ATIVA", 4, "PE",
+                null, "Um ataque desarmado que empurra o inimigo 5 metros para trás e causa o estado atordoado se ele atingir uma parede ou objeto grande e duro (meu pinto).");
+        hab("MEDITACAO_DE_COMBATE", "Meditação de Combate", "MONGE,SABIO", "PASSIVA", 0, null,
+                "Trilha Sábio", "O Monge gasta sua ação para recuperar PE igual ao seu bônus de metade da sabedoria (1 vez por dia) .");
+        hab("PASSOS_DE_VENTO", "Passos de Vento", "MONGE", "ATIVA", 15, "PE",
+                null, "O Monge aumenta em 4 seu deslocamento por uma rodada e pode andar sobre superfícies líquidas.");
+        hab("REFLEXO_BLINDADO", "Reflexo Blindado", "MONGE", "ATIVA", 2, "PE",
+                null, "Permite usar a perícia Combate para bloquear projéteis físicos (flechas, facas).");
+        hab("FLECHA_DE_RASTREIO", "Flecha de Rastreio", "ARQUEIRO", "ATIVA", 3, "PE",
+                null, "Marca um alvo; o Arqueiro e seus aliados ganham Vantagem em testes de Percepção contra este alvo por toda a cena(teste de percepção contra).");
+        hab("TIRO_DE_INTERDICAO", "Tiro de Interdição", "ARQUEIRO", "ATIVA", 4, "PE",
+                null, "Atira nas pernas do alvo, reduzindo seu deslocamento pela metade na próxima rodada.");
+        hab("ARMADILHA_DE_CACADOR", "Armadilha de Caçador", "ARQUEIRO,CACADOR", "ATIVA", 5, "PE",
+                "Trilha Caçador", "suas armadilhas são especiais, causando o dobro de efeito ou dano dependendo da armadilha.");
+        hab("CHUVA_DE_PROJETEIS", "Chuva de Projéteis", "ARQUEIRO", "ATIVA", 8, "PE",
+                null, "O Arqueiro dispara várias flechas em uma área, causando dano reduzido a todos os inimigos nela -2 de dano para cada flecha.");
+        hab("OLHO_DO_PREDADOR", "Olho do Predador", "ARQUEIRO,MERCENARIO", "ATIVA", 8, "PE",
+                "Trilha Mercenário", "Adicione a metade da Inteligência à margem de acerto para o próximo disparo.");
+        hab("BARREIRA_ARCANA", "Barreira Arcana", "MAGO", "ATIVA", 6, "PM",
+                null, "Cria um escudo de mana que absorve dano mágico igual a duas vezes o bônus de Inteligência.");
+        hab("SOBRECARGA_MAGICA", "Sobrecarga Mágica", "ARQUIMAGO,MAGO", "ATIVA", 6, "PM",
+                "Trilha Arquimago", "O próximo feitiço causa o dobro de dano, mas o Mago fica Vulnerável por 1 rodada.");
+        hab("ESCRITA_DE_RUNA", "Escrita de Runa", "MAGO,RUNICISTA", "ATIVA", 6, "PM",
+                "Trilha Runicista", "Grava uma runa em um objeto que explode quando tocado por um inimigo causando 4d6 de dano aumentando 2 dados a cada 10 niveis.");
+        hab("TRANSMUTACAO_DE_MANA", "Transmutação de Mana", "MAGO", "PASSIVA", 0, null,
+                null, "O Mago pode converter 10 pontos de PE em 10 pontos de PM 3 vezes por dia (a cada 10 niveis) (ou vice-versa).");
+        hab("MENTE_LIMPIDA", "Mente Límpida", "MAGO", "ATIVA", 3, "PM",
+                null, "Concede imunidade a efeitos de origem mágica por 3 rodadas.");
+        hab("DESAFIO_DE_HONRA", "Desafio de Honra", "CAVALEIRO,ESPADACHIM,LUTADOR", "ATIVA", 4, "PE",
+                "LUTADOR, ESPADACHIM, CAVALEIRO", "Força um inimigo a focar seus ataques apenas no Espadachim por 1 rodada 1 vez por alvo.");
+        hab("CORTE_DE_RETENCAO", "Corte de Retenção", "ESPADACHIM,SAMURAI", "ATIVA", 6, "PE",
+                "Trilha Samurai", "Um ataque rápido que, se acertar, impede o alvo de realizar reações neste turno.");
+        hab("DANCA_DAS_LAMINAS", "Dança das Lâminas", "ESPADACHIM,SAMURAI", "PASSIVA", 0, null,
+                "samurai, nivel 10", "O usuário ganha +1 de Armadura para cada inimigo adjacente.");
+        hab("LAMINA_RESSONANTE", "Lâmina Ressonante", "ESPADACHIM", "ATIVA", 5, "PE",
+                null, "O Espadachim faz vibrar sua arma, causando dano de impacto adicional de +2 a cada 5 niveis do personagem em alvos que usam armaduras pesadas.");
+        hab("GATUNO_AGIL", "Gatuno Ágil", "LADRAO", "ATIVA", 2, "PE",
+                null, "Permite realizar a ação de \"Roubar\" como uma Ação Secundária durante o combate.");
+        hab("SAQUE_DO_PIRATA", "Saque do Pirata", "LADRAO,PIRATA", "PASSIVA", 0, null,
+                "Trilha Pirata", "Ao derrotar um inimigo, o Ladrão recupera 5 PE a cada 10 niveis instantaneamente (3 vezes por dia).");
+        hab("BOMBA_DE_FUMACA", "Bomba de fumaça", "LADRAO", "ATIVA", 5, "PE",
+                null, "Cria uma nuvem que concede Cobertura Total em um raio curto por 1 rodada.");
+        hab("SORTE_DO_CRIMINOSO", "Sorte do Criminoso", "LADRAO", "ATIVA", 5, "PE",
+                null, "Uma vez por cena, o ladrão pode rolar um teste de Esquiva que tenha falhado.");
+        hab("BALSAMO_REGENERADOR", "Bálsamo Regenerador", "CURANDEIRO", "ATIVA", 5, "PM",
+                null, "pode escolher de 2 a 3 aliados para recuperar 3 de hp por turno durante os próximos 4 turno ( esse número aumenta em 2 a cada 5 níveis)");
+        hab("PRECE_DE_ALIVIO", "Prece de Alívio", "CURANDEIRO,SACERDOTE", "ATIVA", 6, "PM",
+                "Trilha Sacerdote", "tira os efeitos de todos os aliados podendo usar 3 vezes por dia (esse limite aumenta em 1 a cada 5 niveis).");
+        hab("TOXINA_PARALISANTE", "Toxina Paralisante", "CURANDEIRO,MESTRE_TOXINAS", "ATIVA", 4, "PE",
+                "Trilha Mestre de Toxinas", "Cobre uma arma com veneno que deixa o alvo Paralisado por 2 rodadas caso acerte o ataque .");
+        hab("DIAGNOSTICO_RAPIDO", "Diagnóstico Rápido", "CURANDEIRO", "ATIVA", 8, "PM",
+                null, "Identifica instantaneamente o HP atual e as fraquezas elementais de um inimigo (duas vezes por dia, podendo aumentar esse limite em 1 a cada 5 niveis).");
+        hab("ESTABILIZAR_SINAIS", "Estabilizar Sinais", "CURANDEIRO", "ATIVA", 8, "PM",
+                null, "Garante que um aliado que chegou a 0 HP não precise fazer testes de morte por 3 rodadas.");
+        hab("DRENO_DE_VITALIDADE", "Dreno de Vitalidade", "BRUXO", "ATIVA", 6, "PE",
+                null, "Causa dano necrótico ao alvo e cura o Bruxo em metade do valor causado.");
+        hab("SERVO_PUTREFATO", "Servo Putrefato", "BRUXO,NECROMANTE", "ATIVA", 6, "PE",
+                "Trilha Necromante", "Fortalece um morto-vivo invocado, concedendo-lhe +2 em qualquer atributo (aumentando em +2 essa quantidade a cada 5 níveis) por 3 rodadas uma vez por cena.");
+        hab("MAO_DO_MEDO", "Mão do Medo", "BRUXO", "ATIVA", 4, "PM",
+                null, "Um ataque de toque que deixa o alvo com o estado amedrontado (impede de se aproximar do Bruxo) teste de vigor para não funcionar ou esquivar.");
+        hab("PACTO_DE_SANGUE", "Pacto de Sangue", "BRUXO", "ATIVA", 10, "PE",
+                null, "O Bruxo sacrifica 10 HP para recuperar 10PM ou 10 PE (2 vezes por dia) podendo aumentar o limite para + 10 de vida a cada 10 níveis.");
+        hab("GRANADA_QUIMICA", "Granada Química", "ALQUIMISTA", "ATIVA", 4, "PE",
+                null, "Lança um frasco que causa dano de fogo ou ácido em uma área curta, se causar algum efeito será dobrado.");
+        hab("INFUSAO_ARCANA", "Infusão Arcana", "ALQUIMISTA,QUIMICO_ARCANO", "ATIVA", 6, "PM",
+                "Trilha Químico Arcano", "Adiciona dano elemental temporário à arma de um aliado por toda a cena.");
+        hab("ENGRENAGEM_DE_DEFESA", "Engrenagem de Defesa", "ALQUIMISTA,INVENTOR", "ATIVA", 4, "PE",
+                "Trilha Inventor", "Conecta um dispositivo à armadura que concede +2 de bônus em Bloqueio (aumentando em +2 a cada 5 niveis) só pode ser utilizado em um dos aliados, não acumulativo.");
+        hab("ANTIDOTO_RAPIDO", "Antídoto Rápido", "ALQUIMISTA", "ATIVA", 3, "PE",
+                null, "Cria instantaneamente uma cura para qualquer veneno comum encontrado e podendo gastar + 7 PE caso seja um veneno incomum.");
+        hab("NEVOA_DE_ESTASE", "Névoa de Estase", "ALQUIMISTA", "ATIVA", 5, "PE",
+                null, "Lança um gás que reduz a Iniciativa pela metade de todos os inimigos afetados.");
+        hab("ESTOCADA_DE_ALCANCE", "Estocada de Alcance", "LANCEIRO", "ATIVA", 3, "PE",
+                null, "O Lanceiro pode atacar um inimigo a até 3 metros de distância com bônus de +2 em Combate ( a cada 5 níveis esse bônus aumenta +2).");
+        hab("SALTO_DO_GENERAL", "Salto do General", "GENERAL_CEUS,LANCEIRO", "ATIVA", 5, "PE",
+                "Trilha General dos Céus", "O usuário salta alto e cai sobre um inimigo, causando dano dobrado se o alvo estiver no ar, devendo fazer um teste de acrobacia com a DT sendo a esquiva do inimigo, caso erre estará VULNERÁVEL.");
+        hab("INVESTIDA_DA_VALQUIRIA", "Investida da Valquíria", "LANCEIRO,VALQUIRIA", "ATIVA", 6, "PE",
+                "Trilha Valquíria", "O usuário avança em linha reta, atacando todos os inimigos em seu caminho, caso não acerte mais que 1, irá tomar ataque de oportunidade (máximo 3).");
+        hab("BARREIRA_GIRATORIA_LANCEIRO", "Barreira Giratória", "LANCEIRO", "ATIVA", 3, "PE",
+                null, "Usa a lança para bloquear projéteis, ganhando +5 em testes de Bloqueio contra ataques à distância(aumentando em +2 a cadaass5 niveis).");
+        hab("PONTA_ROMPEDORA", "Ponta Rompedora", "LANCEIRO", "ATIVA", 6, "PE",
+                null, "O ataque ignora a resistência a dano perfurante do alvo por 3 rodadas, uma vez por cena.");
+        hab("GANCHO_ASCENDENTE", "Gancho Ascendente", "LUTADOR", "ATIVA", 5, "PE",
+                null, "Um soco potente que joga o alvo para cima, deixando-o Vulnerável por 1 rodada.");
+        hab("POSTURA_DO_CAMPEAO", "Postura do Campeão", "CAMPEAO,LUTADOR", "PASSIVA", 0, null,
+                "Trilha Campeão", "Enquanto estiver cercado inimigos, o Lutador ganha +2 de Dano Extra por cada inimigo (aumentando em +2 a cada 5 níveis).");
+        hab("CONTRA_ATAQUE_FLUIDO", "Contra-Ataque Fluído", "ARTISTA_MARCIAL,LUTADOR", "ATIVA", 5, "PE",
+                "Trilha Artista Marcial", "Ao desviar de um ataque, o Lutador pode realizar um ataque desarmado imediato como reação.");
+        hab("AGARRAO_BRUTAL", "Agarrão Brutal", "LUTADOR", "ATIVA", 5, "PE",
+                null, "O Lutador imobiliza o alvo; ambos ficam sob o estado Agarrado, mas o alvo recebe dano de sufocamento a cada turno (2d8) +1 dado a cada 5 níveis.");
+        hab("FOCO_INABALAVEL", "Foco Inabalável", "LUTADOR", "PASSIVA", 0, null,
+                null, "O lutador ignora qualquer penalidade de movimento causada por terrenos difíceis, gerando +2 em testes físicos em terrenos difíceis (aumentando em +2 a cada 5 níveis).");
+        hab("DEMPSEY_ROLL_DANCA_DO_PUNHO_DEMOLIDOR", "DEMPSEY ROLL - Dança do Punho Demolidor", "LUTADOR", "PASSIVA", 0, null,
+                null, "Sempre que se deslocar pelo menos 1 passo antes de atacar, você ganha 1 Acúmulo de Impulso (máx. 4), lembrando que só pode atacar depois que quiser parar a habilidade, ficando limitado somente à esquiva. Para cada Acúmulo de Impulso, você recebe: +1 dado de dano desarmado +1 na margem de ameaça (aumentando em +1 ambos, essa habilidade pode ser escolhida várias vezes porém a cada 10 níveis do personagem) Se você desviar um ataque inimigo enquanto a habilidade estiver ativa, pode gastar 1 Reação para gerar mais um ataque no final da habilidade, CASO LEVE UM ATAQUE A HABILIDADE É CESSADA. Ao final do turno, faça um teste de Atletismo (DT 16 + 4 por Acúmulo de Impulso).");
+        hab("FALHA", "Falha", "LUTADOR", "PASSIVA", 0, null,
+                null, "você fica paralisado e vulnerável até o próximo turno e perde todos os Acúmulos.• Sucesso: a próxima vez que usar terá mais um ataque extra. (Custo 5 PE + 2 PE por Acúmulo de Impulso gerado) Requisitos: [artista marcial], [Sequência Fluída], [Passos Leves ou Reforçar].");
+        hab("MELODIA_REVIGORANTE", "Melodia Revigorante", "BARDO,VIAJANTE", "ATIVA", 6, "PM",
+                "Trilha Bardo", "Toca uma música que recupera 5 PE de todos os aliados próximos por 2 turnos (uma vez por cena).");
+        hab("VATICINIO_DO_DESTINO", "Vaticínio do Destino", "CIGANO,VIAJANTE", "ATIVA", 3, "PE",
+                "Trilha Cigano", "O Viajante prevê um golpe, concedendo bônus na próxima Esquiva de um aliado de +2 (aumentando em +2 a cada 5 NÍVEIS).");
+        hab("CARTAS_DE_AZAR", "Cartas de Azar", "CARTOMANTE,VIAJANTE", "ATIVA", 8, "PE",
+                "Trilha Cartomante", "Lança uma carta que reduz a sorte do inimigo, causando desvantagem no próximo alvo.");
+        hab("RELATO_DE_VIAGEM", "Relato de Viagem", "SABIO,VIAJANTE", "ATIVA", 6, "PM",
+                "SÁBIO", "O Viajante compartilha uma história que concede +8 em testes de Conhecimento para todo o grupo por 1 hora. Habilidades Gerais Vontade de Sobrevivência: Quando o PV chegar a zero pela primeira vez em combate, o personagem permanece com 1 PV. (Pode ser usada 1 vez por dia). [Requer: Constituição 15 e nível 20]. Treinamento de Campo: Concede um bônus permanente de +2 em uma perícia à escolha do jogador ( aumentando em +2 a cada 5 níveis). (passiva) Foco de Adrenalina: Como uma Ação Livre, o usuário pode utilizar PV ao invés de PE para realizar uma habilidade de classe (uma vez por dia). [Requer: Constituição 10]. Mãos Firmes: O personagem ganha Vantagem em testes para evitar ser desarmado ou derrubar objetos. [Requer: Destreza 8]. Descrição das Habilidades de Trilhas");
+        hab("REFLETIR_IMPACTO", "Refletir Impacto", "ESCUDEIRO", "ATIVA", 5, "PE",
+                null, "Ao realizar um Bloqueio Crítico, devolve metade do dano ao atacante. [Requer: Nível 10].");
+        hab("ESCUDO_ESMAGADOR", "Escudo Esmagador", "ESCUDEIRO", "ATIVA", 4, "PE",
+                null, "Pode realizar um Ataque corpo a corpo usando a perícia Bloqueio em vez de Combate. .");
+        hab("VONTADE_DO_PROTETOR", "Vontade do Protetor", "ESCUDEIRO", "PASSIVA", 0, null,
+                null, "Recebe 2 PE temporário toda vez que usar \"Escudo Aliado\" com sucesso (aumentando em +2 a cada 5 níveis). [Requer: Escudo Aliado].");
+        hab("FOCO_DE_BATALHA", "Foco de Batalha", "COMANDANTE", "ATIVA", 4, "PE",
+                null, "Marca um inimigo; aliados que atacarem esse alvo irão ganhar +2 no acerto, porém caso queira focar em outro alvo, irá ter -2 no acerto (aumentando esse bônus em +2 a cada 5 niveis). .");
+        hab("MANOBRA_DE_FLANCO", "Manobra de Flanco", "COMANDANTE", "ATIVA", 6, "PE",
+                null, "Permite que um aliado se mova como Ação Livre neste turno. .");
+        hab("GRITO_DE_RETOMADA", "Grito de Retomada", "COMANDANTE", "ATIVA", 5, "PE",
+                null, "Remove condições mentais de aliados em área média. .");
+        hab("ESTRATEGIA_DEFENSIVA", "Estratégia Defensiva", "COMANDANTE", "PASSIVA", 0, null,
+                null, "O grupo recebe +2 em testes de Iniciativa enquanto o Comandante estiver consciente(aumenta em +2 a cada 5 niveis). .");
+        hab("GOLPE_COORDENADO", "Golpe Coordenado", "COMANDANTE", "ATIVA", 10, "PE",
+                null, "Se o Comandante acertar um ataque, um aliado próximo pode realizar um ataque simples contra o mesmo alvo. .");
+        hab("PROTECAO_FERREA", "Proteção Férrea", "COMANDANTE", "PASSIVA", 0, null,
+                null, "Aliados adjacentes recebem +4 de Armadura Física, ao fazer um grito de guerra inspirando seus aliados, durante a cena. (5 PE).");
+        hab("KAWARIMI", "Kawarimi", "NINJA", "ATIVA", 10, "PE",
+                "Substituição", "Reação para trocar de lugar com um objeto próximo, anulando o dano recebido, uma vez por cena. .");
+        hab("LAMINAS_MULTIPLAS", "Lâminas Múltiplas", "NINJA", "ATIVA", 2, "PE",
+                null, "Arremessa até 3 armas leves (shurikens/facas) em uma única ação. .");
+        hab("FUMACA_CEGANTE", "Fumaça Cegante", "NINJA", "PASSIVA", 0, null,
+                null, "Ao utilizar uma bomba de fumaça o inimigo também ficará ofuscado. .");
+        hab("GOLPE_DE_LOTUS", "Golpe de Lótus", "MONGE,NINJA", "ATIVA", 5, "PE",
+                "monge", "Ataque que causa dano direto nos Pontos de Mana (PM) do alvo. .");
+        hab("DILACERAR", "Dilacerar", "SICARIO", "ATIVA", 5, "PE",
+                null, "O próximo ataque adiciona +1 acúmulos de Sangramento. .");
+        hab("VENENO_DE_PARALISIA", "Veneno de Paralisia", "MESTRE_TOXINAS,SICARIO", "ATIVA", 4, "PE",
+                "Mestre de Toxinas", "Aplica veneno que reduz a Agilidade e destreza do alvo em -2 por 3 rodadas (bônus aumenta em +2 a cada 5 niveis). .");
+        hab("SEDE_DE_SANGUE", "Sede de Sangue", "SICARIO", "PASSIVA", 0, null,
+                null, "Recebe 4 PE temporários para cada inimigo que receber sangramento pela primeira vez no combate. .");
+        hab("EXPOR_FRAQUEZA", "Expor Fraqueza", "SICARIO", "ATIVA", 3, "PE",
+                null, "Após um ataque crítico Reduz a Armadura do alvo em valor igual à sua Destreza por 2 rodadas. .");
+        hab("FURIA_SANGRENTA", "Fúria Sangrenta", "BERSERKER", "PASSIVA", 0, null,
+                null, "Ganha +2 de Dano Extra para cada 10 PV perdidos em batalha, aumentando esse bônus em +2 a cada 10 niveis. .");
+        hab("GOLPE_DESTRUTIVO", "Golpe Destrutivo", "BERSERKER", "ATIVA", 6, "PE",
+                null, "Ignora a Armadura física do alvo, mas o Bárbaro fica \"Vulnerável\" por 1 rodada. .");
+        hab("REDEMOINHO_DE_CARNE", "Redemoinho de Carne", "BERSERKER,VALQUIRIA", "ATIVA", 10, "PE",
+                "Valquiria", "Ataca todos os inimigos adjacentes de uma vez, sendo que recebe -3 em testes de ataque a cada inimigo. .");
+        hab("RESISTENCIA_A_DOR", "Resistência à Dor", "BERSERKER", "PASSIVA", 0, null,
+                null, "Enquanto em \"Estado de Fúria\", recebe 10 de armadura física Enquanto estiver com o estado de fúria ativo (aumenta a redução em +10 a cada 10 niveis). .");
+        hab("PELE_DE_FERRO", "Pele de Ferro", "IMORTAL", "PASSIVA", 0, null,
+                null, "Recebe Armadura baseada em metade do atributo constituição (nível 20 necessário). .");
+        hab("CURA_ADRENALINA", "Cura Adrenalina", "IMORTAL", "ATIVA", 6, "PE",
+                null, "Converte todos os acúmulos de Fúria em cura direta (5 Pv por acúmulo). .");
+        hab("DESAFIO_SUPREMO", "Desafio Supremo", "IMORTAL", "ATIVA", 5, "PE",
+                null, "Faz com que, caso todos os inimigos em alcance curto ataquem outro alvo que não seja o Imortal, estes sofram -10 em seu Acerto. .");
+        hab("VIGOR_INESGOTAVEL", "Vigor Inesgotável", "IMORTAL", "PASSIVA", 0, null,
+                null, "Reduz o custo de PE de todas as habilidades de reação em -2, nunca a menos que 1.(nível 20 necessário). .");
+        hab("GOLPE_DO_SOBREVIVENTE", "Golpe do Sobrevivente", "IMORTAL", "ATIVA", 10, "PE",
+                null, "Dano do ataque aumenta baseado na Constituição atual do usuário gerando dano extra com base na sua constituição.");
+        hab("AURA_DE_RETRIBUICAO", "Aura de Retribuição", "PALADINO", "ATIVA", 5, "PE",
+                null, "Quando é atacado por bênçãos de uma divindade que não seja a sua, pode devolver 3d6 de dano mágico de sua divindade para o atacante. (aumentando 1 DADO de dano a cada 5 niveis). .");
+        hab("ESCUDO_PURIFICADOR", "Escudo Purificador", "PALADINO", "ATIVA", 4, "PE",
+                null, "Ao bloquear um ataque, remove um efeito negativo de si mesmo. .");
+        hab("INVESTIDA_SAGRADA", "Investida Sagrada", "ESCUDEIRO,PALADINO", "ATIVA", 5, "PE",
+                "escudeiro", "Avança em linha reta; o primeiro alvo atingido fica \"Atordoado\" ou derrubado. .");
+        hab("BASTIAO_DA_LUZ", "Bastião da Luz", "PALADINO", "PASSIVA", 0, null,
+                null, "Aliados em alcance curto ganham 10 de Armadura a benção do mesmo panteão de deuses do usuário (+10 de Armadura a cada 20 Níveis do Personagem). (5 PE).");
+        hab("LUZ_GUIA", "Luz Guia", "SANTO", "ATIVA", 5, "PE",
+                null, "Concede Bônus no próximo teste de ataque com bênção de um aliado, aumentando +2 para o seu acerto. (aumentando em +2 a cada 5 niveis). .");
+        hab("SANTUARIO", "Santuário", "SANTO", "ATIVA", 5, "PE",
+                null, "Cria uma área de 5 metros onde inimigos que possuam divindades do panteão oposto ao usuário precisam passar em teste de Virtude para entrar ou passar algum ataque. .");
+        hab("PALAVRAS_DE_PAZ", "Palavras de Paz", "SANTO", "ATIVA", 5, "PE",
+                null, "Para testes cujo objetivo seja evitar confrontos ou desavenças, o usuário recebe +15 de bônus em Diplomacia. .");
+        hab("MARTIR", "Mártir", "SANTO", "PASSIVA", 0, null,
+                null, "Pode escolher receber os efeitos negativos destinados a um aliado próximo. (Reação - Gasto: 5 PE).");
+        hab("CRESCIMENTO_ACELERADO", "Crescimento Acelerado", "ARAUTO_NATUREZA", "ATIVA", 5, "PE",
+                null, "Transforma o terreno em \"Terreno Difícil\" através de raízes. .");
+        hab("RAIZES_CURATIVAS", "Raízes Curativas", "ARAUTO_NATUREZA", "ATIVA", 2, "PE",
+                null, "Aliados em contato com solo natural recuperam 4 PV por turno (a cada 5 niveis aumenta em +4 esse PV ganho), necessário ação sustentada. .");
+        hab("FURIA_ELEMENTAL", "Fúria Elemental", "ARAUTO_NATUREZA", "ATIVA", 6, "PE",
+                null, "Adiciona qualquer elemento de origem natural à escolha do usuário, para qualquer Feitiço que este possuir. .");
+        hab("VOZ_DA_MATA", "Voz da Mata", "ARAUTO_NATUREZA", "ATIVA", 6, "PE",
+                null, "Pode \"ouvir\" as plantas para localizar inimigos em florestas em uma distância de 50 metros (caso esteja em floresta). .");
+        hab("CORPO_VEGETAL", "Corpo Vegetal", "ARAUTO_NATUREZA", "PASSIVA", 0, null,
+                null, "Você invoca raízes naturais para servir como sua armadura, elas possuem sua Sabedoria em PV e 5 de armadura (a cada 5 Níveis do Personagem). (8 PE).");
+        hab("COMANDO_DE_REACAO", "Comando de Reação", "DOMADOR_FERAS", "ATIVA", 8, "PE",
+                null, "Quando o usuário for atacado, uma criatura aliada que possua pode realizar um ataque imediato como Reação. .");
+        hab("VINCULO_VITAL", "Vínculo Vital", "DOMADOR_FERAS", "PASSIVA", 0, null,
+                null, "Divide o dano recebido igualmente entre o Druida e sua fera. (6 PE).");
+        hab("OLHAR_BESTIAL", "Olhar Bestial", "DOMADOR_FERAS", "ATIVA", 4, "PE",
+                null, "O Druida pode enxergar através dos olhos de sua fera até no máximo sua Sabedoria em metros. .");
+        hab("RUGIDO_SINCRONIZADO", "Rugido Sincronizado", "DOMADOR_FERAS", "ATIVA", 6, "PE",
+                null, "Druida pode realizar um teste de Adestrar para intimidar o seu alvo, além disso, para cada criatura que possua recebe +2 de bônus em seu teste. .");
+        hab("EVOLUCAO_TEMPORARIA", "Evolução Temporária", "DOMADOR_FERAS", "ATIVA", 8, "PE",
+                null, "Aumenta a categoria da fera em um nível por 1d4 rodadas. .");
+        hab("MENTE_DE_CRISTAL", "Mente de Cristal", "SABIO", "PASSIVA", 0, null,
+                null, "Torna-se imune ao estado \"Confuso\" e efeitos de leitura de mente. .");
+        hab("PALMA_DA_SABEDORIA", "Palma da Sabedoria", "SABIO", "ATIVA", 6, "PE",
+                null, "Ataques desarmados somam o valor de Sabedoria ao dano. .");
+        hab("FLUXO_DE_KI", "Fluxo de Ki", "SABIO", "PASSIVA", 0, null,
+                null, "Transfere metade dos Pontos de Energia gastos, para um aliado. .");
+        hab("LEITURA_DE_COMBATE", "Leitura de Combate", "SABIO", "ATIVA", 5, "PE",
+                null, "Prevê a Esquiva do alvo, reduzindo-a em -5 no próximo ataque (aumentando em -5 a cada 10 níveis). .");
+        hab("ESTADO_DE_NIRVANA", "Estado de Nirvana", "SABIO", "ATIVA", 12, "PE",
+                null, "Pelas próximas 1d4 de rodadas, o Monge tem o gasto de qualquer habilidade reduzido para metade. .");
+        hab("IMPACTO_SISMICO", "Impacto Sísmico", "PUNHOS_ACO", "ATIVA", 6, "PE",
+                null, "Soco no solo que derruba todos os inimigos adjacentes, deixando-os derrubados, devem realizar um teste de Esquiva ou Vigor, contra o ataque do usuário. .");
+        hab("BLINDAGEM_INTERNA", "Blindagem Interna", "PUNHOS_ACO", "ATIVA", 4, "PE",
+                null, "Recebe o valor de seu Vigor em Armadura Mágica. .");
+        hab("FOCO_DESTRUTIVO", "Foco Destrutivo", "PUNHOS_ACO", "PASSIVA", 0, null,
+                null, "Dobra o dano causado contra escudos e objetos inanimados. .");
+        hab("ARMADILHA_DE_ESPINHOS", "Armadilha de Espinhos", "CACADOR", "ATIVA", 5, "PE",
+                null, "Cria uma armadilha que imobiliza o alvo por 1 rodada caso ele passe nela. .");
+        hab("TIRO_DE_RASTREIO", "Tiro de Rastreio", "CACADOR", "ATIVA", 3, "PE",
+                null, "O inimigo atingido não pode se beneficiar de invisibilidade ou furtividade. .");
+        hab("ABATE_SILENCIOSO", "Abate Silencioso", "CACADOR", "PASSIVA", 0, null,
+                null, "Adiciona +2 dados de dano contra alvos desprevenidos. (10 PE).");
+        hab("CHAMADO_SELVAGEM", "Chamado Selvagem", "CACADOR,DRUIDA", "ATIVA", 6, "PE",
+                "Druida", "Atrai pequenos animais da região para distrair o inimigo. .");
+        hab("MIMETISMO_FLORESTAL", "Mimetismo Florestal", "CACADOR", "ATIVA", 4, "PE",
+                null, "Fica invisível em ambientes naturais se permanecer imóvel por 1 turno. .");
+        hab("TIRO_DE_OURO", "Tiro de Ouro", "MERCENARIO", "PASSIVA", 0, null,
+                null, "O passo de dano aumenta em +1 para cada 500 moedas de ouro que o Arqueiro carrega. .");
+        hab("VISAO_CALCULISTA", "Visão Calculista", "MERCENARIO", "ATIVA", 8, "PE",
+                null, "Soma metade do atributo Inteligência no teste de Pontaria. .");
+        hab("RETIRADA_AGIL", "Retirada Ágil", "LADRAO,MERCENARIO", "ATIVA", 5, "PE",
+                "Ladrão", "Pode fugir do alcance de um inimigo sem provocar ataques de oportunidade. .");
+        hab("CONTRATO_DE_SANGUE", "Contrato de Sangue", "MERCENARIO", "PASSIVA", 0, null,
+                null, "Recebe 4 PE temporário toda vez que finalizar um inimigo humanoide. .");
+        hab("CAMPO_DE_MANA", "Campo de Mana", "ARQUIMAGO", "ATIVA", 5, "PE",
+                null, "Cria uma área de alcance curto que reduz o custo de magias de aliados em -2 PM, nunca a menos de 1 PM (aumentando em -2 a cada 10 níveis). .");
+        hab("ANULAR_MAGIA", "Anular Magia", "ARQUIMAGO", "ATIVA", 10, "PE",
+                null, "Usa Reação para dissipar um feitiço inimigo de até um Grau que possua usando um teste de Feitiçaria. .");
+        hab("MENTE_EXPANDIDA", "Mente Expandida", "ARQUIMAGO", "PASSIVA", 0, null,
+                null, "Permite manter duas magias de \"Concentração\" ativas ao mesmo tempo. (8 PE).");
+        hab("TORRENTE_ARCANA", "Torrente Arcana", "ARQUIMAGO", "ATIVA", 20, "PE",
+                null, "Dispara um raio que consome todo o PM atual para causar dano massivo. .");
+        hab("RUNA_DE_PROTECAO", "Runa de Proteção", "RUNICISTA", "ATIVA", 4, "PE",
+                null, "Grava uma runa em uma armadura, concedendo +4 de Armadura Mágica dura a cena (+2 a cada 5 níveis) . .");
+        hab("RUNA_EXPLOSIVA", "Runa Explosiva", "RUNICISTA", "ATIVA", 6, "PE",
+                null, "O objeto tocado explode quando um inimigo se aproxima uma ação secundária para cada objeto, causando 4d6 de dano mágico. .");
+        hab("ENCANTAMENTO_DE_LAMINA", "Encantamento de Lâmina", "RUNICISTA", "ATIVA", 3, "PE",
+                null, "Converte todo o dano de uma arma em mágico por 1d4 turnos. .");
+        hab("MESTRE_DAS_GRAVURAS", "Mestre das Gravuras", "RUNICISTA", "PASSIVA", 0, null,
+                null, "Pode ativar runas como Ação Livre uma vez por cena. .");
+        hab("PARADA_ELEGANTE", "Parada Elegante", "DUELISTA", "ATIVA", 5, "PE",
+                null, "Ao Bloquear um ataque com sucesso ganha Bônus no próximo ataque contra o mesmo inimigo de +2 (+2 a cada 5 níveis). .");
+        hab("FINTA_MAGISTRAL", "Finta Magistral", "DUELISTA", "ATIVA", 5, "PE",
+                null, "Realiza um teste de enganação contra o alvo para reduzir a Esquiva do alvo em de acordo com a diferença de valores. .");
+        hab("MESTRE_DO_DUELO", "Mestre do Duelo", "DUELISTA", "PASSIVA", 0, null,
+                null, "Ganha +2 de Dano Extra para cada turno que permanecer lutando contra o mesmo alvo (+2 a cada 5 níveis). .");
+        hab("IAIJUTSU", "Iaijutsu", "SAMURAI", "ATIVA", 6, "PE",
+                null, "Fique um turno preparando o ataque; o dano é dobrado. Caso erre fica vulnerável por uma rodada .");
+        hab("CORTE_ESPIRITUAL", "Corte Espiritual", "SAMURAI", "ATIVA", 5, "PE",
+                null, "Ataque que ignora armadura física e foca no PE do alvo. .");
+        hab("RESILIENCIA_BUSHIDO", "Resiliência Bushido", "SAMURAI", "PASSIVA", 0, null,
+                null, "Ignora condições não mágicas enquanto estiver com menos da metade do HP. .");
+        hab("GOLPE_DE_HONRA", "Golpe de Honra", "SAMURAI", "ATIVA", 8, "PE",
+                null, "Depois de dois turnos Dano aumenta em dois dados se o Samurai não tiver recebido dano. .");
+        hab("PASSO_SOMBRIO", "Passo Sombrio", "SOMBRA", "ATIVA", 5, "PE",
+                null, "Teleporta-se entre sombras em alcance curto. .");
+        hab("LAMINA_DE_EBANO", "Lâmina de Ébano", "SOMBRA", "ATIVA", 3, "PE",
+                null, "Ataque furtivo que silencia o alvo. .");
+        hab("VULTO", "Vulto", "SOMBRA", "PASSIVA", 0, null,
+                null, "Inimigos têm que rolar um 1d10 se cair 10 ele erra ataque físicos contra a Sombra. (passiva).");
+        hab("GARROTE", "Garrote", "SOMBRA", "ATIVA", 8, "PE",
+                null, "Caso esteja furtivo pode realizar um teste de Crime, para sabotar o seu alvo, dessa forma ele fica inibido de usar Magia por 1d4 Turnos. .");
+        hab("GANCHO_DE_ABORDAGEM", "Gancho de Abordagem", "PIRATA", "ATIVA", 4, "PE",
+                null, "Puxa um inimigo distante para perto de si. .");
+        hab("PISTOLAGEM", "Pistolagem", "PIRATA", "ATIVA", 6, "PE",
+                null, "Pode realizar um ataque a distância como Ação Secundária após um ataque corpo a corpo. .");
+        hab("NAVEGADOR", "Navegador", "PIRATA", "PASSIVA", 0, null,
+                null, "Vantagem em testes de Sobrevivência e Percepção em ambientes aquáticos. .");
+        hab("SAQUE_DE_TESOURO", "Saque de Tesouro", "PIRATA", "PASSIVA", 0, null,
+                null, "Ganha o dobro de ouro ao abrir baús do tesouro. .");
+        hab("PRECE_DE_RESSURREICAO", "Prece de ressurreição", "SACERDOTE", "ATIVA", 15, "PE",
+                null, "Levanta um aliado caído instantaneamente sem precisar de teste, só pode ser usado 1 vez por alvo. .");
+        hab("AURA_DE_PUREZA", "Aura de Pureza", "SACERDOTE", "ATIVA", 4, "PE",
+                null, "Aliados próximos tornam-se imunes a efeitos mentais negativos. ).");
+        hab("LUZ_DE_ALIVIO", "Luz de alívio", "SACERDOTE", "ATIVA", 5, "PE",
+                null, "O alvo recebe 1d12 de PE temporário e 1d12 de Armadura Mágica. .");
+        hab("VINCULO_SAGRADO", "Vínculo Sagrado", "SACERDOTE", "PASSIVA", 0, null,
+                null, "O usuário pode escolher repartir qualquer cura mágica entre seus aliados. .");
+        hab("NUVEM_TOXICA", "Nuvem Tóxica", "MESTRE_TOXINAS", "PASSIVA", 0, null,
+                null, "Danos de \"Envenenamento\" em área aumenta em 1 passo. .");
+        hab("NEUTRALIZADOR_TOXICO", "Neutralizador tóxico", "MESTRE_TOXINAS", "ATIVA", 3, "PE",
+                null, "Remove qualquer tipo de veneno ou doença temporária de um aliado. .");
+        hab("DARDO_ENTORPECENTE", "Dardo Entorpecente", "MESTRE_TOXINAS", "ATIVA", 4, "PE",
+                null, "Ao realizar um Ataque à distância pode reduzir a Agilidade do alvo em -2 (A cada 10 Níveis do Personagem). .");
+        hab("ESTUDO_ANATOMICO", "Estudo Anatômico", "MESTRE_TOXINAS", "PASSIVA", 0, null,
+                null, "Críticos do Mestre de Toxinas ignoram a imunidade do alvo. .");
+        hab("INJECAO_DE_ADRENALINA", "Injeção de Adrenalina", "MESTRE_TOXINAS", "ATIVA", 7, "PE",
+                null, "Aliado ganha uma Ação Principal extra, mas perde 3d12 PV no fim do turno. .");
+        hab("EXPLOSAO_DE_CADAVER", "Explosão de Cadáver", "NECROMANTE", "ATIVA", 5, "PE",
+                null, "Explode um corpo no chão para causar 2d12 dano mágico em área curta, média ou grande, dependendo do corpo alvo( +1 dado a cada 10 níveis). .");
+        hab("TOQUE_DA_MORTE", "Toque da Morte", "NECROMANTE", "ATIVA", 7, "PE",
+                null, "Reduz o PV máximo do inimigo em 1d20 pontos por 1 cena. (requisito nível 20).");
+        hab("EXERCITO_PUTREFATO", "Exército Putrefato", "NECROMANTE", "PASSIVA", 0, null,
+                null, "Pode controlar até 5 mortos-vivos simultaneamente(a cada 10 níveis). .");
+        hab("CONSUMIR_MANANCIAL", "Consumir manancial", "NECROMANTE", "ATIVA", 4, "PE",
+                null, "Ganha 10 de PM temporário para cada inimigo que morrer por perto. .");
+        hab("OLHAR_DO_ALEM", "Olhar do Além", "MISTICO", "ATIVA", 5, "PE",
+                null, "Vê através de paredes e detecta seres invisíveis na área média. .");
+        hab("CORRENTE_DE_ALMAS", "Corrente de Almas", "MISTICO", "ATIVA", 10, "PE",
+                null, "Une a alma de dois alvos, fazendo que tudo que um receba, o outro receba também em dano mágico, podendo ser usado somente em inimigos. .");
+        hab("ABSORCAO_DE_ESSENCIA", "Absorção de Essência", "MISTICO", "PASSIVA", 0, null,
+                null, "Recebe 4 PE temporárias toda vez que recebe dano mágico. .");
+        hab("INVOCACAO_ANCESTRAL", "Invocação Ancestral", "MISTICO", "ATIVA", 10, "PE",
+                null, "invoca um espírito local para atacar seus inimigos. .");
+        hab("POCAO_EXPLOSIVA", "Poção Explosiva", "QUIMICO_ARCANO", "ATIVA", 2, "PE",
+                null, "Aumenta a área de efeito em um passo de poções . .");
+        hab("ELIXIR_DE_MANA", "Elixir de Mana", "QUIMICO_ARCANO", "ATIVA", 6, "PE",
+                null, "Acrescenta um bônus de 1d10 (+1 dado a cada 10 níveis) PM e PE temporário, sempre que um aliado em alcance curto consumir uma poção feita pelo usuário. .");
+        hab("MUTACAO_QUIMICA", "Mutação Química", "QUIMICO_ARCANO", "ATIVA", 5, "PE",
+                null, "Aliados em alcance curto que consumirem poções feitas pelo usuário, recebem +2 em testes físicos (+2 a cada 10 Níveis). .");
+        hab("SOLVENTE_UNIVERSAL", "Solvente Universal", "QUIMICO_ARCANO", "ATIVA", 4, "PE",
+                null, "Ataque que remove permanentemente 2 pontos de armadura de um objeto. .");
+        hab("MESTRE_DE_MISTURAS", "Mestre de Misturas", "QUIMICO_ARCANO", "PASSIVA", 0, null,
+                null, "Pode consumir ou lançar duas poções em uma única ação. (2 PE).");
+        hab("TORRETA_PORTATIL", "Torreta Portátil", "INVENTOR", "ATIVA", 8, "PE",
+                null, "Posiciona um mecanismo que ataca automaticamente o inimigo mais próximo, causando 1d6 de dano variado (+1 dado a cada 10 Níveis). .");
+        hab("APRIMORAR_TORRETA", "Aprimorar Torreta", "INVENTOR", "ATIVA", 2, "PE",
+                null, "Melhora 1 “Torreta Portátil”, aumentando o seu dano em um passo. (+1 “Torreta Portátil” a cada 10 Níveis).");
+        hab("DRONE_DE_RECONHECIMENTO", "Drone de Reconhecimento", "INVENTOR", "ATIVA", 4, "PE",
+                null, "Concede percepção em locais distantes sem se mover. .");
+        hab("MAO_NA_MASSA", "Mão na Massa", "INVENTOR", "PASSIVA", 0, null,
+                null, "Ganha Vantagem em todos os testes de Atletismo durante seu processo de criação. .");
+        hab("SOBRECARGA_MECANICA", "Sobrecarga Mecânica", "INVENTOR", "ATIVA", 10, "PE",
+                null, "Faz um dispositivo trabalhar ao extremo, recebendo +2 ações principais mas destruindo-o no turno seguinte. .");
+        hab("COMANDO_DE_VOO", "Comando de Voo", "GENERAL_CEUS", "PASSIVA", 0, null,
+                null, "Aliados próximos ganham +2 (+2 a cada 5 níveis) de bônus em testes de Acrobacia e Salto. .");
+        hab("LANCA_DE_JULGAMENTO", "Lança de Julgamento", "GENERAL_CEUS", "ATIVA", 5, "PE",
+                null, "Realiza um ataque, que causará dano no seu alvo e aqueles atrás dele. .");
+        hab("ASAS_DO_COMANDO", "Asas do Comando", "GENERAL_CEUS", "PASSIVA", 0, null,
+                null, "O usuário realiza um ataque contra o solo ou o alvo, o dano causado irá reduzir o dano de queda. (2 PE).");
+        hab("IMPACTO_METEORICO", "Impacto Meteórico", "GENERAL_CEUS", "PASSIVA", 0, null,
+                null, "O dano da lança aumenta em +1 de dano para cada metro de altura da queda. .");
+        hab("BEIJO_DA_BATALHA", "Beijo da Batalha", "VALQUIRIA", "PASSIVA", 0, null,
+                null, "Recebe 10 PE temporário toda vez que abater um inimigo com uma lança. .");
+        hab("GRITO_DE_GUERRA_DAS_VALQUIRIAS", "Grito de Guerra das Valquírias", "VALQUIRIA", "ATIVA", 4, "PE",
+                null, "Inspira aliados, concedendo +2 (+2 a cada 5 níveis) de dano físico por 1d4 rodadas. .");
+        hab("LANCA_RELUZENTE", "Lança Reluzente", "VALQUIRIA", "ATIVA", 15, "PE",
+                null, "Causa o estado \"Cego\" ao acertar o inimigo por 1d4 turnos. .");
+        hab("ESPIRITO_DE_GUERRA", "Espírito de Guerra", "VALQUIRIA", "PASSIVA", 0, null,
+                null, "Se o PV cair abaixo da metade, ganha uma Ação Principal extra no próximo turno. .");
+        hab("POSTURA_INABALAVEL", "Postura Inabalável", "CAMPEAO", "PASSIVA", 0, null,
+                null, "Torna-se imune a ser derrubado ou empurrado por ataques físicos. .");
+        hab("DESAFIO_DO_RINGUE", "Desafio do Ringue", "CAMPEAO", "ATIVA", 5, "PE",
+                null, "Ninguém em alcance curto pode sair de perto do Campeão por 1d4 rodadas (Virtude Anula). .");
+        hab("GANCHO_DE_OURO", "Gancho de Ouro", "CAMPEAO", "ATIVA", 8, "PE",
+                null, "Se o ataque for crítico, o alvo fica \"Atordoado\" por 1d4 turnos. .");
+        hab("IDOLO_DAS_MASSAS", "Ídolo das Massas", "CAMPEAO", "PASSIVA", 0, null,
+                null, "Soma o bônus de Carisma ao dano de ataques desarmados. .");
+        hab("TROCAR_AS_MAOS_PELOS_PES", "Trocar as Mãos pelos Pés", "ARTISTA_MARCIAL", "ATIVA", 2, "PE",
+                null, "Pode trocar bônus de esquiva por combate e combate por esquiva. .");
+        hab("PONTO_DE_PRESSAO", "Ponto de Pressão", "ARTISTA_MARCIAL,MONGE", "ATIVA", 6, "PE",
+                "Monge", "Paralisa o braço ou perna do inimigo por 1 rodada. Se paralisar o braço não consegue manejar objetos, e se for a perna perde deslocamento pela metade. .");
+        hab("CONTRA_GOLPE_DE_PALMA", "Contra-golpe de Palma", "ARTISTA_MARCIAL", "ATIVA", 6, "PE",
+                null, "Reação que devolve metade do dano físico recebido ao atacante. .");
+        hab("PASSO_DE_VENTO", "Passo de Vento", "ARTISTA_MARCIAL", "PASSIVA", 0, null,
+                null, "Permite esquivar de projéteis com bônus de +2 (+2 a cada 5 níveis). .");
+        hab("COMBO_INFINITO", "Combo Infinito", "ARTISTA_MARCIAL", "PASSIVA", 0, null,
+                null, "Cada acerto consecutivo no mesmo alvo dá +2 ( +2 a cada 10 níveis) de dano cumulativo. .");
     }
 
     /** Reaplica as habilidades (catalogo) em banco ja existente. */
