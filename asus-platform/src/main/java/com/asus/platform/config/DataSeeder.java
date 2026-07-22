@@ -1021,7 +1021,10 @@ public class DataSeeder implements CommandLineRunner {
         hab("GOLPE_DE_HONRA", "Golpe de Honra", "SAMURAI", "ATIVA", 8, "PE",
                 null, "Depois de dois turnos Dano aumenta em dois dados se o Samurai não tiver recebido dano. .");
         hab("PASSO_SOMBRIO", "Passo Sombrio", "SOMBRA", "ATIVA", 5, "PE",
-                null, "Teleporta-se entre sombras em alcance curto. .");
+                null, "Teleporta-se entre sombras em alcance curto.");
+        hab("GRILHOES_DA_PENUMBRA", "Grilhões da Penumbra", "ASSASSINO,SOMBRA", "ATIVA", 2, "PE",
+                "Passo de Sombra ou Passo Sombrio",
+                "“Sua sombra te denuncia. E hoje ela trabalha para mim.” Ao terminar um Passo de Sombra (3 PE) ou Passo Sombrio (5 PE) — terminando adjacente a um inimigo ou tendo cruzado a sombra do alvo — pode pagar +2 PE como Ação Livre para aprisioná-lo: teste de Furtividade contra a Esquiva do alvo. Em sucesso, o alvo fica Preso nas Sombras até o fim do seu próximo turno: Deslocamento 0, não pode usar Esquiva e, ao se soltar, sai com Lentidão por 1 turno; no resto age normalmente (atacar, conjurar e usar habilidades que não exijam se mover). Como o gatilho é o passo, o efeito herda a condição de sombra. Escalonamento: a cada 10 níveis, +1 alvo adjacente ao ponto de chegada.");
         hab("LAMINA_DE_EBANO", "Lâmina de Ébano", "SOMBRA", "ATIVA", 3, "PE",
                 null, "Ataque furtivo que silencia o alvo. .");
         hab("VULTO", "Vulto", "SOMBRA", "PASSIVA", 0, null,
