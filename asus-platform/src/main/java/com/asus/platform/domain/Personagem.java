@@ -113,6 +113,12 @@ public class Personagem {
     /** Dinheiro do personagem em T$ (aceita meio tibar). */
     private Double dinheiro;
 
+    /** Armadura Física base (natural/manual); itens equipados com bonusDefesa somam por fora. */
+    private Integer armaduraFisica;
+
+    /** Armadura Mágica base (natural/manual). */
+    private Integer armaduraMagica;
+
     /** Token do link público da ficha (null = não compartilhada). */
     private String shareToken;
 

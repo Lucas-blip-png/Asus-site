@@ -79,6 +79,20 @@ export default function FichaPublica() {
               </div>
             </div>
           ))}
+
+          <div className="atr-edit" style={{ marginTop: 10 }}>
+            <b>Armadura</b>
+            <div className="atr-grid" style={{ marginTop: 6 }}>
+              <div className="atr-cell">
+                <span className="muted">🛡 Física</span>
+                <b className="stat" style={{ fontSize: '1.1rem' }}>{(p.armaduraFisica ?? 0) + (p.armaduraItens ?? 0)}</b>
+              </div>
+              <div className="atr-cell">
+                <span className="muted">✨ Mágica</span>
+                <b className="stat" style={{ fontSize: '1.1rem' }}>{p.armaduraMagica ?? 0}</b>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Centro: perícias */}

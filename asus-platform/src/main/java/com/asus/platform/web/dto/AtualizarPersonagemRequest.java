@@ -29,4 +29,6 @@ public record AtualizarPersonagemRequest(
         String personalidade,
         String historico,
         String objetivo,
-        Double dinheiro) {}
+        Double dinheiro,
+        Integer armaduraFisica,
+        Integer armaduraMagica) {}

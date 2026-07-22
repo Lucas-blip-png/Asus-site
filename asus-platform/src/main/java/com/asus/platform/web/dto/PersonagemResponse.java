@@ -43,6 +43,9 @@ public record PersonagemResponse(
         String historico,
         String objetivo,
         Double dinheiro,
+        Integer armaduraFisica,
+        Integer armaduraMagica,
+        int armaduraItens,
         boolean arquivado,
         LocalDateTime criadoEm,
         LocalDateTime atualizadoEm) {}
