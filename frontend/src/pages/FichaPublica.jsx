@@ -101,7 +101,7 @@ export default function FichaPublica() {
           <table className="pericias">
             <thead><tr><th>Perícia</th><th>Atr</th><th>Treino</th><th>Outros</th></tr></thead>
             <tbody>
-              {(p.pericias || []).map((pe) => (
+              {(p.pericias || []).slice().sort((a, b) => (a.nome || '').localeCompare(b.nome || '', 'pt-BR')).map((pe) => (
                 <tr key={pe.codigo} className={(pe.treino + (pe.bonus || 0) + (pe.outros || 0)) > 0 ? 'treinada' : undefined}>
                   <td>{pe.nome}{(pe.bonus || 0) > 0 && <span className="tag" style={{ marginLeft: 6 }}>+{pe.bonus}</span>}</td>
                   <td className="muted">{pe.sigla}</td>
