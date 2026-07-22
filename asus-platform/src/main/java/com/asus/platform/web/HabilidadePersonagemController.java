@@ -56,7 +56,8 @@ public class HabilidadePersonagemController {
     }
 
     @GetMapping
-    public List<HabilidadeEscolhidaResponse> escolhidas(@PathVariable Long id) {
+    public List<HabilidadeEscolhidaResponse> escolhidas(@PathVariable Long id, @org.springframework.security.core.annotation.AuthenticationPrincipal com.asus.platform.security.UsuarioPrincipal principal) {
+        acessoService.exigirDonoOuMestrePersonagem(id, principal);
         Personagem p = carregar(id);
         Map<String, Habilidade> catalogo = habilidadeRepository.findByGameSystemId(p.getGameSystemId()).stream()
                 .collect(Collectors.toMap(Habilidade::getCodigo, Function.identity(), (a, b) -> a));
@@ -70,7 +71,8 @@ public class HabilidadePersonagemController {
     }
 
     @GetMapping("/disponiveis")
-    public List<HabilidadeDisponivelResponse> disponiveis(@PathVariable Long id) {
+    public List<HabilidadeDisponivelResponse> disponiveis(@PathVariable Long id, @org.springframework.security.core.annotation.AuthenticationPrincipal com.asus.platform.security.UsuarioPrincipal principal) {
+        acessoService.exigirDonoOuMestrePersonagem(id, principal);
         Personagem p = carregar(id);
         Set<String> classes = classesDoPersonagem(p);
         Set<String> cods = codigosEscolhidos(id);
@@ -92,7 +94,7 @@ public class HabilidadePersonagemController {
     @ResponseStatus(HttpStatus.CREATED)
     public Habilidade adicionar(@PathVariable Long id, @RequestBody Map<String, String> body,
                                 @AuthenticationPrincipal UsuarioPrincipal principal) {
-        acessoService.exigirDonoPersonagem(id, principal);
+        acessoService.exigirDonoOuMestrePersonagem(id, principal);
         String codigo = body.get("codigo");
         Personagem p = carregar(id);
         Habilidade h = habilidadeRepository.findByGameSystemId(p.getGameSystemId()).stream()
@@ -117,7 +119,7 @@ public class HabilidadePersonagemController {
     @ResponseStatus(HttpStatus.CREATED)
     public HabilidadeEscolhidaResponse criarPropria(@PathVariable Long id, @RequestBody Map<String, Object> body,
                                                     @AuthenticationPrincipal UsuarioPrincipal principal) {
-        acessoService.exigirDonoPersonagem(id, principal);
+        acessoService.exigirDonoOuMestrePersonagem(id, principal);
         Personagem p = carregar(id);
         String nome = textoOuNull(body.get("nome"));
         if (nome == null) {
@@ -146,7 +148,7 @@ public class HabilidadePersonagemController {
     public HabilidadeEscolhidaResponse editar(@PathVariable Long id, @PathVariable String codigo,
                                               @RequestBody Map<String, Object> body,
                                               @AuthenticationPrincipal UsuarioPrincipal principal) {
-        acessoService.exigirDonoPersonagem(id, principal);
+        acessoService.exigirDonoOuMestrePersonagem(id, principal);
         Personagem p = carregar(id);
         HabilidadePersonagem hp = escolhidasRepository.findByPersonagemId(id).stream()
                 .filter(e -> e.getHabilidadeCodigo().equals(codigo)).findFirst()
@@ -193,7 +195,7 @@ public class HabilidadePersonagemController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void remover(@PathVariable Long id, @PathVariable String codigo,
                         @AuthenticationPrincipal UsuarioPrincipal principal) {
-        acessoService.exigirDonoPersonagem(id, principal);
+        acessoService.exigirDonoOuMestrePersonagem(id, principal);
         List<HabilidadePersonagem> alvo = escolhidasRepository.findByPersonagemId(id).stream()
                 .filter(e -> e.getHabilidadeCodigo().equals(codigo)).toList();
         escolhidasRepository.deleteAll(alvo);

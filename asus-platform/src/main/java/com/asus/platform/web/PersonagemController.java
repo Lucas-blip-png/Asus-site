@@ -11,6 +11,7 @@ import com.asus.platform.repository.ItemPersonagemRepository;
 import com.asus.platform.repository.PersonagemRepository;
 import com.asus.platform.repository.PersonagemSnapshotRepository;
 import com.asus.platform.security.UsuarioPrincipal;
+import com.asus.platform.service.AcessoService;
 import com.asus.platform.service.DonoService;
 import com.asus.platform.service.PersonagemService;
 import com.asus.platform.web.dto.AtualizarPersonagemRequest;
@@ -48,6 +49,7 @@ public class PersonagemController {
     private final CampanhaPersonagemRepository campanhaPersonagemRepository;
     private final CampanhaRepository campanhaRepository;
     private final DonoService donoService;
+    private final AcessoService acessoService;
 
     public PersonagemController(PersonagemService service,
                                 PersonagemRepository personagemRepository,
@@ -59,7 +61,8 @@ public class PersonagemController {
                                 PersonagemSnapshotRepository snapshotRepository,
                                 CampanhaPersonagemRepository campanhaPersonagemRepository,
                                 CampanhaRepository campanhaRepository,
-                                DonoService donoService) {
+                                DonoService donoService,
+                                AcessoService acessoService) {
         this.service = service;
         this.personagemRepository = personagemRepository;
         this.itemRepository = itemRepository;
@@ -71,11 +74,14 @@ public class PersonagemController {
         this.campanhaPersonagemRepository = campanhaPersonagemRepository;
         this.campanhaRepository = campanhaRepository;
         this.donoService = donoService;
+        this.acessoService = acessoService;
     }
 
     /** Campanhas em que este personagem está vinculado (para o chat de resultados na ficha). */
     @GetMapping("/personagens/{id}/campanhas")
-    public List<Map<String, Object>> campanhasDoPersonagem(@PathVariable Long id) {
+    public List<Map<String, Object>> campanhasDoPersonagem(@PathVariable Long id,
+                                                           @org.springframework.security.core.annotation.AuthenticationPrincipal UsuarioPrincipal principal) {
+        acessoService.exigirDonoOuMestrePersonagem(id, principal);
         return campanhaPersonagemRepository.findByPersonagemId(id).stream()
                 .map(cp -> campanhaRepository.findById(cp.getCampanhaId()).orElse(null))
                 .filter(c -> c != null)
@@ -96,7 +102,15 @@ public class PersonagemController {
         if (principal != null && donoService.ehDono(principal.id())) {
             return service.listarTodos();
         }
-        return service.listar(orgId);
+        List<PersonagemResponse> lista = service.listar(orgId);
+        if (principal == null) {
+            return lista;
+        }
+        // Fichas privadas: cada jogador ve as proprias; o mestre ve tambem as das suas mesas.
+        java.util.Set<Long> meus = new java.util.HashSet<>();
+        personagemRepository.findByUsuarioId(principal.id()).forEach(p -> meus.add(p.getId()));
+        meus.addAll(acessoService.personagensDasMinhasMesas(principal.id()));
+        return lista.stream().filter(r -> meus.contains(r.id())).toList();
     }
 
     @PostMapping("/organizacoes/{orgId}/personagens")
@@ -108,7 +122,9 @@ public class PersonagemController {
     }
 
     @GetMapping("/personagens/{id}")
-    public PersonagemResponse buscar(@PathVariable Long id) {
+    public PersonagemResponse buscar(@PathVariable Long id,
+                                     @org.springframework.security.core.annotation.AuthenticationPrincipal UsuarioPrincipal principal) {
+        acessoService.exigirDonoOuMestrePersonagem(id, principal);
         return service.buscar(id);
     }
 
@@ -135,7 +151,7 @@ public class PersonagemController {
     public PersonagemResponse atualizar(@PathVariable Long id,
                                         @org.springframework.security.core.annotation.AuthenticationPrincipal UsuarioPrincipal principal,
                                         @Valid @RequestBody AtualizarPersonagemRequest req) {
-        exigirAcessoPersonagem(id, principal);
+        acessoService.exigirDonoOuMestrePersonagem(id, principal);
         return service.atualizar(id, req);
     }
 
@@ -143,7 +159,7 @@ public class PersonagemController {
     public PersonagemResponse atualizarStatus(@PathVariable Long id,
                                               @org.springframework.security.core.annotation.AuthenticationPrincipal UsuarioPrincipal principal,
                                               @RequestBody AtualizarStatusRequest req) {
-        exigirAcessoPersonagem(id, principal);
+        acessoService.exigirDonoOuMestrePersonagem(id, principal);
         return service.atualizarStatus(id, req.pvAtual(), req.pmAtual(), req.peAtual(),
                 req.pvMax(), req.pmMax(), req.peMax());
     }
@@ -153,23 +169,8 @@ public class PersonagemController {
     public ProgressoResponse atualizarProgresso(@PathVariable Long id,
                                                 @org.springframework.security.core.annotation.AuthenticationPrincipal UsuarioPrincipal principal,
                                                 @RequestBody ProgressoRequest req) {
-        exigirAcessoPersonagem(id, principal);
+        acessoService.exigirDonoOuMestrePersonagem(id, principal);
         return service.atualizarProgresso(id, req.xpAtual(), req.nivel());
-    }
-
-    /**
-     * Só o dono do personagem (ou o dono/dev da instância) pode alterá-lo. Quando não há
-     * autenticação (modo aberto de desenvolvimento, {@code enforce=false}), não bloqueia.
-     */
-    private void exigirAcessoPersonagem(Long id, UsuarioPrincipal principal) {
-        if (principal == null || donoService.ehDono(principal.id())) {
-            return;
-        }
-        Long donoId = personagemRepository.findById(id)
-                .map(com.asus.platform.domain.Personagem::getUsuarioId).orElse(null);
-        if (donoId != null && !donoId.equals(principal.id())) {
-            throw new AcessoNegadoException("Você não tem permissão sobre este personagem.");
-        }
     }
 
     /** Apaga a ficha e todos os vinculos (inventario, ataques, magias, habilidades, snapshots, campanhas). */
@@ -178,7 +179,7 @@ public class PersonagemController {
     @Transactional
     public void apagar(@PathVariable Long id,
                        @org.springframework.security.core.annotation.AuthenticationPrincipal UsuarioPrincipal principal) {
-        exigirAcessoPersonagem(id, principal);
+        acessoService.exigirDonoPersonagem(id, principal);
         itemRepository.deleteAll(itemRepository.findByPersonagemId(id));
         ataqueRepository.deleteAll(ataqueRepository.findByPersonagemId(id));
         feiticoRepository.deleteAll(feiticoRepository.findByPersonagemId(id));
@@ -190,22 +191,30 @@ public class PersonagemController {
     }
 
     @GetMapping("/personagens/{id}/export")
-    public ExportPersonagemResponse exportar(@PathVariable Long id) {
+    public ExportPersonagemResponse exportar(@PathVariable Long id,
+            @org.springframework.security.core.annotation.AuthenticationPrincipal UsuarioPrincipal principal) {
+        acessoService.exigirDonoOuMestrePersonagem(id, principal);
         return service.exportar(id);
     }
 
     @GetMapping("/personagens/{id}/debug")
-    public CalculoDebugResponse debug(@PathVariable Long id) {
+    public CalculoDebugResponse debug(@PathVariable Long id,
+            @org.springframework.security.core.annotation.AuthenticationPrincipal UsuarioPrincipal principal) {
+        acessoService.exigirDonoOuMestrePersonagem(id, principal);
         return service.debug(id);
     }
 
     @GetMapping("/personagens/{id}/snapshots")
-    public List<SnapshotResponse> snapshots(@PathVariable Long id) {
+    public List<SnapshotResponse> snapshots(@PathVariable Long id,
+            @org.springframework.security.core.annotation.AuthenticationPrincipal UsuarioPrincipal principal) {
+        acessoService.exigirDonoOuMestrePersonagem(id, principal);
         return service.snapshots(id);
     }
 
     @GetMapping("/personagens/{id}/auditoria")
-    public List<AuditoriaResponse> auditoria(@PathVariable Long id) {
+    public List<AuditoriaResponse> auditoria(@PathVariable Long id,
+            @org.springframework.security.core.annotation.AuthenticationPrincipal UsuarioPrincipal principal) {
+        acessoService.exigirDonoOuMestrePersonagem(id, principal);
         return service.historicoAuditoria(id);
     }
 }

@@ -37,6 +37,7 @@ export default function Layout() {
           <NavLink to="/marketplace" className={cls}>Marketplace</NavLink>
           <NavLink to="/templates" className={cls}>Templates</NavLink>
           <NavLink to="/livros" className={cls}>Livros</NavLink>
+          <NavLink to="/habilidades" className={cls}>Habilidades</NavLink>
         </nav>
         <div className="topbar-right">
           <NavLink to="/notificacoes" className="bell" title="Notificações">

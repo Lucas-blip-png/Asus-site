@@ -40,7 +40,8 @@ public class InventarioController {
     }
 
     @GetMapping("/personagens/{id}/inventario")
-    public List<ItemPersonagem> listar(@PathVariable Long id) {
+    public List<ItemPersonagem> listar(@PathVariable Long id, @org.springframework.security.core.annotation.AuthenticationPrincipal com.asus.platform.security.UsuarioPrincipal principal) {
+        acessoService.exigirDonoOuMestrePersonagem(id, principal);
         return inventarioRepository.findByPersonagemId(id);
     }
 
@@ -49,7 +50,7 @@ public class InventarioController {
     @ResponseStatus(HttpStatus.CREATED)
     public ItemPersonagem adicionar(@PathVariable Long id, @RequestBody ItemPersonagem item,
                                     @AuthenticationPrincipal UsuarioPrincipal principal) {
-        acessoService.exigirDonoPersonagem(id, principal);
+        acessoService.exigirDonoOuMestrePersonagem(id, principal);
         if (item.getNome() == null || item.getNome().isBlank()) {
             throw new IllegalArgumentException("nome do item e obrigatorio");
         }
@@ -71,7 +72,7 @@ public class InventarioController {
     @ResponseStatus(HttpStatus.CREATED)
     public ItemPersonagem doCatalogo(@PathVariable Long id, @PathVariable String codigo,
                                      @AuthenticationPrincipal UsuarioPrincipal principal) {
-        acessoService.exigirDonoPersonagem(id, principal);
+        acessoService.exigirDonoOuMestrePersonagem(id, principal);
         ItemJogo c = itemJogoRepository.findByGameSystemIdAndCodigo(asus(), codigo)
                 .orElseThrow(() -> new NotFoundException("Item '" + codigo + "' nao encontrado no catalogo"));
         ItemPersonagem item = ItemPersonagem.builder()
@@ -93,7 +94,7 @@ public class InventarioController {
                               @AuthenticationPrincipal UsuarioPrincipal principal) {
         ItemPersonagem item = inventarioRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Item de inventario " + itemId + " nao encontrado"));
-        acessoService.exigirDonoPersonagem(item.getPersonagemId(), principal);
+        acessoService.exigirDonoOuMestrePersonagem(item.getPersonagemId(), principal);
         Ataque a = garantirAtaque(item);
         if (a == null) {
             throw new IllegalArgumentException("Este item nao e uma arma (defina o dano antes de enviar pro combate).");
@@ -127,7 +128,7 @@ public class InventarioController {
                                     @AuthenticationPrincipal UsuarioPrincipal principal) {
         ItemPersonagem item = inventarioRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Item de inventario " + itemId + " nao encontrado"));
-        acessoService.exigirDonoPersonagem(item.getPersonagemId(), principal);
+        acessoService.exigirDonoOuMestrePersonagem(item.getPersonagemId(), principal);
         if (patch.getQuantidade() != null) {
             item.setQuantidade(Math.max(0, patch.getQuantidade()));
         }
@@ -160,7 +161,7 @@ public class InventarioController {
         if (item == null) {
             return;
         }
-        acessoService.exigirDonoPersonagem(item.getPersonagemId(), principal);
+        acessoService.exigirDonoOuMestrePersonagem(item.getPersonagemId(), principal);
         inventarioRepository.delete(item);
     }
 
