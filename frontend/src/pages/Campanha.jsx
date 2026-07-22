@@ -5,6 +5,7 @@ import { inscrever } from '../ws.js'
 import { useAuth } from '../auth.jsx'
 import { dataHora } from '../format.js'
 import ResultadosPanel from '../components/ResultadosPanel.jsx'
+import CenaMapa from '../components/CenaMapa.jsx'
 
 const fmtData = (iso) => {
   try {
@@ -14,7 +15,7 @@ const fmtData = (iso) => {
   }
 }
 
-const ABAS = ['Agentes', 'Jogadores', 'Sessões', 'Combates', 'Handouts', 'Momentos']
+const ABAS = ['Agentes', 'Jogadores', 'Sessões', 'Combates', 'Cenas', 'Handouts', 'Momentos']
 
 const d20 = () => 1 + Math.floor(Math.random() * 20)
 // Tamanho do grid do mapa tático (células).
@@ -919,6 +920,17 @@ export default function Campanha() {
             </div>
           )}
         </>
+      )}
+
+      {aba === 'Cenas' && (
+        <div className="card">
+          <h2 style={{ marginTop: 0 }}>🗺️ Mapa da cena</h2>
+          <p className="muted" style={{ marginTop: -6, fontSize: '.84rem' }}>
+            {ehMestre ? 'Monte o mapa (fundo, névoa e tokens) e ative a cena para os jogadores verem ao vivo.'
+              : 'A cena que o mestre está apresentando aparece aqui em tempo real.'}
+          </p>
+          <CenaMapa campanhaId={id} orgId={campanha.organizacaoId} ehMestre={ehMestre} />
+        </div>
       )}
 
       {aba === 'Handouts' && (

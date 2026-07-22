@@ -64,6 +64,7 @@ public class CampanhaService {
     private final com.asus.platform.repository.RolagemRepository rolagemRepository;
     private final com.asus.platform.repository.HandoutRepository handoutRepository;
     private final com.asus.platform.repository.MensagemCampanhaRepository mensagemCampanhaRepository;
+    private final com.asus.platform.repository.CenaRepository cenaRepository;
 
     /** Email do dono/dev (config asus.admin.email): vê todas as campanhas. */
     @Value("${asus.admin.email:dev@asus.local}")
@@ -86,7 +87,8 @@ public class CampanhaService {
                            com.asus.platform.repository.PresencaSessaoRepository presencaSessaoRepository,
                            com.asus.platform.repository.RolagemRepository rolagemRepository,
                            com.asus.platform.repository.HandoutRepository handoutRepository,
-                           com.asus.platform.repository.MensagemCampanhaRepository mensagemCampanhaRepository) {
+                           com.asus.platform.repository.MensagemCampanhaRepository mensagemCampanhaRepository,
+                           com.asus.platform.repository.CenaRepository cenaRepository) {
         this.campanhaRepository = campanhaRepository;
         this.campanhaPersonagemRepository = campanhaPersonagemRepository;
         this.campanhaMembroRepository = campanhaMembroRepository;
@@ -105,6 +107,7 @@ public class CampanhaService {
         this.rolagemRepository = rolagemRepository;
         this.handoutRepository = handoutRepository;
         this.mensagemCampanhaRepository = mensagemCampanhaRepository;
+        this.cenaRepository = cenaRepository;
     }
 
     public List<CampanhaResponse> listar(Long organizacaoId) {
@@ -251,6 +254,7 @@ public class CampanhaService {
         conviteRepository.deleteAll(conviteRepository.findByCampanhaId(id));
         handoutRepository.deleteAll(handoutRepository.findByCampanhaIdOrderByCriadoEmDescIdDesc(id));
         mensagemCampanhaRepository.deleteAll(mensagemCampanhaRepository.findByCampanhaId(id));
+        cenaRepository.deleteAll(cenaRepository.findByCampanhaIdOrderByCriadoEmDescIdDesc(id));
         campanhaRepository.delete(campanha);
         auditoriaService.registrar(campanha.getOrganizacaoId(), campanha.getMestreId(),
                 "CAMPANHA_APAGADA", "Campanha", id, null, campanha.getNome(), null);
