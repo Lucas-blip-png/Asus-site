@@ -836,6 +836,18 @@ export default function Ficha() {
   }
 
   if (erro) return <div><p className="error">{erro}</p></div>
+  // Ficha privada: o backend nega o acesso a quem não é dono nem mestre da campanha.
+  if (!p && erro) {
+    return (
+      <div className="center" style={{ flexDirection: 'column', gap: 10, textAlign: 'center' }}>
+        <div style={{ fontSize: 42 }}>🔒</div>
+        <h2 style={{ margin: 0 }}>Ficha privada</h2>
+        <p className="muted" style={{ maxWidth: 420 }}>
+          Só o dono do personagem e o mestre da campanha podem ver esta ficha.
+        </p>
+      </div>
+    )
+  }
   if (!p) return <div className="center">Carregando…</div>
 
   return (

@@ -34,7 +34,8 @@ public class ConteudoPersonagemController {
     }
 
     @GetMapping("/personagens/{id}/ataques")
-    public List<Ataque> ataques(@PathVariable Long id) {
+    public List<Ataque> ataques(@PathVariable Long id, @org.springframework.security.core.annotation.AuthenticationPrincipal com.asus.platform.security.UsuarioPrincipal principal) {
+        acessoService.exigirDonoOuMestrePersonagem(id, principal);
         return ataqueRepository.findByPersonagemId(id);
     }
 
@@ -42,7 +43,7 @@ public class ConteudoPersonagemController {
     @ResponseStatus(HttpStatus.CREATED)
     public Ataque criarAtaque(@PathVariable Long id, @RequestBody Ataque a,
                               @AuthenticationPrincipal UsuarioPrincipal principal) {
-        acessoService.exigirDonoPersonagem(id, principal);
+        acessoService.exigirDonoOuMestrePersonagem(id, principal);
         if (a.getNome() == null || a.getNome().isBlank()) {
             throw new IllegalArgumentException("nome do ataque e obrigatorio");
         }
@@ -56,7 +57,7 @@ public class ConteudoPersonagemController {
                                   @AuthenticationPrincipal UsuarioPrincipal principal) {
         Ataque a = ataqueRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("ataque nao encontrado"));
-        acessoService.exigirDonoPersonagem(a.getPersonagemId(), principal);
+        acessoService.exigirDonoOuMestrePersonagem(a.getPersonagemId(), principal);
         if (dados.getNome() != null && !dados.getNome().isBlank()) {
             a.setNome(dados.getNome());
         }
@@ -74,12 +75,13 @@ public class ConteudoPersonagemController {
                              @AuthenticationPrincipal UsuarioPrincipal principal) {
         Ataque a = ataqueRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("ataque nao encontrado"));
-        acessoService.exigirDonoPersonagem(a.getPersonagemId(), principal);
+        acessoService.exigirDonoOuMestrePersonagem(a.getPersonagemId(), principal);
         ataqueRepository.delete(a);
     }
 
     @GetMapping("/personagens/{id}/feiticos")
-    public List<FeiticoPersonagem> feiticos(@PathVariable Long id) {
+    public List<FeiticoPersonagem> feiticos(@PathVariable Long id, @org.springframework.security.core.annotation.AuthenticationPrincipal com.asus.platform.security.UsuarioPrincipal principal) {
+        acessoService.exigirDonoOuMestrePersonagem(id, principal);
         return feiticoRepository.findByPersonagemId(id);
     }
 
@@ -87,7 +89,7 @@ public class ConteudoPersonagemController {
     @ResponseStatus(HttpStatus.CREATED)
     public FeiticoPersonagem criarFeitico(@PathVariable Long id, @RequestBody FeiticoPersonagem f,
                                           @AuthenticationPrincipal UsuarioPrincipal principal) {
-        acessoService.exigirDonoPersonagem(id, principal);
+        acessoService.exigirDonoOuMestrePersonagem(id, principal);
         if (f.getNome() == null || f.getNome().isBlank()) {
             throw new IllegalArgumentException("nome do feitico e obrigatorio");
         }
@@ -101,7 +103,7 @@ public class ConteudoPersonagemController {
                                               @AuthenticationPrincipal UsuarioPrincipal principal) {
         FeiticoPersonagem f = feiticoRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("feitico nao encontrado"));
-        acessoService.exigirDonoPersonagem(f.getPersonagemId(), principal);
+        acessoService.exigirDonoOuMestrePersonagem(f.getPersonagemId(), principal);
         if (dados.getNome() != null && !dados.getNome().isBlank()) {
             f.setNome(dados.getNome());
         }
@@ -118,7 +120,7 @@ public class ConteudoPersonagemController {
     public void apagarFeitico(@PathVariable Long id,
                               @AuthenticationPrincipal UsuarioPrincipal principal) {
         feiticoRepository.findById(id).ifPresent((f) -> {
-            acessoService.exigirDonoPersonagem(f.getPersonagemId(), principal);
+            acessoService.exigirDonoOuMestrePersonagem(f.getPersonagemId(), principal);
             feiticoRepository.delete(f);
         });
     }
@@ -126,7 +128,8 @@ public class ConteudoPersonagemController {
     // ----- Bênçãos (aba Bênçãos; limite Sab/2 é informativo) -----
 
     @GetMapping("/personagens/{id}/bencaos")
-    public List<BencaoPersonagem> bencaos(@PathVariable Long id) {
+    public List<BencaoPersonagem> bencaos(@PathVariable Long id, @org.springframework.security.core.annotation.AuthenticationPrincipal com.asus.platform.security.UsuarioPrincipal principal) {
+        acessoService.exigirDonoOuMestrePersonagem(id, principal);
         return bencaoRepository.findByPersonagemId(id);
     }
 
@@ -134,7 +137,7 @@ public class ConteudoPersonagemController {
     @ResponseStatus(HttpStatus.CREATED)
     public BencaoPersonagem criarBencao(@PathVariable Long id, @RequestBody BencaoPersonagem b,
                                         @AuthenticationPrincipal UsuarioPrincipal principal) {
-        acessoService.exigirDonoPersonagem(id, principal);
+        acessoService.exigirDonoOuMestrePersonagem(id, principal);
         if (b.getNome() == null || b.getNome().isBlank()) {
             throw new IllegalArgumentException("nome da bencao e obrigatorio");
         }
@@ -148,7 +151,7 @@ public class ConteudoPersonagemController {
                                             @AuthenticationPrincipal UsuarioPrincipal principal) {
         BencaoPersonagem b = bencaoRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("bencao nao encontrada"));
-        acessoService.exigirDonoPersonagem(b.getPersonagemId(), principal);
+        acessoService.exigirDonoOuMestrePersonagem(b.getPersonagemId(), principal);
         if (dados.getNome() != null && !dados.getNome().isBlank()) {
             b.setNome(dados.getNome());
         }
@@ -164,7 +167,7 @@ public class ConteudoPersonagemController {
     public void apagarBencao(@PathVariable Long id,
                              @AuthenticationPrincipal UsuarioPrincipal principal) {
         bencaoRepository.findById(id).ifPresent((b) -> {
-            acessoService.exigirDonoPersonagem(b.getPersonagemId(), principal);
+            acessoService.exigirDonoOuMestrePersonagem(b.getPersonagemId(), principal);
             bencaoRepository.delete(b);
         });
     }

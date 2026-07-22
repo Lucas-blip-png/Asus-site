@@ -1,6 +1,9 @@
 package com.asus.platform.service;
 
+import com.asus.platform.domain.Campanha;
 import com.asus.platform.domain.Personagem;
+import com.asus.platform.repository.CampanhaPersonagemRepository;
+import com.asus.platform.repository.CampanhaRepository;
 import com.asus.platform.repository.PersonagemRepository;
 import com.asus.platform.security.UsuarioPrincipal;
 import com.asus.platform.web.AcessoNegadoException;
@@ -15,10 +18,17 @@ import org.springframework.stereotype.Service;
 public class AcessoService {
 
     private final PersonagemRepository personagemRepository;
+    private final CampanhaPersonagemRepository campanhaPersonagemRepository;
+    private final CampanhaRepository campanhaRepository;
     private final DonoService donoService;
 
-    public AcessoService(PersonagemRepository personagemRepository, DonoService donoService) {
+    public AcessoService(PersonagemRepository personagemRepository,
+                         CampanhaPersonagemRepository campanhaPersonagemRepository,
+                         CampanhaRepository campanhaRepository,
+                         DonoService donoService) {
         this.personagemRepository = personagemRepository;
+        this.campanhaPersonagemRepository = campanhaPersonagemRepository;
+        this.campanhaRepository = campanhaRepository;
         this.donoService = donoService;
     }
 
@@ -40,5 +50,49 @@ public class AcessoService {
             return;
         }
         exigirDonoPersonagem(personagemId, principal);
+    }
+
+    /**
+     * Ficha privada: so o DONO do personagem, o MESTRE de uma campanha em que ele esta
+     * vinculado, ou o dono/dev do site podem ver/alterar. Outros jogadores: acesso negado.
+     */
+    public void exigirDonoOuMestrePersonagem(Long personagemId, UsuarioPrincipal principal) {
+        if (principal == null || donoService.ehDono(principal.id())) {
+            return;
+        }
+        Long donoId = personagemRepository.findById(personagemId)
+                .map(Personagem::getUsuarioId).orElse(null);
+        if (donoId == null || donoId.equals(principal.id())) {
+            return;
+        }
+        if (ehMestreDoPersonagem(personagemId, principal.id())) {
+            return;
+        }
+        throw new AcessoNegadoException("Ficha privada: só o dono e o mestre da campanha podem acessar.");
+    }
+
+    /** True se o usuario e mestre de alguma campanha em que o personagem esta vinculado. */
+    public boolean ehMestreDoPersonagem(Long personagemId, Long usuarioId) {
+        if (usuarioId == null) {
+            return false;
+        }
+        return campanhaPersonagemRepository.findByPersonagemId(personagemId).stream()
+                .map(cp -> campanhaRepository.findById(cp.getCampanhaId()).orElse(null))
+                .anyMatch(c -> c != null && usuarioId.equals(c.getMestreId()));
+    }
+
+    /** Ids de personagens vinculados a campanhas em que o usuario e MESTRE. */
+    public java.util.Set<Long> personagensDasMinhasMesas(Long usuarioId) {
+        java.util.Set<Long> ids = new java.util.HashSet<>();
+        if (usuarioId == null) {
+            return ids;
+        }
+        for (Campanha c : campanhaRepository.findAll()) {
+            if (usuarioId.equals(c.getMestreId())) {
+                campanhaPersonagemRepository.findByCampanhaId(c.getId())
+                        .forEach(cp -> ids.add(cp.getPersonagemId()));
+            }
+        }
+        return ids;
     }
 }
