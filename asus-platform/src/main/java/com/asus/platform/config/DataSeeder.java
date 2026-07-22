@@ -194,22 +194,17 @@ public class DataSeeder implements CommandLineRunner {
         return "Nível de Maestria";
     }
 
-    /** Recompensa principal de cada marco (texto exato da planilha Sistema de Nivel). */
+    /**
+     * Recompensa principal de cada marco.
+     * Nivel 1: classe/bonus/atributos. Marco de 10 niveis (10,20,30,40,50): pericia + atributo + PV/PM/PE
+     * da classe e raca. Marco de 5 niveis (5,15,25,35,45): so o bonus de PV/PM/PE da classe e raca.
+     * Demais niveis: 2 pontos de atributo.
+     */
     private String recompensaDoNivel(int n) {
-        switch (n) {
-            case 1:  return "Classe, Bônus e Atributos";
-            case 5:  return "Bônus de Classe e Raça";
-            case 10: return "Bônus final de Classe primária";
-            case 15: return "Bônus de trilha e Raça";
-            case 20: return "Bônus de trilha (especialização)";
-            case 25: return "Bônus de Classe secundária e Raça";
-            case 30: return "Bônus final de Classe secundária";
-            case 35: return "Bônus de trilha secundária e Raça";
-            case 40: return "Bônus de trilha (especialização)";
-            case 45: return "Bônus de Classe Pri + Sec e Raça";
-            case 50: return "Bônus de Classe Pri + Sec";
-            default: return "Atributos (2 pontos)";
-        }
+        if (n == 1) return "Classe, Bônus e Atributos";
+        if (n % 10 == 0) return "20 pontos de perícia, 10 pontos de Atributo, PV, PM e PE da classe e raça";
+        if (n % 5 == 0) return "PV, PM e PE da classe e raça";
+        return "Atributos (2 pontos)";
     }
 
     // ---------------- Itens (catalogo representativo, moeda T$) ----------------
