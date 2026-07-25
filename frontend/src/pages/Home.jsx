@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useAuth } from '../auth.jsx'
+import Carousel from '../components/Carousel.jsx'
 
 const ATALHOS = [
   ['/personagens', '🎭', 'Personagens', 'Crie e gerencie suas fichas'],
@@ -17,11 +18,7 @@ export default function Home() {
       </div>
       <p className="muted">Plataforma de RPG de mesa — sistema ASUS.</p>
 
-      <div className="carousel">
-        <div className="slide" />
-        <div className="slide mid" />
-        <div className="slide" />
-      </div>
+      <Carousel />
 
       <div className="home-actions">
         {ATALHOS.map(([to, ic, titulo, sub]) => (
