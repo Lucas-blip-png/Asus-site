@@ -655,6 +655,14 @@ export default function Campanha() {
       setAba('Agentes')
     } catch (e) { setErro(e.message) }
   }
+  async function removerPersonagem(cp) {
+    if (!window.confirm(`Tirar "${cp.personagemNome}" desta campanha? A ficha continua existindo; só o vínculo é removido.`)) return
+    setErro(null)
+    try {
+      await api(`/api/campanhas/${id}/personagens/${cp.personagemId}`, { method: 'DELETE' })
+      api(`/api/campanhas/${id}/personagens`).then(setPersonagens)
+    } catch (e) { setErro(e.message) }
+  }
 
   // ----- editar campanha -----
   function abrirEdit() {
@@ -805,6 +813,10 @@ export default function Campanha() {
                   )}
                   <div className="foot">
                     <Link to={`/personagens/${cp.personagemId}`}><button className="mini">Acessar Ficha</button></Link>
+                    {(ehMestre || cp.usuarioId === user?.id) && (
+                      <button className="ghost mini" title="Tirar da campanha"
+                        onClick={() => removerPersonagem(cp)}>Remover</button>
+                    )}
                   </div>
                 </div>
               </div>

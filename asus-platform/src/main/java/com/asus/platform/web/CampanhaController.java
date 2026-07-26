@@ -119,6 +119,17 @@ public class CampanhaController {
         return service.adicionarPersonagem(id, req.personagemId());
     }
 
+    @DeleteMapping("/campanhas/{id}/personagens/{personagemId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void removerPersonagem(@PathVariable Long id, @PathVariable Long personagemId,
+                                  @AuthenticationPrincipal UsuarioPrincipal principal) {
+        // So o dono do personagem (ou o mestre da campanha) pode desvincula-lo.
+        if (principal != null) {
+            acessoService.exigirDonoPersonagemOuMestre(personagemId, service.buscar(id).mestreId(), principal);
+        }
+        service.removerPersonagem(id, personagemId);
+    }
+
     @GetMapping("/campanhas/{id}/membros")
     public List<CampanhaMembroResponse> membros(@PathVariable Long id) {
         return service.listarMembros(id);

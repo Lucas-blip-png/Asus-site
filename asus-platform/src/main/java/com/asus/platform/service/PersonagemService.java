@@ -648,7 +648,7 @@ public class PersonagemService {
         Map<String, Integer> outrosMap = lerPericiasOutros(p);
         List<PericiaCalculadaDto> pericias = new ArrayList<>(rEf.pericias().stream()
                 .map(pc -> new PericiaCalculadaDto(pc.codigo(), pc.nome(), pc.atributoBase(), pc.sigla(),
-                        pc.treino(), pc.cap(), Math.max(0, outrosMap.getOrDefault(pc.codigo(), 0)), pc.bonus(), false))
+                        pc.treino(), pc.cap(), outrosMap.getOrDefault(pc.codigo(), 0), pc.bonus(), false))
                 .toList());
         // Perícias "Outros" (concedidas por itens), com teto = 2x atributo final.
         if (p.getJsonPericiasCustom() != null && !p.getJsonPericiasCustom().isBlank()) {

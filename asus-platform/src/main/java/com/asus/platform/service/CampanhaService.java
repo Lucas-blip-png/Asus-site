@@ -299,6 +299,19 @@ public class CampanhaService {
         return CampanhaPersonagemResponse.de(cp, personagem, classe);
     }
 
+    /** Desvincula um personagem da campanha (nao apaga a ficha, so o vinculo). */
+    @Transactional
+    public void removerPersonagem(Long campanhaId, Long personagemId) {
+        Campanha campanha = carregar(campanhaId);
+        CampanhaPersonagem cp = campanhaPersonagemRepository
+                .findByCampanhaIdAndPersonagemId(campanhaId, personagemId)
+                .orElseThrow(() -> new NotFoundException("Personagem " + personagemId + " nao esta nesta campanha"));
+        campanhaPersonagemRepository.delete(cp);
+        auditoriaService.registrar(campanha.getOrganizacaoId(), null,
+                "PERSONAGEM_REMOVIDO_CAMPANHA", "Campanha", campanhaId,
+                "personagemId", String.valueOf(personagemId), null);
+    }
+
     public List<CampanhaMembroResponse> listarMembros(Long campanhaId) {
         carregar(campanhaId); // valida existencia
         return campanhaMembroRepository.findByCampanhaId(campanhaId).stream()
