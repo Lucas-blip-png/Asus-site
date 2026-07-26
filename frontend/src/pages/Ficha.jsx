@@ -595,7 +595,16 @@ export default function Ficha() {
     })
   // Bônus "Outros" por perícia: livre, aceita negativo (penalidades) e sem teto.
   const setOutro = (cod, delta) =>
-    setOutrosBonus((o) => ({ ...o, [cod]: (o[cod] || 0) + delta }))
+    setOutrosBonus((o) => ({ ...o, [cod]: (Number(o[cod]) || 0) + delta }))
+  // Digitação direta do "Outros" (ex.: -4, -10). Aceita '-' e vazio enquanto digita.
+  const setOutroTexto = (cod, txt) => {
+    if (!/^-?\d*$/.test(txt)) return
+    setOutrosBonus((o) => ({ ...o, [cod]: txt === '' || txt === '-' ? txt : parseInt(txt, 10) }))
+  }
+  const normOutro = (cod) =>
+    setOutrosBonus((o) => ({ ...o, [cod]: numOutro(o[cod]) }))
+  const numOutro = (v) => (v === '' || v === '-' || v == null ? 0 : parseInt(v, 10) || 0)
+  const sanitizarOutros = (o) => Object.fromEntries(Object.entries(o).map(([k, v]) => [k, numOutro(v)]))
   const setTrCustom = (idx, delta, cap) =>
     setOutros((arr) => arr.map((o, i) => (i === idx ? { ...o, treino: Math.max(0, Math.min(cap, o.treino + delta)) } : o)))
   const addOutro = () => {
@@ -1192,7 +1201,7 @@ export default function Ficha() {
               ))}
             </span>
             <button className="mini ghost" title="Rolar um d20" onClick={() => rolar('d20', 0)}>🎲 d20</button>
-            <button className="mini" onClick={() => salvar({ pericias: treino, periciasOutros: outrosBonus, periciasCustom: outros })}>Salvar</button>
+            <button className="mini" onClick={() => salvar({ pericias: treino, periciasOutros: sanitizarOutros(outrosBonus), periciasCustom: outros })}>Salvar</button>
           </div>
           <table className="pericias">
             <thead><tr><th>Perícia</th><th>Atr</th><th>Treino</th><th>Outros</th><th>Teto</th></tr></thead>
@@ -1201,7 +1210,7 @@ export default function Ficha() {
                 .sort((a, b) => (a.nome || '').localeCompare(b.nome || '', 'pt-BR'))
                 .map((pe) => {
                 const bonusClasse = pe.bonus || 0
-                const mod = (treino[pe.codigo] ?? 0) + bonusClasse + (outrosBonus[pe.codigo] ?? 0)
+                const mod = (treino[pe.codigo] ?? 0) + bonusClasse + numOutro(outrosBonus[pe.codigo])
                 return (
                 <tr key={pe.codigo} className={mod > 0 ? 'treinada' : undefined}>
                   <td>
@@ -1223,7 +1232,11 @@ export default function Ficha() {
                   <td>
                     <span className="step">
                       <button className="ghost mini" onClick={() => setOutro(pe.codigo, -1)}>−</button>
-                      <b className="stat">{outrosBonus[pe.codigo] ?? 0}</b>
+                      <input type="text" inputMode="numeric" className="outros-in"
+                        value={outrosBonus[pe.codigo] ?? 0}
+                        onChange={(e) => setOutroTexto(pe.codigo, e.target.value)}
+                        onFocus={(e) => e.target.select()}
+                        onBlur={() => normOutro(pe.codigo)} />
                       <button className="ghost mini" onClick={() => setOutro(pe.codigo, +1)}>+</button>
                     </span>
                   </td>
