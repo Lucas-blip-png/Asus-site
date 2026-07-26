@@ -593,9 +593,9 @@ export default function Ficha() {
       const novo = Math.max(0, Math.min(cap, atual + delta))
       return { ...t, [cod]: novo }
     })
-  // Bônus "Outros" por perícia: livre, sem teto.
+  // Bônus "Outros" por perícia: livre, aceita negativo (penalidades) e sem teto.
   const setOutro = (cod, delta) =>
-    setOutrosBonus((o) => ({ ...o, [cod]: Math.max(0, (o[cod] || 0) + delta) }))
+    setOutrosBonus((o) => ({ ...o, [cod]: (o[cod] || 0) + delta }))
   const setTrCustom = (idx, delta, cap) =>
     setOutros((arr) => arr.map((o, i) => (i === idx ? { ...o, treino: Math.max(0, Math.min(cap, o.treino + delta)) } : o)))
   const addOutro = () => {

@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 public record CampanhaPersonagemResponse(
         Long id, Long campanhaId, Long personagemId, String personagemNome,
         String personagemClasse, Long avatarAssetId, int nivel,
-        LocalDateTime adicionadoEm) {
+        Long usuarioId, LocalDateTime adicionadoEm) {
 
     public static CampanhaPersonagemResponse de(CampanhaPersonagem cp, Personagem p, String classe) {
         return new CampanhaPersonagemResponse(
@@ -16,6 +16,7 @@ public record CampanhaPersonagemResponse(
                 classe,
                 p != null ? p.getAvatarAssetId() : null,
                 p != null ? p.getNivel() : 0,
+                p != null ? p.getUsuarioId() : null,
                 cp.getAdicionadoEm());
     }
 }
