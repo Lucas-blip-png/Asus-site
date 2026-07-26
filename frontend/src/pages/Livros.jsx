@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { api } from '../api.js'
 
-const ABAS = ['Atributos', 'Classes', 'Habilidades', 'Perícias', 'Itens', 'Progressão', 'Feitiços']
+const ABAS = ['Atributos', 'Classes', 'Raças', 'Perícias', 'Itens', 'Progressão', 'Feitiços']
 
 const ATR_SIGLA = {
   FORCA: 'FOR', CONSTITUICAO: 'CON', DESTREZA: 'DES', AGILIDADE: 'AGI',
@@ -160,94 +160,66 @@ function ClasseCard({ c, trilhas }) {
   )
 }
 
-const fmtClasses = (cods) => (cods || '').split(',').map((c) => c.trim()).filter(Boolean)
-  .map((c) => (c === 'GERAL' ? 'Todas as classes'
-    : c.split('_').map((w) => (w ? w[0] + w.slice(1).toLowerCase() : '')).join(' '))).join(', ')
-const capitaliza = (s) => (s ? s.charAt(0) + s.slice(1).toLowerCase() : s)
-
-function HabilidadeRow({ h }) {
+function RacaCard({ r }) {
   const [open, setOpen] = useState(false)
-  const geral = !h.classeCodigo || h.classeCodigo === 'GERAL'
-  const tipoLabel = (h.tipo || '').toUpperCase() === 'PASSIVA' ? 'Passiva' : 'Ativa'
+  let passivas = []
+  try {
+    const j = JSON.parse(r.jsonHabilidades || '[]')
+    passivas = Array.isArray(j) ? j : (j.habilidades || [])
+  } catch { passivas = [] }
+  passivas = passivas.slice().sort((a, b) => (a.nivel || 0) - (b.nivel || 0))
   return (
     <div className={`cris-row${open ? ' open' : ''}`}>
       <div className="cris-head" onClick={() => setOpen((o) => !o)}>
         <span className="chev">▾</span>
-        <b className="nm">{h.nome}</b>
-        <span className="sub">{geral ? 'Todas as classes' : fmtClasses(h.classeCodigo)}</span>
+        <b className="nm">{r.nome}</b>
+        <span className="sub">PV {r.pvBase} · PM {r.pmBase} · PE {r.peBase}</span>
         <div className="spacer" />
-        {h.tipo && <span className="tag">{tipoLabel}</span>}
-        {h.custo > 0 && <span className="tag">{h.custo} {h.custoTipo}</span>}
+        {r.expectativaVida && <span className="tag">{r.expectativaVida}</span>}
+        <span className="tag">{passivas.length} passiva{passivas.length === 1 ? '' : 's'}</span>
       </div>
       {open && (
         <div className="cris-body">
-          <div className="row" style={{ gap: 6, flexWrap: 'wrap', marginBottom: 6 }}>
-            <span className="tag">{geral ? 'Todas as classes' : fmtClasses(h.classeCodigo)}</span>
-            {h.tipo && <span className="tag">{tipoLabel}</span>}
-            {h.custo > 0 && <span className="tag">Custo {h.custo} {h.custoTipo}</span>}
-            {h.nivelMinimo > 1 && <span className="tag">Nível {h.nivelMinimo}</span>}
-            {h.atributoRequisito && (
-              <span className="tag">Requer {h.valorAtributoRequisito} de {capitaliza(h.atributoRequisito)}</span>
-            )}
+          {r.descricao && <p className="muted" style={{ margin: '2px 0 8px' }}>{r.descricao}</p>}
+          <div className="row" style={{ gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
+            <span className="tag">PV base {r.pvBase}</span>
+            <span className="tag">PM base {r.pmBase}</span>
+            <span className="tag">PE base {r.peBase}</span>
+            {r.expectativaVida && <span className="tag">Expectativa de vida: {r.expectativaVida}</span>}
           </div>
-          {h.requisito && <p className="muted" style={{ fontSize: '.78rem', margin: '0 0 6px' }}><b>Requisito:</b> {h.requisito}</p>}
-          {h.efeito && <p style={{ margin: 0, fontSize: '.86rem', lineHeight: 1.5 }}>{h.efeito}</p>}
+          <div className="muted" style={{ textTransform: 'uppercase', fontSize: '.7rem', letterSpacing: 1, marginBottom: 4 }}>Passivas de raça</div>
+          {passivas.map((h, i) => (
+            <div key={i} className="item-card">
+              <div className="t">{h.nome} {h.nivel > 1 && <span className="tag">Nível {h.nivel}</span>}</div>
+              {h.efeito && <div className="s">{h.efeito}</div>}
+            </div>
+          ))}
+          {!passivas.length && <div className="muted">Sem passivas cadastradas.</div>}
         </div>
       )}
     </div>
   )
 }
 
-function HabilidadesView({ habilidades, classes }) {
+function RacasView({ racas }) {
   const [busca, setBusca] = useState('')
-  const [classe, setClasse] = useState('')
-  const [tipo, setTipo] = useState('')
-  const bases = (classes || []).filter((c) => !c.classePaiCodigo)
-  const trilhas = (classes || []).filter((c) => c.classePaiCodigo)
   const q = busca.trim().toLowerCase()
-
-  const filtradas = (habilidades || []).filter((h) => {
-    if (q && !(`${h.nome || ''} ${h.efeito || ''} ${fmtClasses(h.classeCodigo)}`).toLowerCase().includes(q)) return false
-    if (tipo && (h.tipo || '').toUpperCase() !== tipo) return false
-    if (classe) {
-      const donos = (h.classeCodigo || '').split(',').map((s) => s.trim()).filter(Boolean)
-      const geral = donos.length === 0 || donos.includes('GERAL')
-      if (classe === 'GERAL') return geral
-      // classe específica: mostra as da classe + as gerais (que valem pra todas)
-      return donos.includes(classe) || geral
-    }
-    return true
-  })
-
+  const filtradas = (racas || []).filter((r) =>
+    !q || (`${r.nome || ''} ${r.descricao || ''}`).toLowerCase().includes(q))
   return (
     <div>
       <div className="row" style={{ gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
         <div className="search-wrap" style={{ flex: '1 1 220px' }}>
           <span className="ic">🔍</span>
-          <input placeholder="Buscar habilidade…" value={busca} onChange={(e) => setBusca(e.target.value)} />
+          <input placeholder="Buscar raça…" value={busca} onChange={(e) => setBusca(e.target.value)} />
         </div>
-        <select value={classe} onChange={(e) => setClasse(e.target.value)}>
-          <option value="">Todas as classes</option>
-          <option value="GERAL">Gerais (todas as classes)</option>
-          <optgroup label="Classes">
-            {bases.map((c) => <option key={c.codigo} value={c.codigo}>{c.nome}</option>)}
-          </optgroup>
-          <optgroup label="Trilhas">
-            {trilhas.map((t) => <option key={t.codigo} value={t.codigo}>{t.nome}</option>)}
-          </optgroup>
-        </select>
-        <select value={tipo} onChange={(e) => setTipo(e.target.value)}>
-          <option value="">Todos os tipos</option>
-          <option value="ATIVA">Ativas</option>
-          <option value="PASSIVA">Passivas</option>
-        </select>
       </div>
       <div className="muted" style={{ marginBottom: 8 }}>
-        {filtradas.length} habilidade{filtradas.length === 1 ? '' : 's'}
+        {filtradas.length} raça{filtradas.length === 1 ? '' : 's'}
       </div>
       <div className="cris-list">
-        {filtradas.map((h) => <HabilidadeRow key={h.codigo} h={h} />)}
-        {!filtradas.length && <div className="muted">Nenhuma habilidade encontrada.</div>}
+        {filtradas.map((r) => <RacaCard key={r.codigo} r={r} />)}
+        {!filtradas.length && <div className="muted">Nenhuma raça encontrada.</div>}
       </div>
     </div>
   )
@@ -263,7 +235,7 @@ export default function Livros() {
       setD({
         atributos: await api('/api/sistemas/asus/atributos'),
         classes: await api('/api/sistemas/asus/classes'),
-        habilidades: await api('/api/sistemas/asus/habilidades'),
+        racas: await api('/api/sistemas/asus/racas'),
         pericias: await api('/api/sistemas/asus/pericias'),
         itens: await api('/api/sistemas/asus/itens'),
         progressao: await api('/api/sistemas/asus/progressao'),
@@ -305,8 +277,8 @@ export default function Livros() {
         </div>
       )}
 
-      {aba === 'Habilidades' && (
-        <HabilidadesView habilidades={d.habilidades || []} classes={d.classes || []} />
+      {aba === 'Raças' && (
+        <RacasView racas={d.racas || []} />
       )}
 
       {aba === 'Perícias' && (
