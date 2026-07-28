@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Cancela execuções antigas do mesmo ref quando chega um push novo.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend — testes (Maven)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: asus-platform
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configura Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+      - name: Roda os testes (H2 em memória)
+        run: ./mvnw -B -ntp test
+
+  frontend:
+    name: Frontend — build (Vite)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configura Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Instala dependências (lockfile)
+        run: npm ci
+      - name: Build de produção
+        run: npm run build

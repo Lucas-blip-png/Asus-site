@@ -36,6 +36,19 @@ logging:
   level:
     com.asus.platform: INFO
 
+# Health/observabilidade: expõe SÓ /actuator/health (checa o banco). Sem detalhes
+# públicos (evita vazar infra); o status geral vira DOWN se o banco cair.
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+      probes:
+        enabled: true
+
 # Configuracoes da plataforma ASUS
 asus:
   # Fase 11: diretorio de uploads (storage local no MVP; trocar por S3/R2/GCS em producao).

@@ -35,6 +35,12 @@
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
+        <!-- Health/observabilidade: /actuator/health (checa o banco) para o healthcheck do Railway -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
         <!-- Fase 6: tempo real (STOMP sobre WebSocket) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
