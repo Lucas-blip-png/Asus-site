@@ -1,0 +1,111 @@
+From f86d3386cd2630cc6263ea28c66c6a33290c7bdd Mon Sep 17 00:00:00 2001
+From: Lucas-blip-png <177052392+Lucas-blip-png@users.noreply.github.com>
+Date: Fri, 14 Aug 2026 00:58:49 +0000
+Subject: [PATCH] feat(ficha): passivas de raca + remove passiva de outra
+ classe
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+- Aba Habilidades ganha a secao 'Passivas de raca' (read-only): as liberadas
+  pelo nivel aparecem normais, as de nivel maior ficam esmaecidas/'Bloqueada'.
+  As de classe seguem sob 'Habilidades de classe e escolhidas'.
+- Auto-limpeza: ao abrir a ficha, grants de habilidades que nao sao da classe
+  do personagem (nem GERAL) sao removidos — residuo de quando o catalogo tinha
+  classeCodigo errado, que fazia aparecer passiva de outra classe.
+---
+ .../web/HabilidadePersonagemController.java   | 18 +++++++++-
+ frontend/src/pages/Ficha.jsx                  | 34 +++++++++++++++++++
+ 2 files changed, 51 insertions(+), 1 deletion(-)
+
+diff --git a/asus-platform/src/main/java/com/asus/platform/web/HabilidadePersonagemController.java b/asus-platform/src/main/java/com/asus/platform/web/HabilidadePersonagemController.java
+index 5da4d12..ec6f9c9 100644
+--- a/asus-platform/src/main/java/com/asus/platform/web/HabilidadePersonagemController.java
++++ b/asus-platform/src/main/java/com/asus/platform/web/HabilidadePersonagemController.java
+@@ -61,7 +61,23 @@ public class HabilidadePersonagemController {
+         Personagem p = carregar(id);
+         Map<String, Habilidade> catalogo = habilidadeRepository.findByGameSystemId(p.getGameSystemId()).stream()
+                 .collect(Collectors.toMap(Habilidade::getCodigo, Function.identity(), (a, b) -> a));
+-        return escolhidasRepository.findByPersonagemId(id).stream()
++        Set<String> classes = classesDoPersonagem(p);
++        List<HabilidadePersonagem> rows = escolhidasRepository.findByPersonagemId(id);
++        // Auto-limpeza: remove grants de habilidades que nao sao da classe do personagem
++        // (nem GERAL) — residuo de quando o catalogo tinha classeCodigo errado. Uma
++        // habilidade so entra na ficha se passar por pertenceClasse, entao qualquer uma
++        // que falhe agora e um grant invalido antigo e pode sair com seguranca.
++        List<HabilidadePersonagem> intrusas = rows.stream()
++                .filter(hp -> {
++                    Habilidade h = catalogo.get(hp.getHabilidadeCodigo());
++                    return h != null && !pertenceClasse(h, classes);
++                })
++                .toList();
++        if (!intrusas.isEmpty()) {
++            escolhidasRepository.deleteAll(intrusas);
++            rows = escolhidasRepository.findByPersonagemId(id);
++        }
++        return rows.stream()
+                 .map(hp -> {
+                     Habilidade h = catalogo.get(hp.getHabilidadeCodigo());
+                     return h == null ? null : HabilidadeEscolhidaResponse.de(h, hp);
+diff --git a/frontend/src/pages/Ficha.jsx b/frontend/src/pages/Ficha.jsx
+index ee098a5..443ce41 100644
+--- a/frontend/src/pages/Ficha.jsx
++++ b/frontend/src/pages/Ficha.jsx
+@@ -238,6 +238,7 @@ export default function Ficha() {
+   const [levelUp, setLevelUp] = useState(null)
+   const [habChosen, setHabChosen] = useState([])
+   const [habDisp, setHabDisp] = useState([])
++  const [racaPassivas, setRacaPassivas] = useState([])
+   const [habSel, setHabSel] = useState('')
+   const [modalHab, setModalHab] = useState(false)
+   const [habBusca, setHabBusca] = useState('')
+@@ -430,6 +431,14 @@ export default function Ficha() {
+         aplicar(d)
+         api(`/api/personagens/${id}/habilidades`).then(setHabChosen).catch(() => {})
+         api(`/api/personagens/${id}/habilidades/disponiveis`).then(setHabDisp).catch(() => {})
++        api('/api/sistemas/asus/racas').then((rs) => {
++          const r = (rs || []).find((x) => x.codigo === d.racaCodigo)
++          let arr = []
++          if (r) {
++            try { const j = JSON.parse(r.jsonHabilidades || '[]'); arr = Array.isArray(j) ? j : (j.habilidades || []) } catch { arr = [] }
++          }
++          setRacaPassivas(arr)
++        }).catch(() => {})
+         api('/api/sistemas/asus/itens').then(setItens).catch(() => {})
+         api('/api/sistemas/asus/classes').then(setClassesCat).catch(() => {})
+         api(`/api/personagens/${id}/ataques`).then(setAtaques).catch(() => {})
+@@ -1313,6 +1322,31 @@ export default function Ficha() {
+ 
+           {aba === 'Habilidades' && (
+             <div>
++              {racaPassivas.length > 0 && (
++                <div style={{ marginBottom: 16 }}>
++                  <div className="muted" style={{ textTransform: 'uppercase', fontSize: '.7rem', letterSpacing: 1, marginBottom: 6 }}>
++                    Passivas de raça · {p.racaNome}
++                  </div>
++                  <div className="cris-list">
++                    {racaPassivas.slice().sort((a, b) => (a.nivel || 0) - (b.nivel || 0)).map((h, i) => {
++                      const liberada = (p.nivel || 1) >= (h.nivel || 1)
++                      return (
++                        <div key={i} className="item-card" style={liberada ? undefined : { opacity: 0.45 }}>
++                          <div className="t">
++                            {h.nome}
++                            {h.nivel > 1 && <span className="tag">Nível {h.nivel}</span>}
++                            {!liberada && <span className="tag">Bloqueada</span>}
++                          </div>
++                          {h.efeito && <div className="s">{h.efeito}</div>}
++                        </div>
++                      )
++                    })}
++                  </div>
++                </div>
++              )}
++              <div className="muted" style={{ textTransform: 'uppercase', fontSize: '.7rem', letterSpacing: 1, marginBottom: 6 }}>
++                Habilidades de classe e escolhidas
++              </div>
+               <div className="muted" style={{ marginBottom: 6 }}>{habChosen.length} habilidade{habChosen.length === 1 ? '' : 's'} (sem limite)</div>
+               <div className="cris-list">
+                 {habChosen.map((h) => (
+-- 
+2.43.0
+
