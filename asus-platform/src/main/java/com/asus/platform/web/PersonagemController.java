@@ -152,7 +152,7 @@ public class PersonagemController {
                                         @org.springframework.security.core.annotation.AuthenticationPrincipal UsuarioPrincipal principal,
                                         @Valid @RequestBody AtualizarPersonagemRequest req) {
         acessoService.exigirDonoOuMestrePersonagem(id, principal);
-        return service.atualizar(id, req);
+        return service.atualizar(id, req, principal == null ? null : principal.id());
     }
 
     @PatchMapping("/personagens/{id}/status")
