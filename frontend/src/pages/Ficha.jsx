@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { api } from '../api.js'
 import { inscrever } from '../ws.js'
@@ -6,8 +6,26 @@ import { useAuth } from '../auth.jsx'
 import Heptagono from '../components/Heptagono.jsx'
 import ResultadosPanel from '../components/ResultadosPanel.jsx'
 
-const ABAS = ['Combate', 'Habilidades', 'Magias', 'Bênçãos', 'Inventário', 'Descrição']
+const ABAS = ['Combate', 'Habilidades', 'Magias', 'Bênçãos', 'Inventário', 'Descrição', 'Histórico']
 const BARRAS = [['Vida', 'vida', 'pv'], ['Mana', 'mana', 'pm'], ['Energia', 'energia', 'pe']]
+
+// --- Histórico da ficha ---
+const ACOES = {
+  FICHA_EDITADA: 'Ficha editada', PERSONAGEM_CRIADO: 'Ficha criada',
+  PERSONAGEM_ATUALIZADO: 'Ficha atualizada', PERSONAGEM_IMPORTADO: 'Ficha importada',
+  STATUS_ALTERADO: 'PV/PM/PE alterados',
+}
+const rotuloAcao = (a) => ACOES[a] || (a || '').replaceAll('_', ' ').toLowerCase()
+function fmtQuando(iso) {
+  if (!iso) return ''
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return ''
+  const diff = (Date.now() - d.getTime()) / 1000
+  if (diff < 60) return 'agora'
+  if (diff < 3600) return `há ${Math.floor(diff / 60)} min`
+  if (diff < 86400) return `há ${Math.floor(diff / 3600)} h`
+  return d.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+}
 const ATRIBS = [
   ['forca', 'For'], ['constituicao', 'Con'], ['destreza', 'Des'], ['agilidade', 'Agi'],
   ['inteligencia', 'Int'], ['sabedoria', 'Sab'], ['carisma', 'Car'],
@@ -239,6 +257,7 @@ export default function Ficha() {
   const [habChosen, setHabChosen] = useState([])
   const [habDisp, setHabDisp] = useState([])
   const [racaPassivas, setRacaPassivas] = useState([])
+  const [historicoLog, setHistoricoLog] = useState(null) // null = ainda nao carregado
   const [habSel, setHabSel] = useState('')
   const [modalHab, setModalHab] = useState(false)
   const [habBusca, setHabBusca] = useState('')
@@ -624,10 +643,19 @@ export default function Ficha() {
   const delOutro = (idx) => setOutros((arr) => arr.filter((_, i) => i !== idx))
   const siglaDe = (atributo) => (ATRIBS.find(([k]) => k === atributo.toLowerCase()) || [])[1] || atributo
 
+  // Histórico da ficha: log de quem mudou o quê (carrega ao abrir a aba).
+  const carregarHistorico = useCallback(() => {
+    api(`/api/personagens/${id}/auditoria`).then(setHistoricoLog).catch(() => setHistoricoLog([]))
+  }, [id])
+  useEffect(() => {
+    if (aba === 'Histórico') carregarHistorico()
+  }, [aba, carregarHistorico])
+
   async function salvar(body) {
     try {
       await api(`/api/personagens/${id}`, { method: 'PUT', body })
       carregar()
+      if (aba === 'Histórico') carregarHistorico()
     } catch (e) { setErro(e.message) }
   }
 
@@ -1536,6 +1564,44 @@ export default function Ficha() {
                 </div>
               ))}
               <button style={{ marginTop: 10 }} onClick={() => salvar(desc)}>Salvar descrição</button>
+            </div>
+          )}
+
+          {aba === 'Histórico' && (
+            <div>
+              <div className="row" style={{ marginBottom: 8 }}>
+                <span className="muted">
+                  {historicoLog === null ? 'Carregando…'
+                    : `${historicoLog.length} alteraç${historicoLog.length === 1 ? 'ão' : 'ões'}`}
+                </span>
+                <div className="spacer" />
+                <button className="ghost mini" onClick={carregarHistorico}>↻ Atualizar</button>
+              </div>
+              <div className="log-list">
+                {(historicoLog || []).map((h) => (
+                  <div key={h.id} className="log-item">
+                    <div className="log-head">
+                      <b>{h.campo || rotuloAcao(h.acao)}</b>
+                      <span className="muted">{fmtQuando(h.criadoEm)}</span>
+                    </div>
+                    {h.campo ? (
+                      <div className="log-valores">
+                        <span className="log-de">{h.valorAnterior ?? '—'}</span>
+                        <span className="log-seta">→</span>
+                        <span className="log-para">{h.valorNovo ?? '—'}</span>
+                      </div>
+                    ) : (
+                      <div className="muted" style={{ fontSize: '.8rem' }}>{rotuloAcao(h.acao)}</div>
+                    )}
+                    <div className="muted" style={{ fontSize: '.72rem' }}>
+                      por {h.usuarioNome || (h.usuarioId ? `usuário #${h.usuarioId}` : 'sistema')}
+                    </div>
+                  </div>
+                ))}
+                {historicoLog !== null && !historicoLog.length && (
+                  <div className="muted">Nenhuma alteração registrada ainda.</div>
+                )}
+              </div>
             </div>
           )}
         </div>

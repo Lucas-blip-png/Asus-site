@@ -410,6 +410,18 @@ button.ghost.mini.ativo { background: var(--gold); color: #1a1206; border-color:
 /* Tabela de pericias */
 .pericias th { color: var(--muted); font-weight: 600; font-size: .72rem; text-transform: uppercase; }
 .pericias td { padding: 3px 4px; font-size: .82rem; }
+/* Histórico da ficha (log de alterações) */
+.log-list { display: flex; flex-direction: column; gap: 8px; max-height: 60vh; overflow-y: auto; }
+.log-item { border-left: 2px solid var(--gold-2); background: var(--panel-2);
+  border-radius: var(--radius-sm); padding: 7px 10px; }
+.log-head { display: flex; align-items: baseline; gap: 8px; justify-content: space-between; font-size: .84rem; }
+.log-head .muted { font-size: .72rem; white-space: nowrap; }
+.log-valores { display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  font-size: .8rem; margin: 2px 0 3px; font-variant-numeric: tabular-nums; }
+.log-de { color: var(--muted); text-decoration: line-through; }
+.log-seta { color: var(--gold); }
+.log-para { color: var(--text); font-weight: 600; }
+
 .pericias .step { display: inline-flex; gap: 4px; align-items: center; }
 .pericias .outros-in { width: 46px; text-align: center; padding: 3px 4px; font-variant-numeric: tabular-nums; }
 
