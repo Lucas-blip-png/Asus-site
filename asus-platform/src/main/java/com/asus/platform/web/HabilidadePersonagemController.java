@@ -61,7 +61,23 @@ public class HabilidadePersonagemController {
         Personagem p = carregar(id);
         Map<String, Habilidade> catalogo = habilidadeRepository.findByGameSystemId(p.getGameSystemId()).stream()
                 .collect(Collectors.toMap(Habilidade::getCodigo, Function.identity(), (a, b) -> a));
-        return escolhidasRepository.findByPersonagemId(id).stream()
+        Set<String> classes = classesDoPersonagem(p);
+        List<HabilidadePersonagem> rows = escolhidasRepository.findByPersonagemId(id);
+        // Auto-limpeza: remove grants de habilidades que nao sao da classe do personagem
+        // (nem GERAL) — residuo de quando o catalogo tinha classeCodigo errado. Uma
+        // habilidade so entra na ficha se passar por pertenceClasse, entao qualquer uma
+        // que falhe agora e um grant invalido antigo e pode sair com seguranca.
+        List<HabilidadePersonagem> intrusas = rows.stream()
+                .filter(hp -> {
+                    Habilidade h = catalogo.get(hp.getHabilidadeCodigo());
+                    return h != null && !pertenceClasse(h, classes);
+                })
+                .toList();
+        if (!intrusas.isEmpty()) {
+            escolhidasRepository.deleteAll(intrusas);
+            rows = escolhidasRepository.findByPersonagemId(id);
+        }
+        return rows.stream()
                 .map(hp -> {
                     Habilidade h = catalogo.get(hp.getHabilidadeCodigo());
                     return h == null ? null : HabilidadeEscolhidaResponse.de(h, hp);

@@ -238,6 +238,7 @@ export default function Ficha() {
   const [levelUp, setLevelUp] = useState(null)
   const [habChosen, setHabChosen] = useState([])
   const [habDisp, setHabDisp] = useState([])
+  const [racaPassivas, setRacaPassivas] = useState([])
   const [habSel, setHabSel] = useState('')
   const [modalHab, setModalHab] = useState(false)
   const [habBusca, setHabBusca] = useState('')
@@ -430,6 +431,14 @@ export default function Ficha() {
         aplicar(d)
         api(`/api/personagens/${id}/habilidades`).then(setHabChosen).catch(() => {})
         api(`/api/personagens/${id}/habilidades/disponiveis`).then(setHabDisp).catch(() => {})
+        api('/api/sistemas/asus/racas').then((rs) => {
+          const r = (rs || []).find((x) => x.codigo === d.racaCodigo)
+          let arr = []
+          if (r) {
+            try { const j = JSON.parse(r.jsonHabilidades || '[]'); arr = Array.isArray(j) ? j : (j.habilidades || []) } catch { arr = [] }
+          }
+          setRacaPassivas(arr)
+        }).catch(() => {})
         api('/api/sistemas/asus/itens').then(setItens).catch(() => {})
         api('/api/sistemas/asus/classes').then(setClassesCat).catch(() => {})
         api(`/api/personagens/${id}/ataques`).then(setAtaques).catch(() => {})
@@ -1313,6 +1322,31 @@ export default function Ficha() {
 
           {aba === 'Habilidades' && (
             <div>
+              {racaPassivas.length > 0 && (
+                <div style={{ marginBottom: 16 }}>
+                  <div className="muted" style={{ textTransform: 'uppercase', fontSize: '.7rem', letterSpacing: 1, marginBottom: 6 }}>
+                    Passivas de raça · {p.racaNome}
+                  </div>
+                  <div className="cris-list">
+                    {racaPassivas.slice().sort((a, b) => (a.nivel || 0) - (b.nivel || 0)).map((h, i) => {
+                      const liberada = (p.nivel || 1) >= (h.nivel || 1)
+                      return (
+                        <div key={i} className="item-card" style={liberada ? undefined : { opacity: 0.45 }}>
+                          <div className="t">
+                            {h.nome}
+                            {h.nivel > 1 && <span className="tag">Nível {h.nivel}</span>}
+                            {!liberada && <span className="tag">Bloqueada</span>}
+                          </div>
+                          {h.efeito && <div className="s">{h.efeito}</div>}
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+              <div className="muted" style={{ textTransform: 'uppercase', fontSize: '.7rem', letterSpacing: 1, marginBottom: 6 }}>
+                Habilidades de classe e escolhidas
+              </div>
               <div className="muted" style={{ marginBottom: 6 }}>{habChosen.length} habilidade{habChosen.length === 1 ? '' : 's'} (sem limite)</div>
               <div className="cris-list">
                 {habChosen.map((h) => (
