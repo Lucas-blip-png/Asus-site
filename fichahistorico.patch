@@ -1,0 +1,484 @@
+From 2b065f5e8c1376cf3d5d08f58b68ca1fe0121de2 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sun, 16 Aug 2026 01:57:38 +0000
+Subject: [PATCH 1/2] feat(ficha): passivas de raca + remove passiva de outra
+ classe
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+- Aba Habilidades ganha a secao 'Passivas de raca' (read-only): as liberadas
+  pelo nivel aparecem normais, as de nivel maior ficam esmaecidas/'Bloqueada'.
+  As de classe seguem sob 'Habilidades de classe e escolhidas'.
+- Auto-limpeza: ao abrir a ficha, grants de habilidades que nao sao da classe
+  do personagem (nem GERAL) sao removidos — residuo de quando o catalogo tinha
+  classeCodigo errado, que fazia aparecer passiva de outra classe.
+---
+ .../web/HabilidadePersonagemController.java   | 18 +++++++++-
+ frontend/src/pages/Ficha.jsx                  | 34 +++++++++++++++++++
+ 2 files changed, 51 insertions(+), 1 deletion(-)
+
+diff --git a/asus-platform/src/main/java/com/asus/platform/web/HabilidadePersonagemController.java b/asus-platform/src/main/java/com/asus/platform/web/HabilidadePersonagemController.java
+index 5da4d12..ec6f9c9 100644
+--- a/asus-platform/src/main/java/com/asus/platform/web/HabilidadePersonagemController.java
++++ b/asus-platform/src/main/java/com/asus/platform/web/HabilidadePersonagemController.java
+@@ -61,7 +61,23 @@ public class HabilidadePersonagemController {
+         Personagem p = carregar(id);
+         Map<String, Habilidade> catalogo = habilidadeRepository.findByGameSystemId(p.getGameSystemId()).stream()
+                 .collect(Collectors.toMap(Habilidade::getCodigo, Function.identity(), (a, b) -> a));
+-        return escolhidasRepository.findByPersonagemId(id).stream()
++        Set<String> classes = classesDoPersonagem(p);
++        List<HabilidadePersonagem> rows = escolhidasRepository.findByPersonagemId(id);
++        // Auto-limpeza: remove grants de habilidades que nao sao da classe do personagem
++        // (nem GERAL) — residuo de quando o catalogo tinha classeCodigo errado. Uma
++        // habilidade so entra na ficha se passar por pertenceClasse, entao qualquer uma
++        // que falhe agora e um grant invalido antigo e pode sair com seguranca.
++        List<HabilidadePersonagem> intrusas = rows.stream()
++                .filter(hp -> {
++                    Habilidade h = catalogo.get(hp.getHabilidadeCodigo());
++                    return h != null && !pertenceClasse(h, classes);
++                })
++                .toList();
++        if (!intrusas.isEmpty()) {
++            escolhidasRepository.deleteAll(intrusas);
++            rows = escolhidasRepository.findByPersonagemId(id);
++        }
++        return rows.stream()
+                 .map(hp -> {
+                     Habilidade h = catalogo.get(hp.getHabilidadeCodigo());
+                     return h == null ? null : HabilidadeEscolhidaResponse.de(h, hp);
+diff --git a/frontend/src/pages/Ficha.jsx b/frontend/src/pages/Ficha.jsx
+index ee098a5..443ce41 100644
+--- a/frontend/src/pages/Ficha.jsx
++++ b/frontend/src/pages/Ficha.jsx
+@@ -238,6 +238,7 @@ export default function Ficha() {
+   const [levelUp, setLevelUp] = useState(null)
+   const [habChosen, setHabChosen] = useState([])
+   const [habDisp, setHabDisp] = useState([])
++  const [racaPassivas, setRacaPassivas] = useState([])
+   const [habSel, setHabSel] = useState('')
+   const [modalHab, setModalHab] = useState(false)
+   const [habBusca, setHabBusca] = useState('')
+@@ -430,6 +431,14 @@ export default function Ficha() {
+         aplicar(d)
+         api(`/api/personagens/${id}/habilidades`).then(setHabChosen).catch(() => {})
+         api(`/api/personagens/${id}/habilidades/disponiveis`).then(setHabDisp).catch(() => {})
++        api('/api/sistemas/asus/racas').then((rs) => {
++          const r = (rs || []).find((x) => x.codigo === d.racaCodigo)
++          let arr = []
++          if (r) {
++            try { const j = JSON.parse(r.jsonHabilidades || '[]'); arr = Array.isArray(j) ? j : (j.habilidades || []) } catch { arr = [] }
++          }
++          setRacaPassivas(arr)
++        }).catch(() => {})
+         api('/api/sistemas/asus/itens').then(setItens).catch(() => {})
+         api('/api/sistemas/asus/classes').then(setClassesCat).catch(() => {})
+         api(`/api/personagens/${id}/ataques`).then(setAtaques).catch(() => {})
+@@ -1313,6 +1322,31 @@ export default function Ficha() {
+ 
+           {aba === 'Habilidades' && (
+             <div>
++              {racaPassivas.length > 0 && (
++                <div style={{ marginBottom: 16 }}>
++                  <div className="muted" style={{ textTransform: 'uppercase', fontSize: '.7rem', letterSpacing: 1, marginBottom: 6 }}>
++                    Passivas de raça · {p.racaNome}
++                  </div>
++                  <div className="cris-list">
++                    {racaPassivas.slice().sort((a, b) => (a.nivel || 0) - (b.nivel || 0)).map((h, i) => {
++                      const liberada = (p.nivel || 1) >= (h.nivel || 1)
++                      return (
++                        <div key={i} className="item-card" style={liberada ? undefined : { opacity: 0.45 }}>
++                          <div className="t">
++                            {h.nome}
++                            {h.nivel > 1 && <span className="tag">Nível {h.nivel}</span>}
++                            {!liberada && <span className="tag">Bloqueada</span>}
++                          </div>
++                          {h.efeito && <div className="s">{h.efeito}</div>}
++                        </div>
++                      )
++                    })}
++                  </div>
++                </div>
++              )}
++              <div className="muted" style={{ textTransform: 'uppercase', fontSize: '.7rem', letterSpacing: 1, marginBottom: 6 }}>
++                Habilidades de classe e escolhidas
++              </div>
+               <div className="muted" style={{ marginBottom: 6 }}>{habChosen.length} habilidade{habChosen.length === 1 ? '' : 's'} (sem limite)</div>
+               <div className="cris-list">
+                 {habChosen.map((h) => (
+-- 
+2.43.0
+
+
+From 112a9c02616093adf6b7264745bea38c043492dc Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sun, 16 Aug 2026 01:57:39 +0000
+Subject: [PATCH 2/2] feat(ficha): aba Historico com o log de todas as
+ alteracoes
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Antes o PUT da ficha gravava so uma linha generica (nivel ou nome). Agora
+compara um 'retrato' da ficha antes/depois e grava UMA LINHA POR CAMPO
+alterado: nome, jogador, nivel, XP, raca/classe/trilha, cada atributo, cada
+pericia (treino e 'Outros'), armaduras, dinheiro e os textos (resumidos).
+Salvar sem mudar nada nao gera log.
+
+Registra tambem QUEM editou (ator do JWT, nao mais o dono) — o mestre que
+edita a ficha do jogador aparece corretamente; a resposta ganha usuarioNome.
+
+Front: aba 'Historico' na ficha consumindo GET /personagens/{id}/auditoria
+(ja existente e protegido por dono/mestre), com valor antigo riscado -> novo,
+quando e autor.
+---
+ .../platform/service/PersonagemService.java   | 124 +++++++++++++++++-
+ .../platform/web/PersonagemController.java    |   2 +-
+ .../platform/web/dto/AuditoriaResponse.java   |   8 +-
+ frontend/src/pages/Ficha.jsx                  |  70 +++++++++-
+ frontend/src/styles.css                       |  12 ++
+ 5 files changed, 206 insertions(+), 10 deletions(-)
+
+diff --git a/asus-platform/src/main/java/com/asus/platform/service/PersonagemService.java b/asus-platform/src/main/java/com/asus/platform/service/PersonagemService.java
+index a39b7d4..a8e85da 100644
+--- a/asus-platform/src/main/java/com/asus/platform/service/PersonagemService.java
++++ b/asus-platform/src/main/java/com/asus/platform/service/PersonagemService.java
+@@ -62,6 +62,7 @@ public class PersonagemService {
+     private final ItemPersonagemRepository itemPersonagemRepository;
+     private final PassivasService passivasService;
+     private final ObjectMapper objectMapper;
++    private final com.asus.platform.repository.UsuarioRepository usuarioRepository;
+ 
+     public PersonagemService(PersonagemRepository personagemRepository,
+                              GameSystemRepository gameSystemRepository,
+@@ -76,7 +77,9 @@ public class PersonagemService {
+                              ProgressaoNivelRepository progressaoNivelRepository,
+                              ItemPersonagemRepository itemPersonagemRepository,
+                              PassivasService passivasService,
++                             com.asus.platform.repository.UsuarioRepository usuarioRepository,
+                              ObjectMapper objectMapper) {
++        this.usuarioRepository = usuarioRepository;
+         this.personagemRepository = personagemRepository;
+         this.gameSystemRepository = gameSystemRepository;
+         this.racaRepository = racaRepository;
+@@ -153,8 +156,20 @@ public class PersonagemService {
+     /** Atualiza a ficha (PUT): recalcula, preserva dano e snapshota. */
+     @Transactional
+     public PersonagemResponse atualizar(Long id, AtualizarPersonagemRequest req) {
++        return atualizar(id, req, null);
++    }
++
++    /**
++     * Atualiza a ficha registrando no historico o que mudou e quem mudou.
++     *
++     * @param atorId usuario que fez a edicao (o mestre pode editar a ficha do jogador);
++     *               {@code null} cai no dono da ficha.
++     */
++    @Transactional
++    public PersonagemResponse atualizar(Long id, AtualizarPersonagemRequest req, Long atorId) {
+         Personagem p = carregar(id);
+         int nivelAntigo = p.getNivel();
++        java.util.Map<String, String> antes = instantaneo(p);
+ 
+         if (req.nome() != null) {
+             p.setNome(req.nome());
+@@ -272,11 +287,8 @@ public class PersonagemService {
+             passivasService.concederPassivas(p);
+         }
+         snapshotService.criar(p, subiuNivel ? "LEVEL_UP" : "EDICAO");
+-        auditoriaService.registrar(p.getOrganizacaoId(), p.getUsuarioId(), "PERSONAGEM_ATUALIZADO",
+-                "Personagem", p.getId(),
+-                subiuNivel ? "nivel" : null,
+-                subiuNivel ? String.valueOf(nivelAntigo) : null,
+-                subiuNivel ? String.valueOf(p.getNivel()) : p.getNome());
++        // Historico: uma linha por campo alterado (nada muda -> nada e registrado).
++        registrarDiferencas(p, atorId, antes, instantaneo(p));
+ 
+         realtimeNotifier.statusPersonagem(p.getId(), StatusDto.de(p.getStatus()));
+         return toResponse(p);
+@@ -284,8 +296,108 @@ public class PersonagemService {
+ 
+     public List<AuditoriaResponse> historicoAuditoria(Long id) {
+         carregar(id);
++        java.util.Map<Long, String> nomes = new HashMap<>();
+         return auditoriaService.historico("Personagem", id).stream()
+-                .map(AuditoriaResponse::de).toList();
++                .map(a -> AuditoriaResponse.de(a, a.getUsuarioId() == null ? null
++                        : nomes.computeIfAbsent(a.getUsuarioId(), uid -> usuarioRepository.findById(uid)
++                                .map(com.asus.platform.domain.Usuario::getNome).orElse(null))))
++                .toList();
++    }
++
++    // ---------------- Historico da ficha (log de alteracoes campo a campo) ----------------
++
++    /**
++     * "Retrato" dos campos da ficha que valem historico: rotulo legivel -> valor.
++     * Comparando o retrato de antes com o de depois sai o log do que mudou.
++     */
++    private java.util.Map<String, String> instantaneo(Personagem p) {
++        java.util.Map<String, String> m = new java.util.LinkedHashMap<>();
++        m.put("Nome", txt(p.getNome()));
++        m.put("Jogador", txt(p.getJogador()));
++        m.put("Nivel", String.valueOf(p.getNivel()));
++        m.put("XP", String.valueOf(p.getXpAtual()));
++        m.put("Raca", p.getRacaId() == null ? "—"
++                : racaRepository.findById(p.getRacaId()).map(Raca::getNome).orElse("—"));
++        m.put("Classe", nomeDaClasse(p.getClasseId()));
++        m.put("Trilha", nomeDaClasse(p.getTrilhaId()));
++        m.put("Classe 2a", nomeDaClasse(p.getClasseSecundariaId()));
++        m.put("Trilha 2a", nomeDaClasse(p.getTrilhaSecundariaId()));
++        m.put("Divindade", txt(p.getDivindade()));
++        var a = p.getAtributosBase();
++        if (a != null) {
++            m.put("Forca", String.valueOf(a.getForca()));
++            m.put("Constituicao", String.valueOf(a.getConstituicao()));
++            m.put("Destreza", String.valueOf(a.getDestreza()));
++            m.put("Agilidade", String.valueOf(a.getAgilidade()));
++            m.put("Inteligencia", String.valueOf(a.getInteligencia()));
++            m.put("Sabedoria", String.valueOf(a.getSabedoria()));
++            m.put("Carisma", String.valueOf(a.getCarisma()));
++        }
++        m.put("Armadura fisica", String.valueOf(p.getArmaduraFisica() == null ? 0 : p.getArmaduraFisica()));
++        m.put("Armadura magica", String.valueOf(p.getArmaduraMagica() == null ? 0 : p.getArmaduraMagica()));
++        m.put("Dinheiro", String.valueOf(p.getDinheiro() == null ? 0 : p.getDinheiro()));
++        lerMapaInt(p.getJsonPericias()).forEach((cod, v) -> m.put("Pericia " + cod, String.valueOf(v)));
++        lerMapaInt(p.getJsonPericiasOutros())
++                .forEach((cod, v) -> m.put("Pericia " + cod + " (Outros)", String.valueOf(v)));
++        // Textos longos: guarda so um resumo, pra o historico nao virar copia da ficha.
++        m.put("Anotacoes", resumo(p.getAnotacoes()));
++        m.put("Aparencia", resumo(p.getAparencia()));
++        m.put("Personalidade", resumo(p.getPersonalidade()));
++        m.put("Historia", resumo(p.getHistorico()));
++        m.put("Objetivo", resumo(p.getObjetivo()));
++        return m;
++    }
++
++    /** Grava uma linha de historico para cada campo que mudou de valor. */
++    private void registrarDiferencas(Personagem p, Long atorId,
++                                     java.util.Map<String, String> antes,
++                                     java.util.Map<String, String> depois) {
++        Long autor = atorId != null ? atorId : p.getUsuarioId();
++        for (var e : depois.entrySet()) {
++            String velho = antes.get(e.getKey());
++            if (!java.util.Objects.equals(velho, e.getValue())) {
++                auditoriaService.registrar(p.getOrganizacaoId(), autor, "FICHA_EDITADA",
++                        "Personagem", p.getId(), e.getKey(), velho, e.getValue());
++            }
++        }
++    }
++
++    private String nomeDaClasse(Long id) {
++        return id == null ? "—" : classeRepository.findById(id).map(Classe::getNome).orElse("—");
++    }
++
++    private static String txt(String s) {
++        return s == null || s.isBlank() ? "—" : s;
++    }
++
++    /** Texto longo vira um resumo curto (o historico registra que mudou, nao o texto inteiro). */
++    private static String resumo(String s) {
++        if (s == null || s.isBlank()) {
++            return "—";
++        }
++        String limpo = s.strip().replaceAll("\\s+", " ");
++        return limpo.length() <= 60 ? limpo : limpo.substring(0, 60) + "…";
++    }
++
++    /** Le um JSON {"COD": n} tolerando nulo/invalido. */
++    private java.util.Map<String, Integer> lerMapaInt(String json) {
++        java.util.Map<String, Integer> mapa = new java.util.TreeMap<>();
++        if (json == null || json.isBlank()) {
++            return mapa;
++        }
++        try {
++            var node = objectMapper.readTree(json);
++            if (node.isObject()) {
++                var it = node.fields();
++                while (it.hasNext()) {
++                    var e = it.next();
++                    mapa.put(e.getKey(), e.getValue().asInt(0));
++                }
++            }
++        } catch (Exception ignored) {
++            // json invalido: historico segue sem as pericias
++        }
++        return mapa;
+     }
+ 
+     @Transactional
+diff --git a/asus-platform/src/main/java/com/asus/platform/web/PersonagemController.java b/asus-platform/src/main/java/com/asus/platform/web/PersonagemController.java
+index 14ea215..ecaf9e2 100644
+--- a/asus-platform/src/main/java/com/asus/platform/web/PersonagemController.java
++++ b/asus-platform/src/main/java/com/asus/platform/web/PersonagemController.java
+@@ -152,7 +152,7 @@ public class PersonagemController {
+                                         @org.springframework.security.core.annotation.AuthenticationPrincipal UsuarioPrincipal principal,
+                                         @Valid @RequestBody AtualizarPersonagemRequest req) {
+         acessoService.exigirDonoOuMestrePersonagem(id, principal);
+-        return service.atualizar(id, req);
++        return service.atualizar(id, req, principal == null ? null : principal.id());
+     }
+ 
+     @PatchMapping("/personagens/{id}/status")
+diff --git a/asus-platform/src/main/java/com/asus/platform/web/dto/AuditoriaResponse.java b/asus-platform/src/main/java/com/asus/platform/web/dto/AuditoriaResponse.java
+index 1770c41..d863809 100644
+--- a/asus-platform/src/main/java/com/asus/platform/web/dto/AuditoriaResponse.java
++++ b/asus-platform/src/main/java/com/asus/platform/web/dto/AuditoriaResponse.java
+@@ -8,6 +8,8 @@ public record AuditoriaResponse(
+         Long id,
+         Long organizacaoId,
+         Long usuarioId,
++        /** Nome de quem fez a alteracao (para o historico da ficha); pode ser nulo. */
++        String usuarioNome,
+         String acao,
+         String entidade,
+         Long entidadeId,
+@@ -17,7 +19,11 @@ public record AuditoriaResponse(
+         LocalDateTime criadoEm) {
+ 
+     public static AuditoriaResponse de(Auditoria a) {
+-        return new AuditoriaResponse(a.getId(), a.getOrganizacaoId(), a.getUsuarioId(),
++        return de(a, null);
++    }
++
++    public static AuditoriaResponse de(Auditoria a, String usuarioNome) {
++        return new AuditoriaResponse(a.getId(), a.getOrganizacaoId(), a.getUsuarioId(), usuarioNome,
+                 a.getAcao(), a.getEntidade(), a.getEntidadeId(), a.getCampo(),
+                 a.getValorAnterior(), a.getValorNovo(), a.getCriadoEm());
+     }
+diff --git a/frontend/src/pages/Ficha.jsx b/frontend/src/pages/Ficha.jsx
+index 443ce41..1e70598 100644
+--- a/frontend/src/pages/Ficha.jsx
++++ b/frontend/src/pages/Ficha.jsx
+@@ -1,4 +1,4 @@
+-import { useEffect, useRef, useState } from 'react'
++import { useCallback, useEffect, useRef, useState } from 'react'
+ import { Link, useNavigate, useParams } from 'react-router-dom'
+ import { api } from '../api.js'
+ import { inscrever } from '../ws.js'
+@@ -6,8 +6,26 @@ import { useAuth } from '../auth.jsx'
+ import Heptagono from '../components/Heptagono.jsx'
+ import ResultadosPanel from '../components/ResultadosPanel.jsx'
+ 
+-const ABAS = ['Combate', 'Habilidades', 'Magias', 'Bênçãos', 'Inventário', 'Descrição']
++const ABAS = ['Combate', 'Habilidades', 'Magias', 'Bênçãos', 'Inventário', 'Descrição', 'Histórico']
+ const BARRAS = [['Vida', 'vida', 'pv'], ['Mana', 'mana', 'pm'], ['Energia', 'energia', 'pe']]
++
++// --- Histórico da ficha ---
++const ACOES = {
++  FICHA_EDITADA: 'Ficha editada', PERSONAGEM_CRIADO: 'Ficha criada',
++  PERSONAGEM_ATUALIZADO: 'Ficha atualizada', PERSONAGEM_IMPORTADO: 'Ficha importada',
++  STATUS_ALTERADO: 'PV/PM/PE alterados',
++}
++const rotuloAcao = (a) => ACOES[a] || (a || '').replaceAll('_', ' ').toLowerCase()
++function fmtQuando(iso) {
++  if (!iso) return ''
++  const d = new Date(iso)
++  if (Number.isNaN(d.getTime())) return ''
++  const diff = (Date.now() - d.getTime()) / 1000
++  if (diff < 60) return 'agora'
++  if (diff < 3600) return `há ${Math.floor(diff / 60)} min`
++  if (diff < 86400) return `há ${Math.floor(diff / 3600)} h`
++  return d.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
++}
+ const ATRIBS = [
+   ['forca', 'For'], ['constituicao', 'Con'], ['destreza', 'Des'], ['agilidade', 'Agi'],
+   ['inteligencia', 'Int'], ['sabedoria', 'Sab'], ['carisma', 'Car'],
+@@ -239,6 +257,7 @@ export default function Ficha() {
+   const [habChosen, setHabChosen] = useState([])
+   const [habDisp, setHabDisp] = useState([])
+   const [racaPassivas, setRacaPassivas] = useState([])
++  const [historicoLog, setHistoricoLog] = useState(null) // null = ainda nao carregado
+   const [habSel, setHabSel] = useState('')
+   const [modalHab, setModalHab] = useState(false)
+   const [habBusca, setHabBusca] = useState('')
+@@ -624,10 +643,19 @@ export default function Ficha() {
+   const delOutro = (idx) => setOutros((arr) => arr.filter((_, i) => i !== idx))
+   const siglaDe = (atributo) => (ATRIBS.find(([k]) => k === atributo.toLowerCase()) || [])[1] || atributo
+ 
++  // Histórico da ficha: log de quem mudou o quê (carrega ao abrir a aba).
++  const carregarHistorico = useCallback(() => {
++    api(`/api/personagens/${id}/auditoria`).then(setHistoricoLog).catch(() => setHistoricoLog([]))
++  }, [id])
++  useEffect(() => {
++    if (aba === 'Histórico') carregarHistorico()
++  }, [aba, carregarHistorico])
++
+   async function salvar(body) {
+     try {
+       await api(`/api/personagens/${id}`, { method: 'PUT', body })
+       carregar()
++      if (aba === 'Histórico') carregarHistorico()
+     } catch (e) { setErro(e.message) }
+   }
+ 
+@@ -1538,6 +1566,44 @@ export default function Ficha() {
+               <button style={{ marginTop: 10 }} onClick={() => salvar(desc)}>Salvar descrição</button>
+             </div>
+           )}
++
++          {aba === 'Histórico' && (
++            <div>
++              <div className="row" style={{ marginBottom: 8 }}>
++                <span className="muted">
++                  {historicoLog === null ? 'Carregando…'
++                    : `${historicoLog.length} alteraç${historicoLog.length === 1 ? 'ão' : 'ões'}`}
++                </span>
++                <div className="spacer" />
++                <button className="ghost mini" onClick={carregarHistorico}>↻ Atualizar</button>
++              </div>
++              <div className="log-list">
++                {(historicoLog || []).map((h) => (
++                  <div key={h.id} className="log-item">
++                    <div className="log-head">
++                      <b>{h.campo || rotuloAcao(h.acao)}</b>
++                      <span className="muted">{fmtQuando(h.criadoEm)}</span>
++                    </div>
++                    {h.campo ? (
++                      <div className="log-valores">
++                        <span className="log-de">{h.valorAnterior ?? '—'}</span>
++                        <span className="log-seta">→</span>
++                        <span className="log-para">{h.valorNovo ?? '—'}</span>
++                      </div>
++                    ) : (
++                      <div className="muted" style={{ fontSize: '.8rem' }}>{rotuloAcao(h.acao)}</div>
++                    )}
++                    <div className="muted" style={{ fontSize: '.72rem' }}>
++                      por {h.usuarioNome || (h.usuarioId ? `usuário #${h.usuarioId}` : 'sistema')}
++                    </div>
++                  </div>
++                ))}
++                {historicoLog !== null && !historicoLog.length && (
++                  <div className="muted">Nenhuma alteração registrada ainda.</div>
++                )}
++              </div>
++            </div>
++          )}
+         </div>
+       </div>
+ 
+diff --git a/frontend/src/styles.css b/frontend/src/styles.css
+index 2905ae6..97231fc 100644
+--- a/frontend/src/styles.css
++++ b/frontend/src/styles.css
+@@ -410,6 +410,18 @@ button.ghost.mini.ativo { background: var(--gold); color: #1a1206; border-color:
+ /* Tabela de pericias */
+ .pericias th { color: var(--muted); font-weight: 600; font-size: .72rem; text-transform: uppercase; }
+ .pericias td { padding: 3px 4px; font-size: .82rem; }
++/* Histórico da ficha (log de alterações) */
++.log-list { display: flex; flex-direction: column; gap: 8px; max-height: 60vh; overflow-y: auto; }
++.log-item { border-left: 2px solid var(--gold-2); background: var(--panel-2);
++  border-radius: var(--radius-sm); padding: 7px 10px; }
++.log-head { display: flex; align-items: baseline; gap: 8px; justify-content: space-between; font-size: .84rem; }
++.log-head .muted { font-size: .72rem; white-space: nowrap; }
++.log-valores { display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
++  font-size: .8rem; margin: 2px 0 3px; font-variant-numeric: tabular-nums; }
++.log-de { color: var(--muted); text-decoration: line-through; }
++.log-seta { color: var(--gold); }
++.log-para { color: var(--text); font-weight: 600; }
++
+ .pericias .step { display: inline-flex; gap: 4px; align-items: center; }
+ .pericias .outros-in { width: 46px; text-align: center; padding: 3px 4px; font-variant-numeric: tabular-nums; }
+ 
+-- 
+2.43.0
+
