@@ -905,7 +905,24 @@ export default function Ficha() {
     .map((c) => c.trim())
     .some((c) => c && c !== 'GERAL' && codigosClasse.includes(c))
   const passivaDeClasse = (h) => (h.tipo || '').toUpperCase() === 'PASSIVA' && ehDaClasse(h)
+  // Passiva "de assinatura" de cada classe/trilha (vem do catálogo de classes,
+  // no formato "Nome. Descrição") — todo personagem da classe tem desde o nível 1.
+  const passivasAssinatura = codigosClasse
+    .map((cod) => (classesCat || []).find((c) => c.codigo === cod))
+    .filter((c) => c && (c.jsonPassiva || '').trim())
+    .map((c) => {
+      const txt = c.jsonPassiva.trim()
+      const corte = txt.indexOf('. ')
+      return {
+        codigo: 'ASSINATURA_' + c.codigo,
+        nome: corte > 0 ? txt.slice(0, corte) : c.nome,
+        efeito: corte > 0 ? txt.slice(corte + 2) : txt,
+        origem: c.nome,
+        bloqueada: false,
+      }
+    })
   const classePassivas = [
+    ...passivasAssinatura,
     ...habChosen.filter(passivaDeClasse).map((h) => ({ ...h, bloqueada: false })),
     ...habDisp.filter(passivaDeClasse),
   ].sort((a, b) => (a.nivelMinimo || 1) - (b.nivelMinimo || 1))
@@ -1398,6 +1415,7 @@ export default function Ficha() {
                       <div key={h.codigo} className="item-card" style={h.bloqueada ? { opacity: 0.45 } : undefined}>
                         <div className="t">
                           {h.nome}
+                          {h.origem && <span className="tag">{h.origem}</span>}
                           {h.nivelMinimo > 1 && <span className="tag">Nível {h.nivelMinimo}</span>}
                           {h.bloqueada && <span className="tag">Bloqueada</span>}
                         </div>
