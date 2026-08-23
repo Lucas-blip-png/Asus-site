@@ -31,6 +31,22 @@ const CONDICOES = [
   ['Congelado', '-5 em Esquiva e Iniciativa; deslocamento reduzido pela metade.'],
 ]
 
+// Tabela oficial de efeitos positivos (Patch v0.1).
+const BENEFICIOS = [
+  ['Fortalecido', '+2 em Testes Físicos. (acumulável)'],
+  ['Focado', '+2 em Testes Mentais. (acumulável)'],
+  ['Inspirado', '+2 no próximo teste; consome o acúmulo ao usar. (acumulável)'],
+  ['Protegido', '+4 em Armadura Física. (acumulável)'],
+  ['Apressado', '+2 em Iniciativa e Esquiva. (acumulável)'],
+  ['Regenerando', 'Ao fim de cada turno recupera 1d4 PV e perde 1 acúmulo. (acumulável)'],
+  ['Abençoado', '+2 em testes de resistência. (acumulável)'],
+  ['Vantagem', 'Rola 2d20 e usa o maior resultado.'],
+  ['Invisível', 'Ataques contra o usuário têm Desvantagem; ele ataca com Vantagem.'],
+  ['Voando', 'Ignora terreno difícil e é imune a Caído.'],
+  ['Acelerado', 'Ganha 1 Ação Secundária adicional no turno.'],
+  ['Inabalável', 'Imune a efeitos que controlem a mente.'],
+]
+
 const fmtData = (iso) => {
   try {
     return new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' })
@@ -345,6 +361,11 @@ function CombateTracker({ combate, personagens, orgId, ehMestre, onClose, onMudo
                     {CONDICOES.map(([c, efeito]) => (
                       <button key={c} className="ghost mini" title={efeito}
                         style={{ fontSize: '.68rem', padding: '1px 6px' }}
+                        onClick={() => setCondForm((s) => ({ ...s, nome: c }))}>{c}</button>
+                    ))}
+                    {BENEFICIOS.map(([c, efeito]) => (
+                      <button key={c} className="ghost mini" title={efeito}
+                        style={{ fontSize: '.68rem', padding: '1px 6px', borderColor: 'var(--gold-2)', color: 'var(--gold-3)' }}
                         onClick={() => setCondForm((s) => ({ ...s, nome: c }))}>{c}</button>
                     ))}
                   </div>
