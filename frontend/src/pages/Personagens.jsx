@@ -50,7 +50,8 @@ export default function Personagens() {
     const acc = {}
     for (const cod of [form.classeCodigo, form.trilhaCodigo]) {
       const c = classes.find((x) => x.codigo === cod)
-      if (c && c.jsonBonus) {
+      // Trilha (classePaiCodigo) não dá atributo fixo — só a classe base dá.
+      if (c && !c.classePaiCodigo && c.jsonBonus) {
         try {
           const atrs = JSON.parse(c.jsonBonus).atributos || {}
           for (const [k, v] of Object.entries(atrs)) acc[k] = (acc[k] || 0) + Number(v)
