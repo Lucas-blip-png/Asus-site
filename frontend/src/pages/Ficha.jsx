@@ -935,7 +935,9 @@ export default function Ficha() {
       {levelUp && (() => {
         // Assistente de level-up: quanto sobrou pra distribuir e o que desbloqueou.
         const niveisComPontos = Math.max(0, (p.nivel - 1) - Math.floor(p.nivel / 5))
-        const atrRestantes = (5 + 2 * niveisComPontos)
+        // Nível 11 (trilha) não dá atributo — dá uma habilidade da trilha.
+        const niveisComAtributo = Math.max(0, p.nivel >= 11 ? niveisComPontos - 1 : niveisComPontos)
+        const atrRestantes = (5 + 2 * niveisComAtributo)
           - ATRIBS.reduce((s, [k]) => s + (Number(p.atributosBase?.[k]) || 0), 0)
         const perRestantes = (5 + 4 * niveisComPontos)
           - Object.values(treino).reduce((s, v) => s + (Number(v) || 0), 0)
