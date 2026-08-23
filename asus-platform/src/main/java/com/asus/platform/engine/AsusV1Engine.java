@@ -93,9 +93,9 @@ public class AsusV1Engine implements GameSystemEngine {
             if (bonus == null) {
                 continue;
             }
-            // Atributo fixo vem SO da classe (base ou secundaria). Trilha nao soma atributo:
-            // ao pegar a trilha o personagem ganha a habilidade e a passiva dela, nao atributos.
-            // As pericias da trilha continuam entrando (abaixo).
+            // Bonus fixo (atributos e pericias) vem SO da classe — base ou secundaria.
+            // A trilha nao soma nada disso: ao pega-la o personagem ganha a habilidade
+            // da trilha e a passiva dela, mais nada.
             boolean ehTrilha = c.getClassePaiCodigo() != null;
             JsonNode atrs = ehTrilha ? null : bonus.get("atributos");
             if (atrs != null && atrs.isObject()) {
@@ -109,7 +109,7 @@ public class AsusV1Engine implements GameSystemEngine {
                     }
                 }
             }
-            JsonNode pers = bonus.get("pericias");
+            JsonNode pers = ehTrilha ? null : bonus.get("pericias");
             if (pers != null && pers.isObject()) {
                 Iterator<Map.Entry<String, JsonNode>> it = pers.fields();
                 while (it.hasNext()) {
