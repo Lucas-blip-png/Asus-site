@@ -624,7 +624,7 @@ public class PersonagemService {
             throw new IllegalArgumentException(
                     "Trilha so pode ser escolhida a partir do nivel " + NIVEL_MINIMO_TRILHA + ".");
         }
-        int maxAtr = 5 + 2 * niveisComAtributo(nivel);
+        int maxAtr = 5 + 2 * niveisComPontos(nivel);
         if (a != null) {
             int soma = somaAtributos(a);
             if (soma > maxAtr) {
@@ -645,19 +645,21 @@ public class PersonagemService {
         }
     }
 
-    /** Niveis que dao pontos: cada nivel, exceto multiplos de 5 (que dao o bonus de classe+raca). */
+    /**
+     * Niveis que dao pontos (atributo e pericia). Ficam de fora:
+     * <ul>
+     *   <li>multiplos de 5 — dao o bonus de classe/raca (e a cada 10, o marco grande);</li>
+     *   <li>niveis de desbloqueio 11, 21, 31 e 41 — dao a habilidade da trilha/classe
+     *       secundaria/trilha secundaria/maestria, e nada mais.</li>
+     * </ul>
+     */
     private int niveisComPontos(int nivel) {
-        return Math.max(0, (nivel - 1) - (nivel / 5));
+        return Math.max(0, (nivel - 1) - (nivel / 5) - niveisDeDesbloqueio(nivel));
     }
 
-    /**
-     * Niveis que dao ATRIBUTO. Igual aos que dao pontos, menos o nivel da trilha
-     * ({@value #NIVEL_MINIMO_TRILHA}): nele o personagem ganha uma habilidade da
-     * trilha no lugar dos 2 pontos de atributo.
-     */
-    private int niveisComAtributo(int nivel) {
-        int n = niveisComPontos(nivel);
-        return Math.max(0, nivel >= NIVEL_MINIMO_TRILHA ? n - 1 : n);
+    /** Quantos niveis de desbloqueio (11, 21, 31, 41) ja foram alcancados. */
+    private int niveisDeDesbloqueio(int nivel) {
+        return Math.max(0, (nivel - 1) / 10);
     }
 
     /** Orcamento de pericias no nivel: base 5 + 4 por nivel com pontos. */
