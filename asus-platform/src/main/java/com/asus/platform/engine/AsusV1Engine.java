@@ -93,7 +93,11 @@ public class AsusV1Engine implements GameSystemEngine {
             if (bonus == null) {
                 continue;
             }
-            JsonNode atrs = bonus.get("atributos");
+            // Atributo fixo vem SO da classe (base ou secundaria). Trilha nao soma atributo:
+            // ao pegar a trilha o personagem ganha a habilidade e a passiva dela, nao atributos.
+            // As pericias da trilha continuam entrando (abaixo).
+            boolean ehTrilha = c.getClassePaiCodigo() != null;
+            JsonNode atrs = ehTrilha ? null : bonus.get("atributos");
             if (atrs != null && atrs.isObject()) {
                 Iterator<Map.Entry<String, JsonNode>> it = atrs.fields();
                 while (it.hasNext()) {

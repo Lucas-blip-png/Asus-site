@@ -703,6 +703,9 @@ public class PersonagemService {
             if (opt.isEmpty() || opt.get().getJsonBonus() == null || opt.get().getJsonBonus().isBlank()) {
                 continue;
             }
+            if (opt.get().getClassePaiCodigo() != null) {
+                continue; // trilha nao da atributo fixo (so habilidade/passiva e pericias)
+            }
             try {
                 com.fasterxml.jackson.databind.JsonNode atrs =
                         objectMapper.readTree(opt.get().getJsonBonus()).get("atributos");
