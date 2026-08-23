@@ -477,6 +477,52 @@ public class DataSeeder implements CommandLineRunner {
                 "Místico", "Uma habilidade desenvolvida por aqueles que possuem um bom uso para almas, é capaz de guardá-las em um espaço que somente o usuário tem acesso. O limite de almas é de 4 a cada 10 Níveis do Personagem.");
         hab("AUMENTO_DE_ATRIBUTO", "Aumento de Atributo", "GERAL", "PASSIVA", 0, null,
                 "Todas as Classes", "Você recebe +2 pontos de atributo para distribuir como desejar. Você pode escolher várias vezes essa habilidade e o valor ganho aumenta de acordo com o Nível de Personagem atual. Sendo +2 a cada 10 níveis de Personagem.");
+        // Novas habilidades do Patch v0.1 (secao "Novidades").
+        hab("MINUCIOSO", "Minucioso", "GERAL", "PASSIVA", 0, null,
+                "Destreza 10", "Você domina armas pequenas com extrema precisão, transformando velocidade e técnica em golpes "
+                        + "letais. Para cada 10 pontos no atributo Destreza, adiciona +2 de dano para armas pequenas.");
+        hab("VERSATIL", "Versátil", "GERAL", "PASSIVA", 0, null,
+                "Agilidade 10", "Você domina armas médias com equilíbrio e técnica, aproveitando cada abertura para desferir "
+                        + "golpes eficientes. Para cada 10 pontos no atributo Agilidade, adiciona +2 de dano para armas "
+                        + "médias.");
+        hab("BRUTAMONTES", "Brutamontes", "GERAL", "PASSIVA", 0, null,
+                "Força 10", "Você utiliza sua força para desferir golpes devastadores, extraindo o máximo poder de armas "
+                        + "pesadas. Para cada 10 pontos no atributo Força, adiciona +2 de dano para armas grandes.");
+        hab("ERUDITO", "Erudito", "GERAL", "PASSIVA", 0, null,
+                "Inteligência 10", "Você domina o uso de catalizadores arcanos, canalizando seu conhecimento para potencializar "
+                        + "feitiços. Para cada 10 pontos no atributo Inteligência, adiciona +2 de dano para Feitiços ao "
+                        + "utilizar um catalizador.");
+        hab("DEVOTO", "Devoto", "GERAL", "PASSIVA", 0, null,
+                "Sabedoria 10", "Você domina o uso de catalizadores sagrados, canalizando sua fé para fortalecer bênçãos "
+                        + "ofensivas. Para cada 10 pontos no atributo Sabedoria, adiciona +2 de dano para Bênçãos ao "
+                        + "utilizar um catalizador.");
+        hab("CRIACAO_DE_POCOES", "Criação de Poções", "GERAL", "PASSIVA", 0, null,
+                "Alquimia 10", "O usuário é capaz de utilizar seus conhecimentos em Alquimia para produzir diferentes tipos de "
+                        + "poções. Para criar uma poção, deve possuir os ingredientes necessários e realizar um teste de "
+                        + "Alquimia. A qualidade da poção aumenta em um passo para cada 10 pontos de Inteligência do "
+                        + "usuário.");
+        hab("RECARGA_ARCANA", "Recarga Arcana", "GERAL", "ATIVA", 0, "PM",
+                "Nível 10", "Durante um Descanso Longo, o usuário pode canalizar sua própria Mana para um Cajado Mágico, "
+                        + "restaurando PM no valor de metade da Mana utilizada. Caso possua a habilidade Absorção Arcana, "
+                        + "pode transferir os PM diretamente para o cajado, sem gastar sua própria Mana no processo. "
+                        + "(Custo variável de PM.)");
+        hab("ENCERRAR_DUELO", "Encerrar Duelo", "DUELISTA", "ATIVA", 5, "PE",
+                "Duelista e Destreza 15", "Enquanto a habilidade Duelar estiver ativa, acumule turnos de duelo. Ao ativar esta habilidade, "
+                        + "encerre Duelar e no mesmo turno, contra o mesmo alvo, receba 1 dado de dano com lâminas e +2 de "
+                        + "Acerto por cada turno acumulado. Se o alvo for derrotado, recupere metade dos PE gastos com "
+                        + "Duelar; se ele sobreviver, perca novamente os PE gastos com Duelar.");
+        hab("KIT_DE_REPAROS", "Kit de Reparos", "INVENTOR", "ATIVA", 3, "PE",
+                "Inventor", "O usuário realiza reparos rápidos em um mecanismo ou construto, restaurando 2d6 PV. Caso o alvo "
+                        + "seja uma Torreta Portátil ou outro dispositivo criado pelo usuário, também remove um efeito "
+                        + "negativo relacionado a danos.");
+        hab("SUCATA_IMPROVISADA", "Sucata Improvisada", "INVENTOR", "ATIVA", 4, "PE",
+                "Inventor", "O usuário improvisa um pequeno mecanismo utilizando materiais encontrados no ambiente. O "
+                        + "dispositivo funciona normalmente por 1 turno antes de se desfazer, podendo realizar apenas uma "
+                        + "única função simples, a critério do mestre.");
+        hab("FURIOSO", "Furioso", "BARBARO", "PASSIVA", 0, null,
+                "Bárbaro", "Sempre que sofrer dano, o usuário recebe 1 Acúmulo de Fúria, respeitando o limite de 1 acúmulo "
+                        + "por rodada a cada 5 Níveis do Personagem. Ao passar 1 turno sem sofrer dano, perde 1 Acúmulo de "
+                        + "Fúria.");
         // Habilidades Gerais (estavam grudadas na descricao de "Relato de Viagem" no documento).
         hab("VONTADE_DE_SOBREVIVENCIA", "Vontade de Sobrevivência", "GERAL", "PASSIVA", 0, null,
                 "Constituição 15 e nível 20", "Quando o PV chegar a zero pela primeira vez em combate, o personagem permanece com 1 PV. (Pode ser usada 1 vez por dia).");

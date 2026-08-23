@@ -7,6 +7,30 @@ import { dataHora } from '../format.js'
 import ResultadosPanel from '../components/ResultadosPanel.jsx'
 import CenaMapa from '../components/CenaMapa.jsx'
 
+// Tabela oficial de efeitos negativos (Patch v0.1). O texto vai no tooltip do botão.
+const CONDICOES = [
+  ['Debilitado', '-2 em Testes Físicos. (acumulável)'],
+  ['Vulnerável', '-4 em Armadura Física. (acumulável)'],
+  ['Amedrontado', '-2 em ataques à distância e incapaz de se aproximar da fonte. (acumulável)'],
+  ['Sonolência', '-2 em todos os testes. Ao usar Ação Principal, perde a Secundária. (acumulável)'],
+  ['Ofuscado', '-3 em Percepção, Arremesso e Combate. (acumulável)'],
+  ['Enjoo', '-2 em testes Físicos. Esforço físico exige teste de Vigor; falhou, perde o turno. (acumulável)'],
+  ['Ansioso', '-2 em testes Mentais, +2 em Iniciativa. (acumulável)'],
+  ['Embriaguez', '-2 em testes de Carisma, +3 em Esquiva, Pontaria, Percepção e Iniciativa. (acumulável)'],
+  ['Sangramento', 'Ao fim de cada turno sofre 1d4 de dano de Sangue e perde 1 acúmulo. (acumulável)'],
+  ['Envenenado', 'Ao fim de cada turno sofre 1d4 de Veneno e -1 em testes Físicos, até ser tratado. (acumulável)'],
+  ['Queimando', 'Ao fim de cada turno sofre 1d6 de Fogo, até apagar as chamas. (acumulável)'],
+  ['Hemorragia', 'Ao fim de cada turno perde 1d8 PV, até ser tratado. (acumulável)'],
+  ['Silenciado', 'Incapaz de falar e de conjurar magias que exijam verbalização.'],
+  ['Cegueira', '-15 em Percepção e Combate; incapaz de atacar à distância.'],
+  ['Atordoado', 'Incapaz de realizar Ações Principais e -5 em Esquiva.'],
+  ['Apavorado', '-10 em testes ofensivos e Desvantagem contra a fonte; não pode se aproximar dela.'],
+  ['Imobilizado', 'Incapaz de se deslocar; pode agir se não depender de movimento.'],
+  ['Paralisado', 'Perde a ação de movimento e não pode agir com esforço físico.'],
+  ['Caído', 'No chão: -5 em ataques e -5 em Esquiva. Levantar exige Ação Secundária.'],
+  ['Congelado', '-5 em Esquiva e Iniciativa; deslocamento reduzido pela metade.'],
+]
+
 const fmtData = (iso) => {
   try {
     return new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' })
@@ -318,8 +342,9 @@ function CombateTracker({ combate, personagens, orgId, ehMestre, onClose, onMudo
                 <>
                   {/* Condições comuns: 1 clique aplica */}
                   <div className="row" style={{ gap: 4, marginTop: 5, flexWrap: 'wrap' }}>
-                    {['Envenenado', 'Atordoado', 'Sangrando', 'Caído', 'Agarrado', 'Cego', 'Amedrontado', 'Queimando'].map((c) => (
-                      <button key={c} className="ghost mini" style={{ fontSize: '.68rem', padding: '1px 6px' }}
+                    {CONDICOES.map(([c, efeito]) => (
+                      <button key={c} className="ghost mini" title={efeito}
+                        style={{ fontSize: '.68rem', padding: '1px 6px' }}
                         onClick={() => setCondForm((s) => ({ ...s, nome: c }))}>{c}</button>
                     ))}
                   </div>
