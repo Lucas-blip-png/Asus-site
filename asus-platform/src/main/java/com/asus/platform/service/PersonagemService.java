@@ -62,6 +62,7 @@ public class PersonagemService {
     private final ItemPersonagemRepository itemPersonagemRepository;
     private final PassivasService passivasService;
     private final ObjectMapper objectMapper;
+    private final com.asus.platform.repository.UsuarioRepository usuarioRepository;
 
     public PersonagemService(PersonagemRepository personagemRepository,
                              GameSystemRepository gameSystemRepository,
@@ -76,7 +77,9 @@ public class PersonagemService {
                              ProgressaoNivelRepository progressaoNivelRepository,
                              ItemPersonagemRepository itemPersonagemRepository,
                              PassivasService passivasService,
+                             com.asus.platform.repository.UsuarioRepository usuarioRepository,
                              ObjectMapper objectMapper) {
+        this.usuarioRepository = usuarioRepository;
         this.personagemRepository = personagemRepository;
         this.gameSystemRepository = gameSystemRepository;
         this.racaRepository = racaRepository;
@@ -153,8 +156,20 @@ public class PersonagemService {
     /** Atualiza a ficha (PUT): recalcula, preserva dano e snapshota. */
     @Transactional
     public PersonagemResponse atualizar(Long id, AtualizarPersonagemRequest req) {
+        return atualizar(id, req, null);
+    }
+
+    /**
+     * Atualiza a ficha registrando no historico o que mudou e quem mudou.
+     *
+     * @param atorId usuario que fez a edicao (o mestre pode editar a ficha do jogador);
+     *               {@code null} cai no dono da ficha.
+     */
+    @Transactional
+    public PersonagemResponse atualizar(Long id, AtualizarPersonagemRequest req, Long atorId) {
         Personagem p = carregar(id);
         int nivelAntigo = p.getNivel();
+        java.util.Map<String, String> antes = instantaneo(p);
 
         if (req.nome() != null) {
             p.setNome(req.nome());
@@ -272,11 +287,8 @@ public class PersonagemService {
             passivasService.concederPassivas(p);
         }
         snapshotService.criar(p, subiuNivel ? "LEVEL_UP" : "EDICAO");
-        auditoriaService.registrar(p.getOrganizacaoId(), p.getUsuarioId(), "PERSONAGEM_ATUALIZADO",
-                "Personagem", p.getId(),
-                subiuNivel ? "nivel" : null,
-                subiuNivel ? String.valueOf(nivelAntigo) : null,
-                subiuNivel ? String.valueOf(p.getNivel()) : p.getNome());
+        // Historico: uma linha por campo alterado (nada muda -> nada e registrado).
+        registrarDiferencas(p, atorId, antes, instantaneo(p));
 
         realtimeNotifier.statusPersonagem(p.getId(), StatusDto.de(p.getStatus()));
         return toResponse(p);
@@ -284,8 +296,108 @@ public class PersonagemService {
 
     public List<AuditoriaResponse> historicoAuditoria(Long id) {
         carregar(id);
+        java.util.Map<Long, String> nomes = new HashMap<>();
         return auditoriaService.historico("Personagem", id).stream()
-                .map(AuditoriaResponse::de).toList();
+                .map(a -> AuditoriaResponse.de(a, a.getUsuarioId() == null ? null
+                        : nomes.computeIfAbsent(a.getUsuarioId(), uid -> usuarioRepository.findById(uid)
+                                .map(com.asus.platform.domain.Usuario::getNome).orElse(null))))
+                .toList();
+    }
+
+    // ---------------- Historico da ficha (log de alteracoes campo a campo) ----------------
+
+    /**
+     * "Retrato" dos campos da ficha que valem historico: rotulo legivel -> valor.
+     * Comparando o retrato de antes com o de depois sai o log do que mudou.
+     */
+    private java.util.Map<String, String> instantaneo(Personagem p) {
+        java.util.Map<String, String> m = new java.util.LinkedHashMap<>();
+        m.put("Nome", txt(p.getNome()));
+        m.put("Jogador", txt(p.getJogador()));
+        m.put("Nivel", String.valueOf(p.getNivel()));
+        m.put("XP", String.valueOf(p.getXpAtual()));
+        m.put("Raca", p.getRacaId() == null ? "—"
+                : racaRepository.findById(p.getRacaId()).map(Raca::getNome).orElse("—"));
+        m.put("Classe", nomeDaClasse(p.getClasseId()));
+        m.put("Trilha", nomeDaClasse(p.getTrilhaId()));
+        m.put("Classe 2a", nomeDaClasse(p.getClasseSecundariaId()));
+        m.put("Trilha 2a", nomeDaClasse(p.getTrilhaSecundariaId()));
+        m.put("Divindade", txt(p.getDivindade()));
+        var a = p.getAtributosBase();
+        if (a != null) {
+            m.put("Forca", String.valueOf(a.getForca()));
+            m.put("Constituicao", String.valueOf(a.getConstituicao()));
+            m.put("Destreza", String.valueOf(a.getDestreza()));
+            m.put("Agilidade", String.valueOf(a.getAgilidade()));
+            m.put("Inteligencia", String.valueOf(a.getInteligencia()));
+            m.put("Sabedoria", String.valueOf(a.getSabedoria()));
+            m.put("Carisma", String.valueOf(a.getCarisma()));
+        }
+        m.put("Armadura fisica", String.valueOf(p.getArmaduraFisica() == null ? 0 : p.getArmaduraFisica()));
+        m.put("Armadura magica", String.valueOf(p.getArmaduraMagica() == null ? 0 : p.getArmaduraMagica()));
+        m.put("Dinheiro", String.valueOf(p.getDinheiro() == null ? 0 : p.getDinheiro()));
+        lerMapaInt(p.getJsonPericias()).forEach((cod, v) -> m.put("Pericia " + cod, String.valueOf(v)));
+        lerMapaInt(p.getJsonPericiasOutros())
+                .forEach((cod, v) -> m.put("Pericia " + cod + " (Outros)", String.valueOf(v)));
+        // Textos longos: guarda so um resumo, pra o historico nao virar copia da ficha.
+        m.put("Anotacoes", resumo(p.getAnotacoes()));
+        m.put("Aparencia", resumo(p.getAparencia()));
+        m.put("Personalidade", resumo(p.getPersonalidade()));
+        m.put("Historia", resumo(p.getHistorico()));
+        m.put("Objetivo", resumo(p.getObjetivo()));
+        return m;
+    }
+
+    /** Grava uma linha de historico para cada campo que mudou de valor. */
+    private void registrarDiferencas(Personagem p, Long atorId,
+                                     java.util.Map<String, String> antes,
+                                     java.util.Map<String, String> depois) {
+        Long autor = atorId != null ? atorId : p.getUsuarioId();
+        for (var e : depois.entrySet()) {
+            String velho = antes.get(e.getKey());
+            if (!java.util.Objects.equals(velho, e.getValue())) {
+                auditoriaService.registrar(p.getOrganizacaoId(), autor, "FICHA_EDITADA",
+                        "Personagem", p.getId(), e.getKey(), velho, e.getValue());
+            }
+        }
+    }
+
+    private String nomeDaClasse(Long id) {
+        return id == null ? "—" : classeRepository.findById(id).map(Classe::getNome).orElse("—");
+    }
+
+    private static String txt(String s) {
+        return s == null || s.isBlank() ? "—" : s;
+    }
+
+    /** Texto longo vira um resumo curto (o historico registra que mudou, nao o texto inteiro). */
+    private static String resumo(String s) {
+        if (s == null || s.isBlank()) {
+            return "—";
+        }
+        String limpo = s.strip().replaceAll("\\s+", " ");
+        return limpo.length() <= 60 ? limpo : limpo.substring(0, 60) + "…";
+    }
+
+    /** Le um JSON {"COD": n} tolerando nulo/invalido. */
+    private java.util.Map<String, Integer> lerMapaInt(String json) {
+        java.util.Map<String, Integer> mapa = new java.util.TreeMap<>();
+        if (json == null || json.isBlank()) {
+            return mapa;
+        }
+        try {
+            var node = objectMapper.readTree(json);
+            if (node.isObject()) {
+                var it = node.fields();
+                while (it.hasNext()) {
+                    var e = it.next();
+                    mapa.put(e.getKey(), e.getValue().asInt(0));
+                }
+            }
+        } catch (Exception ignored) {
+            // json invalido: historico segue sem as pericias
+        }
+        return mapa;
     }
 
     @Transactional
