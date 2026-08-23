@@ -8,6 +8,8 @@ public record AuditoriaResponse(
         Long id,
         Long organizacaoId,
         Long usuarioId,
+        /** Nome de quem fez a alteracao (para o historico da ficha); pode ser nulo. */
+        String usuarioNome,
         String acao,
         String entidade,
         Long entidadeId,
@@ -17,7 +19,11 @@ public record AuditoriaResponse(
         LocalDateTime criadoEm) {
 
     public static AuditoriaResponse de(Auditoria a) {
-        return new AuditoriaResponse(a.getId(), a.getOrganizacaoId(), a.getUsuarioId(),
+        return de(a, null);
+    }
+
+    public static AuditoriaResponse de(Auditoria a, String usuarioNome) {
+        return new AuditoriaResponse(a.getId(), a.getOrganizacaoId(), a.getUsuarioId(), usuarioNome,
                 a.getAcao(), a.getEntidade(), a.getEntidadeId(), a.getCampo(),
                 a.getValorAnterior(), a.getValorNovo(), a.getCriadoEm());
     }
