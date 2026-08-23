@@ -475,6 +475,15 @@ public class DataSeeder implements CommandLineRunner {
                 "Místico", "Uma habilidade desenvolvida por aqueles que possuem um bom uso para almas, é capaz de guardá-las em um espaço que somente o usuário tem acesso. O limite de almas é de 4 a cada 10 Níveis do Personagem.");
         hab("AUMENTO_DE_ATRIBUTO", "Aumento de Atributo", "GERAL", "PASSIVA", 0, null,
                 "Todas as Classes", "Você recebe +2 pontos de atributo para distribuir como desejar. Você pode escolher várias vezes essa habilidade e o valor ganho aumenta de acordo com o Nível de Personagem atual. Sendo +2 a cada 10 níveis de Personagem.");
+        // Habilidades Gerais (estavam grudadas na descricao de "Relato de Viagem" no documento).
+        hab("VONTADE_DE_SOBREVIVENCIA", "Vontade de Sobrevivência", "GERAL", "PASSIVA", 0, null,
+                "Constituição 15 e nível 20", "Quando o PV chegar a zero pela primeira vez em combate, o personagem permanece com 1 PV. (Pode ser usada 1 vez por dia).");
+        hab("TREINAMENTO_DE_CAMPO", "Treinamento de Campo", "GERAL", "PASSIVA", 0, null,
+                null, "Concede um bônus permanente de +2 em uma perícia à escolha do jogador (aumentando em +2 a cada 5 níveis).");
+        hab("FOCO_DE_ADRENALINA", "Foco de Adrenalina", "GERAL", "ATIVA", 0, null,
+                "Constituição 10", "Como uma Ação Livre, o usuário pode utilizar PV ao invés de PE para realizar uma habilidade de classe (uma vez por dia).");
+        hab("MAOS_FIRMES", "Mãos Firmes", "GERAL", "PASSIVA", 0, null,
+                "Destreza 8", "O personagem ganha Vantagem em testes para evitar ser desarmado ou derrubar objetos.");
         hab("AMBIDESTRIA", "Ambidestria", "GERAL", "PASSIVA", 0, null,
                 "Destreza 10", "O usuário poderá utilizar de 2 armas ao mesmo tempo, podendo atacar com ambas em apenas 1 ação. Para isso é necessário ter a capacidade de usar ambas as armas individualmente, somando seus requerimentos.");
         hab("MASTERIZAR_ARMA", "Masterizar Arma", "GERAL", "PASSIVA", 0, null,
@@ -888,7 +897,7 @@ public class DataSeeder implements CommandLineRunner {
         hab("CARTAS_DE_AZAR", "Cartas de Azar", "CARTOMANTE,VIAJANTE", "ATIVA", 8, "PE",
                 "Trilha Cartomante", "Lança uma carta que reduz a sorte do inimigo, causando desvantagem no próximo alvo.");
         hab("RELATO_DE_VIAGEM", "Relato de Viagem", "SABIO,VIAJANTE", "ATIVA", 6, "PM",
-                "SÁBIO", "O Viajante compartilha uma história que concede +8 em testes de Conhecimento para todo o grupo por 1 hora. Habilidades Gerais Vontade de Sobrevivência: Quando o PV chegar a zero pela primeira vez em combate, o personagem permanece com 1 PV. (Pode ser usada 1 vez por dia). [Requer: Constituição 15 e nível 20]. Treinamento de Campo: Concede um bônus permanente de +2 em uma perícia à escolha do jogador ( aumentando em +2 a cada 5 níveis). (passiva) Foco de Adrenalina: Como uma Ação Livre, o usuário pode utilizar PV ao invés de PE para realizar uma habilidade de classe (uma vez por dia). [Requer: Constituição 10]. Mãos Firmes: O personagem ganha Vantagem em testes para evitar ser desarmado ou derrubar objetos. [Requer: Destreza 8]. Descrição das Habilidades de Trilhas");
+                "SÁBIO", "O Viajante compartilha uma história que concede +8 em testes de Conhecimento para todo o grupo por 1 hora.");
         hab("REFLETIR_IMPACTO", "Refletir Impacto", "ESCUDEIRO", "ATIVA", 5, "PE",
                 null, "Ao realizar um Bloqueio Crítico, devolve metade do dano ao atacante. [Requer: Nível 10].");
         hab("ESCUDO_ESMAGADOR", "Escudo Esmagador", "ESCUDEIRO", "ATIVA", 4, "PE",
