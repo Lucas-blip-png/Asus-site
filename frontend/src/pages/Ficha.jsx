@@ -897,6 +897,22 @@ export default function Ficha() {
   }
   if (!p) return <div className="center">Carregando…</div>
 
+  // Passivas da CLASSE/trilha: as concedidas + as ainda bloqueadas por requisito.
+  // Só as específicas da classe — as GERAIS são escolha e ficam na lista de escolhidas.
+  const codigosClasse = [p.classeCodigo, p.trilhaCodigo, p.classeSecundariaCodigo, p.trilhaSecundariaCodigo]
+    .filter(Boolean)
+  const ehDaClasse = (h) => (h.classeCodigo || '').split(',')
+    .map((c) => c.trim())
+    .some((c) => c && c !== 'GERAL' && codigosClasse.includes(c))
+  const passivaDeClasse = (h) => (h.tipo || '').toUpperCase() === 'PASSIVA' && ehDaClasse(h)
+  const classePassivas = [
+    ...habChosen.filter(passivaDeClasse).map((h) => ({ ...h, bloqueada: false })),
+    ...habDisp.filter(passivaDeClasse),
+  ].sort((a, b) => (a.nivelMinimo || 1) - (b.nivelMinimo || 1))
+  const nomeDasClasses = [p.classeNome, p.trilhaNome, p.classeSecundariaNome, p.trilhaSecundariaNome]
+    .filter(Boolean).join(' · ')
+  const habEscolhidas = habChosen.filter((h) => !passivaDeClasse(h))
+
   return (
     <>
       {levelUp && (() => {
@@ -1372,12 +1388,34 @@ export default function Ficha() {
                   </div>
                 </div>
               )}
+              {classePassivas.length > 0 && (
+                <div style={{ marginBottom: 16 }}>
+                  <div className="muted" style={{ textTransform: 'uppercase', fontSize: '.7rem', letterSpacing: 1, marginBottom: 6 }}>
+                    Passivas de classe · {nomeDasClasses}
+                  </div>
+                  <div className="cris-list">
+                    {classePassivas.map((h) => (
+                      <div key={h.codigo} className="item-card" style={h.bloqueada ? { opacity: 0.45 } : undefined}>
+                        <div className="t">
+                          {h.nome}
+                          {h.nivelMinimo > 1 && <span className="tag">Nível {h.nivelMinimo}</span>}
+                          {h.bloqueada && <span className="tag">Bloqueada</span>}
+                        </div>
+                        {h.efeito && <div className="s">{h.efeito}</div>}
+                        {h.bloqueada && h.motivo && (
+                          <div className="s muted" style={{ fontSize: '.72rem' }}>{h.motivo}</div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
               <div className="muted" style={{ textTransform: 'uppercase', fontSize: '.7rem', letterSpacing: 1, marginBottom: 6 }}>
-                Habilidades de classe e escolhidas
+                Habilidades escolhidas
               </div>
-              <div className="muted" style={{ marginBottom: 6 }}>{habChosen.length} habilidade{habChosen.length === 1 ? '' : 's'} (sem limite)</div>
+              <div className="muted" style={{ marginBottom: 6 }}>{habEscolhidas.length} habilidade{habEscolhidas.length === 1 ? '' : 's'} (sem limite)</div>
               <div className="cris-list">
-                {habChosen.map((h) => (
+                {habEscolhidas.map((h) => (
                   <HabRow key={h.codigo} h={h} onEdit={setEditHab} onDelete={delHab} />
                 ))}
               </div>
