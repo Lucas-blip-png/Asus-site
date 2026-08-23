@@ -897,38 +897,26 @@ export default function Ficha() {
   }
   if (!p) return <div className="center">Carregando…</div>
 
-  // Passivas da CLASSE/trilha: as concedidas + as ainda bloqueadas por requisito.
-  // Só as específicas da classe — as GERAIS são escolha e ficam na lista de escolhidas.
+  // Passivas de CLASSE/TRILHA: a passiva propria de cada classe e trilha do personagem
+  // (vem do catalogo de classes, no formato "Nome. Descricao"). Nao confundir com
+  // habilidades do tipo PASSIVA — essas sao habilidades e ficam na lista de habilidades.
   const codigosClasse = [p.classeCodigo, p.trilhaCodigo, p.classeSecundariaCodigo, p.trilhaSecundariaCodigo]
     .filter(Boolean)
-  const ehDaClasse = (h) => (h.classeCodigo || '').split(',')
-    .map((c) => c.trim())
-    .some((c) => c && c !== 'GERAL' && codigosClasse.includes(c))
-  const passivaDeClasse = (h) => (h.tipo || '').toUpperCase() === 'PASSIVA' && ehDaClasse(h)
-  // Passiva "de assinatura" de cada classe/trilha (vem do catálogo de classes,
-  // no formato "Nome. Descrição") — todo personagem da classe tem desde o nível 1.
-  const passivasAssinatura = codigosClasse
+  const classePassivas = codigosClasse
     .map((cod) => (classesCat || []).find((c) => c.codigo === cod))
     .filter((c) => c && (c.jsonPassiva || '').trim())
     .map((c) => {
       const txt = c.jsonPassiva.trim()
       const corte = txt.indexOf('. ')
       return {
-        codigo: 'ASSINATURA_' + c.codigo,
+        codigo: 'PASSIVA_' + c.codigo,
         nome: corte > 0 ? txt.slice(0, corte) : c.nome,
         efeito: corte > 0 ? txt.slice(corte + 2) : txt,
         origem: c.nome,
-        bloqueada: false,
       }
     })
-  const classePassivas = [
-    ...passivasAssinatura,
-    ...habChosen.filter(passivaDeClasse).map((h) => ({ ...h, bloqueada: false })),
-    ...habDisp.filter(passivaDeClasse),
-  ].sort((a, b) => (a.nivelMinimo || 1) - (b.nivelMinimo || 1))
   const nomeDasClasses = [p.classeNome, p.trilhaNome, p.classeSecundariaNome, p.trilhaSecundariaNome]
     .filter(Boolean).join(' · ')
-  const habEscolhidas = habChosen.filter((h) => !passivaDeClasse(h))
 
   return (
     <>
@@ -1414,28 +1402,23 @@ export default function Ficha() {
                   </div>
                   <div className="cris-list">
                     {classePassivas.map((h) => (
-                      <div key={h.codigo} className="item-card" style={h.bloqueada ? { opacity: 0.45 } : undefined}>
+                      <div key={h.codigo} className="item-card">
                         <div className="t">
                           {h.nome}
-                          {h.origem && <span className="tag">{h.origem}</span>}
-                          {h.nivelMinimo > 1 && <span className="tag">Nível {h.nivelMinimo}</span>}
-                          {h.bloqueada && <span className="tag">Bloqueada</span>}
+                          <span className="tag">{h.origem}</span>
                         </div>
                         {h.efeito && <div className="s">{h.efeito}</div>}
-                        {h.bloqueada && h.motivo && (
-                          <div className="s muted" style={{ fontSize: '.72rem' }}>{h.motivo}</div>
-                        )}
                       </div>
                     ))}
                   </div>
                 </div>
               )}
               <div className="muted" style={{ textTransform: 'uppercase', fontSize: '.7rem', letterSpacing: 1, marginBottom: 6 }}>
-                Habilidades escolhidas
+                Habilidades de classe e escolhidas
               </div>
-              <div className="muted" style={{ marginBottom: 6 }}>{habEscolhidas.length} habilidade{habEscolhidas.length === 1 ? '' : 's'} (sem limite)</div>
+              <div className="muted" style={{ marginBottom: 6 }}>{habChosen.length} habilidade{habChosen.length === 1 ? '' : 's'} (sem limite)</div>
               <div className="cris-list">
-                {habEscolhidas.map((h) => (
+                {habChosen.map((h) => (
                   <HabRow key={h.codigo} h={h} onEdit={setEditHab} onDelete={delHab} />
                 ))}
               </div>
