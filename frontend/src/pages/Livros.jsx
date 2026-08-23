@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { api } from '../api.js'
 
-const ABAS = ['Atributos', 'Classes', 'Raças', 'Perícias', 'Itens', 'Progressão', 'Feitiços']
+const ABAS = ['Atributos', 'Classes', 'Raças', 'Perícias', 'Itens', 'Progressão', 'Feitiços', 'Regras']
 
 const ATR_SIGLA = {
   FORCA: 'FOR', CONSTITUICAO: 'CON', DESTREZA: 'DES', AGILIDADE: 'AGI',
@@ -240,6 +240,7 @@ export default function Livros() {
         itens: await api('/api/sistemas/asus/itens'),
         progressao: await api('/api/sistemas/asus/progressao'),
         feiticos: await api('/api/sistemas/asus/feiticos/regras'),
+        regras: await api('/api/sistemas/asus/regras/combate'),
       })
     })().catch((e) => setErro(e.message))
   }, [])
@@ -303,6 +304,40 @@ export default function Livros() {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {aba === 'Regras' && d.regras && (
+        <div>
+          {[d.regras.estadoMorrendo, d.regras.reacao].map((sec) => (
+            <div key={sec.titulo} className="card" style={{ marginBottom: 14 }}>
+              <h2 style={{ marginTop: 0 }}>{sec.titulo}</h2>
+              <p className="muted" style={{ marginTop: 0 }}>{sec.resumo}</p>
+              <ul style={{ margin: 0, paddingLeft: 18, lineHeight: 1.7 }}>
+                {sec.regras.map((r, i) => <li key={i}>{r}</li>)}
+              </ul>
+            </div>
+          ))}
+          <div className="grid">
+            {[['Efeitos Negativos', d.regras.efeitosNegativos, 'neg'],
+              ['Efeitos Positivos', d.regras.efeitosPositivos, 'pos']].map(([titulo, tab, tipo]) => (
+              <div key={titulo} className="card">
+                <h2 style={{ marginTop: 0 }}>{titulo}</h2>
+                {[['Acumuláveis', tab.acumulaveis], ['Únicos', tab.unicos]].map(([sub, lista]) => (
+                  <div key={sub} style={{ marginBottom: 10 }}>
+                    <div className="muted" style={{ textTransform: 'uppercase', fontSize: '.7rem', letterSpacing: 1, marginBottom: 4 }}>{sub}</div>
+                    {lista.map((e) => (
+                      <div key={e.nome} className="item-card"
+                        style={{ borderLeftColor: tipo === 'pos' ? 'var(--gold-3)' : 'var(--vida)' }}>
+                        <div className="t">{e.nome}</div>
+                        <div className="s">{e.efeito}</div>
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
         </div>
       )}
 

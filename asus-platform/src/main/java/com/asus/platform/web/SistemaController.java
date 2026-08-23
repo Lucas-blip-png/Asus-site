@@ -123,6 +123,76 @@ public class SistemaController {
         return FeiticoRegras.padrao();
     }
 
+    /**
+     * Regras de combate do sistema: Estado de Morrendo, Reacao e as tabelas de
+     * efeitos (negativos e positivos). Consumido pelo Livro de Regras e pela mesa.
+     */
+    @GetMapping("/asus/regras/combate")
+    public Map<String, Object> regrasCombate() {
+        return Map.of(
+                "estadoMorrendo", Map.of(
+                        "titulo", "Estado de Morrendo",
+                        "resumo", "O que acontece ao chegar a 0 PV.",
+                        "regras", List.of(
+                                "Ao chegar a 0 PV o personagem entra em Morrendo: fica incapacitado, não age e não se move.",
+                                "No início de cada um de seus turnos faz um teste de Vigor (DT 15).",
+                                "3 sucessos: estabiliza e sai do estado (permanece com 0 PV e inconsciente).",
+                                "3 falhas: o personagem morre. Os sucessos e falhas não precisam ser seguidos.",
+                                "Sofrer dano enquanto está Morrendo conta como 1 falha automática; um crítico conta como 2.",
+                                "Qualquer cura que leve o personagem acima de 0 PV encerra o estado imediatamente.")),
+                "reacao", Map.of(
+                        "titulo", "Sistema de Reação",
+                        "resumo", "Quantas reações se tem e no que elas são gastas.",
+                        "regras", List.of(
+                                "Cada personagem tem 1 Reação por rodada.",
+                                "A Reação é recuperada no início do próprio turno.",
+                                "Gasta-se Reação em: Bloqueio, Esquiva de oportunidade e ataque de oportunidade.",
+                                "Habilidades e passivas que concedem Reação extra somam-se a esse limite (ex.: Escudo Protetor, Postura Defensiva).",
+                                "Sem Reação disponível, o personagem não pode bloquear nem reagir até o próximo turno.")),
+                "efeitosNegativos", Map.of(
+                        "acumulaveis", List.of(
+                                efeito("Debilitado", "-2 em Testes Físicos."),
+                                efeito("Vulnerável", "-4 em Armadura Física."),
+                                efeito("Amedrontado", "-2 em ataques à distância e incapaz de se aproximar da fonte."),
+                                efeito("Sonolência", "-2 em todos os testes. Ao usar Ação Principal, perde a Secundária."),
+                                efeito("Ofuscado", "-3 em Percepção, Arremesso e Combate."),
+                                efeito("Enjoo", "-2 em testes Físicos. Esforço físico exige teste de Vigor; em caso de falha, perde o turno."),
+                                efeito("Ansioso", "-2 em testes Mentais, +2 em Iniciativa."),
+                                efeito("Embriaguez", "-2 em testes de Carisma, +3 em Esquiva, Pontaria, Percepção e Iniciativa."),
+                                efeito("Sangramento", "Ao fim de cada turno sofre 1d4 de dano de Sangue e perde 1 acúmulo."),
+                                efeito("Envenenado", "Ao fim de cada turno sofre 1d4 de Veneno e -1 em testes Físicos, até ser tratado."),
+                                efeito("Queimando", "Ao fim de cada turno sofre 1d6 de Fogo, até apagar as chamas."),
+                                efeito("Hemorragia", "Ao fim de cada turno perde 1d8 PV, até ser tratado.")),
+                        "unicos", List.of(
+                                efeito("Silenciado", "Incapaz de falar e de conjurar magias que exijam verbalização."),
+                                efeito("Cegueira", "-15 em Percepção e Combate; incapaz de atacar à distância."),
+                                efeito("Atordoado", "Incapaz de realizar Ações Principais e -5 em Esquiva."),
+                                efeito("Apavorado", "-10 em testes ofensivos e Desvantagem contra a fonte; não pode se aproximar dela."),
+                                efeito("Imobilizado", "Incapaz de se deslocar; pode agir se não depender de movimento."),
+                                efeito("Paralisado", "Perde a ação de movimento e não pode agir com esforço físico."),
+                                efeito("Caído", "No chão: -5 em ataques e -5 em Esquiva. Levantar exige Ação Secundária."),
+                                efeito("Congelado", "-5 em Esquiva e Iniciativa; deslocamento reduzido pela metade."))),
+                "efeitosPositivos", Map.of(
+                        "acumulaveis", List.of(
+                                efeito("Fortalecido", "+2 em Testes Físicos."),
+                                efeito("Focado", "+2 em Testes Mentais."),
+                                efeito("Inspirado", "+2 no próximo teste; consome o acúmulo ao usar."),
+                                efeito("Protegido", "+4 em Armadura Física."),
+                                efeito("Apressado", "+2 em Iniciativa e Esquiva."),
+                                efeito("Regenerando", "Ao fim de cada turno recupera 1d4 PV e perde 1 acúmulo."),
+                                efeito("Abençoado", "+2 em testes de resistência.")),
+                        "unicos", List.of(
+                                efeito("Vantagem", "Rola 2d20 e usa o maior resultado."),
+                                efeito("Invisível", "Ataques contra o usuário têm Desvantagem; ele ataca com Vantagem."),
+                                efeito("Voando", "Ignora terreno difícil e é imune a Caído."),
+                                efeito("Acelerado", "Ganha 1 Ação Secundária adicional no turno."),
+                                efeito("Inabalável", "Imune a efeitos que controlem a mente."))));
+    }
+
+    private static Map<String, String> efeito(String nome, String efeito) {
+        return Map.of("nome", nome, "efeito", efeito);
+    }
+
     /** Feiticos prontos (montados pelas regras de construcao) para adicionar com 1 clique. */
     @GetMapping("/asus/feiticos/prontos")
     public List<Map<String, Object>> feiticosProntos() {
