@@ -71,11 +71,11 @@ export default function Personagens() {
 
   // Pontos de atributo: base 5 + 2 por nível "com pontos" (a cada 5 níveis vira bônus de classe+raça).
   const nivelSel = Number(form.nivel) || 1
-  const niveisComPontos = Math.max(0, (nivelSel - 1) - Math.floor(nivelSel / 5))
-  // No nível da trilha (11) não entram os 2 pontos de atributo: no lugar deles
-  // o personagem ganha uma habilidade da trilha.
-  const niveisComAtributo = Math.max(0, nivelSel >= 11 ? niveisComPontos - 1 : niveisComPontos)
-  const maxPontos = 5 + 2 * niveisComAtributo
+  // Níveis que dão pontos: todos, menos os múltiplos de 5 (bônus de classe/raça)
+  // e os de desbloqueio 11/21/31/41 (que dão só a habilidade do desbloqueio).
+  const niveisComPontos = Math.max(0,
+    (nivelSel - 1) - Math.floor(nivelSel / 5) - Math.floor((nivelSel - 1) / 10))
+  const maxPontos = 5 + 2 * niveisComPontos
   const NIVEL_TRILHA = 11
   const podeTrilha = nivelSel >= NIVEL_TRILHA
 
