@@ -29,6 +29,7 @@ const CONDICOES = [
   ['Paralisado', 'Perde a ação de movimento e não pode agir com esforço físico.'],
   ['Caído', 'No chão: -5 em ataques e -5 em Esquiva. Levantar exige Ação Secundária.'],
   ['Congelado', '-5 em Esquiva e Iniciativa; deslocamento reduzido pela metade.'],
+  ['Confusão', 'Toda vez que realizar um ataque, role 1d4: ao cair 4, erra automaticamente.'],
 ]
 
 // Tabela oficial de efeitos positivos (Patch v0.1).
@@ -36,15 +37,7 @@ const BENEFICIOS = [
   ['Fortalecido', '+2 em Testes Físicos. (acumulável)'],
   ['Focado', '+2 em Testes Mentais. (acumulável)'],
   ['Inspirado', '+2 no próximo teste; consome o acúmulo ao usar. (acumulável)'],
-  ['Protegido', '+4 em Armadura Física. (acumulável)'],
-  ['Apressado', '+2 em Iniciativa e Esquiva. (acumulável)'],
-  ['Regenerando', 'Ao fim de cada turno recupera 1d4 PV e perde 1 acúmulo. (acumulável)'],
-  ['Abençoado', '+2 em testes de resistência. (acumulável)'],
   ['Vantagem', 'Rola 2d20 e usa o maior resultado.'],
-  ['Invisível', 'Ataques contra o usuário têm Desvantagem; ele ataca com Vantagem.'],
-  ['Voando', 'Ignora terreno difícil e é imune a Caído.'],
-  ['Acelerado', 'Ganha 1 Ação Secundária adicional no turno.'],
-  ['Inabalável', 'Imune a efeitos que controlem a mente.'],
 ]
 
 const fmtData = (iso) => {

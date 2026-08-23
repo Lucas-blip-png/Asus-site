@@ -171,22 +171,15 @@ public class SistemaController {
                                 efeito("Imobilizado", "Incapaz de se deslocar; pode agir se não depender de movimento."),
                                 efeito("Paralisado", "Perde a ação de movimento e não pode agir com esforço físico."),
                                 efeito("Caído", "No chão: -5 em ataques e -5 em Esquiva. Levantar exige Ação Secundária."),
-                                efeito("Congelado", "-5 em Esquiva e Iniciativa; deslocamento reduzido pela metade."))),
+                                efeito("Congelado", "-5 em Esquiva e Iniciativa; deslocamento reduzido pela metade."),
+                                efeito("Confusão", "Toda vez que realizar um ataque, role 1d4: ao cair 4, erra automaticamente."))),
                 "efeitosPositivos", Map.of(
                         "acumulaveis", List.of(
                                 efeito("Fortalecido", "+2 em Testes Físicos."),
                                 efeito("Focado", "+2 em Testes Mentais."),
-                                efeito("Inspirado", "+2 no próximo teste; consome o acúmulo ao usar."),
-                                efeito("Protegido", "+4 em Armadura Física."),
-                                efeito("Apressado", "+2 em Iniciativa e Esquiva."),
-                                efeito("Regenerando", "Ao fim de cada turno recupera 1d4 PV e perde 1 acúmulo."),
-                                efeito("Abençoado", "+2 em testes de resistência.")),
+                                efeito("Inspirado", "+2 no próximo teste; consome o acúmulo ao usar.")),
                         "unicos", List.of(
-                                efeito("Vantagem", "Rola 2d20 e usa o maior resultado."),
-                                efeito("Invisível", "Ataques contra o usuário têm Desvantagem; ele ataca com Vantagem."),
-                                efeito("Voando", "Ignora terreno difícil e é imune a Caído."),
-                                efeito("Acelerado", "Ganha 1 Ação Secundária adicional no turno."),
-                                efeito("Inabalável", "Imune a efeitos que controlem a mente."))));
+                                efeito("Vantagem", "Rola 2d20 e usa o maior resultado."))));
     }
 
     private static Map<String, String> efeito(String nome, String efeito) {
