@@ -468,7 +468,9 @@ public class DataSeeder implements CommandLineRunner {
         hab("FEITICARIA_DE_4_GRAUEFEITO", "Feitiçaria de 4° Grau", "BRUXO,CARTOMANTE,DRUIDA,MAGO,QUIMICO_ARCANO", "PASSIVA", 0, null,
                 "Mago; Bruxo; Druida; Químico Arcano; Cartomante & (Feitiçaria de 3° Grau & Nível 40)", "A partir deste conhecimento, o personagem é capaz de conjurar feitiços de 4º Grau normalmente.");
         hab("ESTOURAR_SANGRAMENTO", "Estourar Sangramento", "ESPADACHIM,SICARIO", "ATIVA", 2, "PE",
-                "Sicário, ou Espadachim", "Ao atacar alguém que está sangrando, você pode optar por estourar o “Sangramento” o que triplicará o dano de sangramento que o alvo receberá naquele turno, removendo todos os acúmulos no processo.");
+                "Sicário, ou Espadachim", "Ao atacar alguém que está sangrando, você pode optar por estourar o “Sangramento” o que "
+                        + "duplicará o dano de sangramento que o alvo receberá naquele turno, removendo todos os acúmulos "
+                        + "no processo.");
         hab("INVESTIDA", "Investida", "GERAL", "ATIVA", 2, "PE",
                 "Arma Perfurante", "Segure sua arma com ambas as mãos e avance contra um inimigo distante para empalá-lo, ao avançar unicamente em uma linha reta, receberá metade do valor de “Deslocamento” atual no seu total, e causará seu “Deslocamento” total a mais de dano.");
         hab("ARMAZENAR_ALMAS", "Armazenar Almas", "MISTICO", "PASSIVA", 0, null,
@@ -491,7 +493,9 @@ public class DataSeeder implements CommandLineRunner {
         hab("REDUCAO_DE_DANO", "Redução de Dano", "BARBARO,ESCUDEIRO,PALADINO", "ATIVA", 3, "PE",
                 "Bárbaro; Escudeiro; Paladino", "Ao sofrer um ataque, você pode escolher receber o ataque e gastar sua reação para adicionar seu valor de “Constituição” em sua “Armadura”.");
         hab("DUELAR", "Duelar", "CAVALEIRO,ESPADACHIM,LUTADOR", "ATIVA", 4, "PE",
-                "Espadachim, Cavaleiro, Lutador", "Ao entrar em uma luta um contra um no alvo selecionado, irá receber “Vantagem” para atacar o alvo e “Desvantagem” para atacar qualquer outro que não seja o alvo selecionado, também recebe +5 em Armadura a cada 5 Níveis do Personagem, para cada ataque vindo de fora do duelo.");
+                "Espadachim, Cavaleiro, Lutador", "Ao entrar em uma luta um contra um no alvo selecionado, irá receber “Vantagem” para atacar o "
+                        + "alvo e “Desvantagem” para atacar qualquer outro que não seja o alvo selecionado, também recebe "
+                        + "+5 em Armadura a cada 5 Níveis do Personagem, contra qualquer ataque vindo de fora do Duelo. Manter o Duelo custa 2 PE por Turno.");
         hab("ESCUDO_ALIADO", "Escudo Aliado", "CAVALEIRO,LUTADOR,MONGE,PALADINO", "ATIVA", 3, "PE",
                 "Cavaleiro, Monge, Lutador, Paladino", "Caso um aliado esteja sendo atacado, você pode gastar sua Reação para tomar o ataque para si e ficar a frente de seu aliado, se o fizer receberá um aumento equivalente ao Nível atual do personagem em Armadura contra esse ataque.");
         hab("MURALHA_IMPENETRAVEL", "Muralha Impenetrável", "CAVALEIRO,PALADINO", "ATIVA", 5, "PE",
@@ -504,7 +508,7 @@ public class DataSeeder implements CommandLineRunner {
                 "Assassino", "Faz com que nos próximos 3 turnos seguintes, a sua arma cause +1 acúmulo de “Sangramento” ao atingir um alvo.");
         hab("ATAQUE_PREDOMINANTE", "Ataque Predominante", "ASSASSINO,ESPADACHIM,LANCEIRO,LUTADOR,MONGE", "ATIVA", 6, "PE",
                 "Assassino, Monge, Espadachim, Lanceiro, Lutador", "Pode usar sua “Reação” para lançar um ataque contra o ataque do inimigo, se feito ambos rodam seu dano, os valores serão subtraídos e causará o valor em dano a aquele que causou mais dano. Para funcionar é necessário que ambos os ataques possuam o mesmo tipo de dano.");
-        hab("VULTO_AMEACADOR", "Vulto Ameaçador", "ARQUEIRO,ASSASSINO,LADRAO", "ATIVA", 6, "PE",
+        hab("VULTO_AMEACADOR", "Vulto Ameaçador", "ARQUEIRO,ASSASSINO,LADRAO", "ATIVA", 4, "PE",
                 "Assassino, Arqueiro, Ladrão", "Ao entrar em furtividade durante um combate que já havia sido percebido, pode-se usar essa habilidade para aumentar sua margem de ameaça em +2, até seu próximo ataque / Além disso, caso consiga entrar em furtividade novamente depois de usar essa habilidade, ganhará +2 dados de dano crítico.");
         hab("ARREMESSO_CERTEIRO", "Arremesso Certeiro", "ASSASSINO,CARTOMANTE,LADRAO,LANCEIRO", "ATIVA", 3, "PE",
                 "Assassino, Ladrão, Lanceiro, Cartomante", "Ao utilizar armas corpo a corpo para arremessar em seu alvo, ganha-se +2 Pontos em “Arremessar” a cada 5 Níveis do Personagem, além disso o dano de sua arma aumenta em um passo para esse ataque.");
@@ -515,7 +519,7 @@ public class DataSeeder implements CommandLineRunner {
         hab("FURIA_INCANSAVEL", "Fúria Incansável", "BARBARO", "PASSIVA", 0, null,
                 "Bárbaro", "Após o término da habilidade “Estado de Fúria”, o usuário ainda permanecerá com metade dos acúmulos de fúria gastos. (Passivo)");
         hab("CORPO_SAUDAVEL", "Corpo Saudável", "BARBARO", "PASSIVA", 0, null,
-                "Bárbaro", "O usuário terá sua armadura natural dobrada para o primeiro ataque que receber no dia.");
+                "Bárbaro", "O usuário reduz metade do dano para o primeiro ataque que receber no dia.");
         hab("FORCA_IMPARAVEL", "Força Imparável", "BARBARO", "ATIVA", 8, "PE",
                 "Bárbaro", "O usuário torna-se irracional atacando qualquer coisa em sua frente, assim dobrando os efeitos de “Estado de Fúria” e dobrando sua armadura natural, porém é necessário atacar um alvo todos os turnos, até acabar.");
         hab("ESCOLHA_DIVINA", "Escolha Divina", "CLERIGO", "PASSIVA", 0, null,
@@ -545,17 +549,24 @@ public class DataSeeder implements CommandLineRunner {
         hab("FORMA_BESTIAL", "Forma Bestial", "DRUIDA", "ATIVA", 3, "PE",
                 "Druida", "Assim como os Meio Fera, pode se tornar um animal bestial qualquer após beber o sangue do mesmo, é necessário estar sem armadura pesada.");
         hab("SENHOR_DAS_FERAS", "Senhor das Feras", "DOMADOR_FERAS", "PASSIVA", 0, null,
-                "Domador de Feras", "O usuário pode escolher 2 de seus companheiros para subir em 1 categoria, ou 1 companheiro para subir em 2 categorias. (Passiva)");
+                "Domador de Feras", "O usuário pode escolher 2 de seus companheiros para subir em 1 categoria, ou 1 companheiro para "
+                        + "subir em 2 categorias. (Passiva) O efeito dessa habilidade não pode ser aplicado duas vezes na "
+                        + "mesma criatura.");
         hab("FORMA_BESTIAL_INSTAVEL", "Forma Bestial Instável", "DRUIDA", "ATIVA", 4, "PE",
                 "Druida & Nível 20", "Enquanto estiver com a “Forma Bestial” e beber o sangue de uma criatura compatível com a em que está, irá criar um resultado híbrido o que fará sua categoria subir em 1.");
         hab("COMUNHAO_COM_A_NATUREZA", "Comunhão com a Natureza", "DRUIDA", "PASSIVA", 0, null,
-                "Druida", "Você se torna mais próximo da mata sagrada, dessa forma toda vez que sofrer dano em combate você pode ressoar sua dor para a vegetação ao redor, ao rolar 1d4 e o resultado for 4, irá surgir um espírito da floresta para lhe auxiliar. A categoria do espírito vai depender da localidade e do Nível de Personagem. (Custo: 2 PE)");
+                "Druida", "Você se torna mais próximo da mata sagrada, dessa forma toda vez que sofrer dano em combate "
+                        + "você pode ressoar sua dor para a vegetação ao redor, ao rolar 1d4 e o resultado for 4, irá "
+                        + "surgir um espírito da floresta para lhe auxiliar. A categoria do espírito vai depender da "
+                        + "localidade e do Nível de Personagem. ()");
         hab("MAO_VERDE", "Mão Verde", "DRUIDA", "ATIVA", 5, "PE",
                 "Druida & Nível 10", "Crie um Microbioma a partir de um toque no chão, dessa forma possibilitando o uso de todas as Habilidades e Magias que requerem estar em uma zona de natureza. Além disso, caso usado em um local já natural, irá densificar a vegetação o que fará a habilidade “Magia Druida” ter seu gasto reduzido em -2 PE e sua invocação se torna Ação Secundária.");
         hab("DANO_DESARMADO", "Dano Desarmado", "LUTADOR,MONGE", "PASSIVA", 0, null,
                 "Monge, Lutador", "O dano desarmado do usuário aumenta em um passo. Você pode pegar até 5 vezes essa habilidade, porém a cada 10 Níveis do Personagem (Passivo)");
-        hab("SEQUENCIA_DE_SOCOS", "Sequência de Socos", "LUTADOR,MONGE", "ATIVA", 2, "PE",
-                "Monge, Lutador", "O usuário ataca o seu alvo com 1d4 golpes desarmados. Você pode pegar essa habilidade várias vezes, porém a cada 10 Níveis do Personagem.");
+        hab("SEQUENCIA_DE_SOCOS", "Sequência de Socos", "LUTADOR,MONGE", "ATIVA", 3, "PE",
+                "Monge, Lutador", "O usuário ataca o seu alvo com 1d4 golpes desarmados. Você pode pegar essa habilidade várias "
+                        + "vezes, porém a cada 10 Níveis do Personagem. O custo da habilidade é aplicado novamente para "
+                        + "cada dado de golpe adicional.");
         hab("TECNICA_ANTIGA", "Técnica Antiga", "MONGE", "ATIVA", 3, "PE",
                 "Monge", "O usuário pode utilizar a perícia de “Combate” como teste de reação, caso falhe ainda poderá lançar um ataque desarmado, como redutor de dano.");
         hab("CHI", "Chi", "MONGE", "ATIVA", 3, "PE",
@@ -584,7 +595,7 @@ public class DataSeeder implements CommandLineRunner {
                 "Arqueiro", "Ao ativar a habilidade de “Recompensa”, no primeiro turno pós, o usuário pode reduzir a Ação necessária para qualquer realização que tentar em um passo.");
         hab("PREDADOR_OFUSCANTE", "Predador Ofuscante", "ARQUEIRO", "ATIVA", 10, "PE",
                 "Arqueiro & Nível 20", "Ao ingerir o sangue de seu alvo, cria-se uma forte conexão forçada com seu alvo, assim sempre sabendo uma estimativa aproximada de sua localização, também recebendo “Vantagem” contra o alvo. Porém, só é possível ter 1 alvo marcado por vez.");
-        hab("FLUXO_DE_MANA", "Fluxo de Mana", "BRUXO,MAGO", "ATIVA", 3, "PE",
+        hab("FLUXO_DE_MANA", "Fluxo de Mana", "BRUXO,MAGO", "ATIVA", 8, "PE",
                 "Mago, Bruxo", "Ganha +2 no atributo “Inteligência” a cada 5 Níveis do Personagem, além disso recebe “Vantagem” para reagir a golpes mágicos de todos os tipos.");
         hab("SIGILO_VINCULATIVO", "Sigilo Vinculativo", "BRUXO,MAGO,QUIMICO_ARCANO", "PASSIVA", 0, null,
                 "Mago, Bruxo, Químico Arcano", "Transforma um item não mágico até tamanho médio a sua escolha em uma manifestação mágica, que pode ser invocada a qualquer momento. Você pode escolher várias vezes essa habilidade, porém a cada 10 Níveis do Personagem. (Passivo)");
@@ -611,9 +622,11 @@ public class DataSeeder implements CommandLineRunner {
         hab("CORTE_CIRURGICO", "Corte Cirúrgico", "ESPADACHIM", "ATIVA", 10, "PE",
                 "Espadachim & Nível 20 + Dano Cortante", "Ao rolar um ataque crítico, você pode escolher ao invés de atacar, fragilizar um membro do alvo, dessa forma toda vez que o alvo receber um crítico de dano cortante, terá 1d6 de chance de perder um membro, onde se o resultado for 6 ele perde.");
         hab("CORTE_GEOMETRICO", "Corte Geométrico", "ESPADACHIM", "ATIVA", 3, "PE",
-                "Espadachim & Nível 15", "Realiza uma sequência de ataques determinado pelo dado que escolher, cada ataque adiciona +1 dado de dano do mesmo tipo para a arma do usuário. Este deverá escolher se rodará 1d4, 1d6, 1d8 ou 1d12.");
-        hab("ESPADA_DA_VINGANCA", "Espada da Vingança", "CAVALEIRO,ESPADACHIM,LUTADOR,MONGE", "ATIVA", 4, "PE",
-                "Espadachim,Monge,Lutador, cavaleiro", "Caso tenha sido atacado por vários inimigos no turno anterior, pode além de sua ação principal, realizar um ataque simples contra todos aqueles que lhe atacaram no turno passado.");
+                "Espadachim & Nível 15", "Escolha entre 1d4, 1d6, 1d8 ou 1d12. O resultado determina a quantidade de golpes consecutivos. "
+                        + "O último golpe recebe 1 dado de dano do mesmo passo de dado escolhido. O custo da habilidade é "
+                        + "aplicado novamente para cada passo de dado acima de 1d4.");
+        hab("ESPADA_DA_VINGANCA", "Espada da Vingança", "CAVALEIRO,ESPADACHIM", "ATIVA", 4, "PE",
+                "Espadachim, Cavaleiro", "Caso tenha sido atacado por vários inimigos no turno anterior, pode além de sua ação principal, realizar um ataque simples contra todos aqueles que lhe atacaram no turno passado.");
         hab("FINALIZACAO", "Finalização", "ESPADACHIM", "ATIVA", 0, "PE",
                 "Espadachim", "Caso o confronto já tenha passado de 3 rodadas, o usuário poderá lançar 2 habilidades como ação padrão no mesmo turno. Só é possível utilizar essa habilidade uma vez por cena.");
         hab("CORTE_ABSOLUTO", "Corte Absoluto", "ESPADACHIM", "ATIVA", 5, "PE",
@@ -635,7 +648,10 @@ public class DataSeeder implements CommandLineRunner {
         hab("VULTO_SOBREPOSTO", "Vulto Sobreposto", "LADRAO", "ATIVA", 5, "PE",
                 "Ladrão & Nível 10", "Caso o usuário seja percebido em seu estado de furtividade, ele pode realizar um teste de “Enganação” ou “Aparência” para manter-se furtivo, se feito, ainda recebe “Vantagem” em seu próximo teste.");
         hab("CURAR_FERIMENTOS", "Curar Ferimentos", "ALQUIMISTA,BRUXO,CLERIGO,CURANDEIRO,DRUIDA,MONGE", "ATIVA", 2, "PE",
-                "Curandeiro, Clérigo, Druida, Monge, Bruxo, Alquimista", "O usuário restaura 1d10 Pontos de Vida do seu alvo. Você pode pegar várias vezes essa habilidade, porém a cada 5 Níveis do Personagem.");
+                "Curandeiro, Clérigo, Druida, Monge, Bruxo, Alquimista", "O usuário restaura 1d10 Pontos de Vida do seu alvo. Você pode pegar várias vezes essa "
+                        + "habilidade, porém a cada 5 Níveis do Personagem. Cada vez que adquirir esta habilidade, aumenta "
+                        + "a cura em 1d10. Caso não seja utilizada por um Curandeiro, não levantará alvos que estejam em "
+                        + "estado de morrendo.");
         hab("LIMPEZA_ESPIRITUAL", "Limpeza Espiritual", "BRUXO,CURANDEIRO", "ATIVA", 1, "PE",
                 "Curandeiro, Bruxo", "Ao tocar um alvo remove todos os seus efeitos negativos, além disso o deixa imune a tais efeitos durante 2 turnos seguintes.");
         hab("AREA_MEDICA", "Área Médica", "CURANDEIRO", "ATIVA", 5, "PE",
@@ -667,7 +683,8 @@ public class DataSeeder implements CommandLineRunner {
         hab("TRUCO", "Truco?", "CARTOMANTE", "ATIVA", 5, "PE",
                 "Cartomante & Nível 10", "O usuário puxa 3 cartas, deverá rodar 1d4 para cada uma delas, cada carta funciona como um bônus para seus próximos ataques, o usuário pode escolher quantas e quando usá-las: Espadas(1): Ignora 4 da Armadura do Alvo; Paus(2): Adiciona 5 de dano ao seu ataque; Copas(3): Adiciona 5 de Roubo de Vida ao seu ataque; Ouros(4): Causa -2 na Reação do seu Alvo. Cada um dos efeitos aumenta a cada 20 Níveis do Personagem.");
         hab("CONSUMIR_FORCAS", "Consumir Forças", "BRUXO", "ATIVA", 6, "PE",
-                "Bruxo", "Ao tocar em um alvo pode drenar suas forças, assim removendo 2 pontos a cada 5 Níveis do Personagem do atributo de “Força” do alvo, além disso recebe metade dos pontos reduzidos em Pontos de Energia.");
+                "Bruxo", "Ao tocar em um alvo pode drenar suas forças, do alvo “Força” do alvo, além disso recebe metade "
+                        + "dos pontos reduzidos em Pontos de Energia.");
         hab("ODOR_DO_DECREPITO", "Odor do Decrépito", "BRUXO", "ATIVA", 4, "PE",
                 "Bruxo", "Após abater um alvo em combate, o usuário pode transferir a essência de morte para o seu alvo, dessa forma o mesmo deverá rodar um teste de “Vigor” para resistir, caso falhe o alvo fica sem reação de “Bloqueio” e “Esquiva” até o final da cena.");
         hab("FERIMENTOS_HORRENDOS", "Ferimentos Horrendos", "BRUXO", "ATIVA", 2, "PE",
@@ -677,7 +694,10 @@ public class DataSeeder implements CommandLineRunner {
         hab("INFERIOR_A_MIM", "Inferior a Mim", "BRUXO", "ATIVA", 4, "PE",
                 "Bruxo", "Ao encarar um oponente o oprime com sua aura, pode usar “Feitiçaria” como teste de intimidação, caso passe o alvo fica “Intimidado” e a habilidade “Visão Turva” ganha +1 de efeito a cada 5 Níveis do Personagem.");
         hab("ALVOROCA_MALDICAO", "Alvoroça Maldição", "BRUXO", "ATIVA", 8, "PE",
-                "Bruxo", "Ao gastar uma Ação Completa o usuário consegue moldar a mana do ambiente e lançar uma maldição no seu alvo, a maldição deverá ter uma condição quaisquer para ser ativada, e quando ativada reduz 5 pontos a cada 10 Níveis do Personagem de Atributo do Alvo, o usuário pode distribuir os pontos reduzidos como desejar.");
+                "Bruxo", "Ao gastar uma Ação Completa, o usuário molda a mana do ambiente e lança uma maldição sobre um "
+                        + "alvo. O usuário define uma condição para ativá-la; quando a condição for cumprida, a maldição "
+                        + "reduz 4 pontos de atributos, aumentando em 2 a cada 10 níveis. Os pontos podem ser distribuídos "
+                        + "entre diferentes atributos, mas nenhum atributo pode ser reduzido em mais de 4 pontos.");
         hab("RESGATAR_FAMILIAR", "Resgatar Familiar", "BRUXO", "ATIVA", 5, "PE",
                 "Bruxo", "O usuário absorve as capacidades de seu familiar para si, oque o faz entrar em seu intervalo de retorno, mas com isso, ganha +2 do maior atributo do seu familiar a cada 5 Níveis do Personagem e consegue utilizar as bênçãos do mesmo como se fossem suas, até o final da cena.");
         hab("TRANSMUTAR", "Transmutar", "ALQUIMISTA", "ATIVA", 3, "PE",
@@ -699,7 +719,8 @@ public class DataSeeder implements CommandLineRunner {
         hab("BALANCEAR_PESO", "Balancear Peso", "LANCEIRO", "PASSIVA", 0, null,
                 "Lanceiro", "Reduz o peso de qualquer arma da categoria de “Lança” em -1, além disso, sacar lanças é uma ação livre. (Passiva)");
         hab("BARRAGEM_DE_GOLPES", "Barragem de Golpes", "LANCEIRO", "ATIVA", 8, "PE",
-                "Lanceiro", "O usuário lança uma sequência de ataques determinado por 1d10, cada golpe consecutivo causa -2 de dano.");
+                "Lanceiro", "O usuário desfere uma sequência de estocadas rápidas. Role 1d10 para determinar o número de "
+                        + "ataques realizados. Cada ataque causa tem 2 de acerto e de dano em relação ao anterior.");
         hab("ATAQUE_EXTENSOR", "Ataque Extensor", "GERAL", "ATIVA", 2, "PE",
                 "Arma Corpo a Corpo Média", "O usuário pega na ponta do cabo de sua arma e assim desfere um ataque, o alcance da sua arma aumenta em um passo, além disso, no primeiro turno caso use essa habilidade sua arma receberá +1 dado de dano do mesmo tipo.");
         hab("PANCADA_CRITICA", "Pancada Crítica", "BARBARO,LANCEIRO", "ATIVA", 10, "PE",
@@ -717,7 +738,10 @@ public class DataSeeder implements CommandLineRunner {
         hab("FINTA", "Finta", "LUTADOR", "PASSIVA", 0, null,
                 "Lutador", "O usuário entende muito bem qual o momento certo para atacar seu oponente, assim sempre que desviar ou defender por um valor maior que 10 do ataque inimigo, irá poder realizar um ataque contra o atacante. (Passiva)");
         hab("SEQUENCIA_FLUIDA", "Sequência Fluída", "LUTADOR", "ATIVA", 4, "PE",
-                "Lutador", "O usuário utiliza força de impacto de seu golpe para já lançar outro, dessa forma quando atacar seu alvo e acertar, pode rolar 1d4 onde se cair 4 poderá lançar um novo ataque. Pode-se reduzir a margem do dado ao gastar PE, a cada 1 PE gasto reduz em -1 a margem de acerto.");
+                "Lutador", "O usuário utiliza o impacto de um golpe para emendar outro imediatamente. Sempre que acertar um "
+                        + "ataque corpo a corpo, role 1d4. Caso o resultado seja 4, poderá realizar um ataque adicional "
+                        + "contra o mesmo alvo. Antes da rolagem, o usuário pode gastar PE adicionais para aumentar suas "
+                        + "chances. Para cada 1 PE gasto, reduz em 1 o resultado necessário para ativar a habilidade.");
         hab("REFORCAR", "Reforçar", "LUTADOR", "ATIVA", 2, "PE",
                 "Lutador", "Ao contrair todos os seus músculos, o usuário faz um esforço que lhe garante +2 a cada 5 pontos de Força em Armadura, Dano e Penetração de Armadura.");
         hab("MEMORIA_MUSCULAR", "Memória Muscular", "LUTADOR", "ATIVA", 4, "PE",
@@ -759,15 +783,15 @@ public class DataSeeder implements CommandLineRunner {
         hab("GRITO_DE_ORDEM", "Grito de Ordem", "CAVALEIRO,COMANDANTE", "ATIVA", 5, "PE",
                 "Trilha Comandante", "O Cavaleiro inspira aliados em alcance médio, concedendo um bônus de +2 (a cada 5 niveis) em testes de Iniciativa e Ataque por 2 rodadas.");
         hab("GOLPE_DE_CONVICCAO", "Golpe de Convicção", "CAMPEAO,CAVALEIRO,COMANDANTE", "ATIVA", 3, "PE",
-                "Trilha Comandante, campeão", "Adicione metade do valor de carisma ao dano de um ataque físico, representando a força de seus ideais.");
+                "Trilha Comandante, Campeão, Carisma 10", "Adicione metade do valor de carisma ao dano de um ataque físico, representando a força de seus ideais.");
         hab("RESISTENCIA_BLINDADA", "Resistência Blindada", "CAVALEIRO,MONGE", "PASSIVA", 0, null,
-                "cavaleiro, monge", "Passivamente, o Cavaleiro reduz o dano de ataques críticos recebidos em um passo de dado.");
+                "cavaleiro, monge", "Passivamente, o Usuário reduz o dano de ataques críticos recebidos em um passo de dado.");
         hab("LAMINA_FANTASMAGORICA", "Lâmina Fantasmagórica", "ASSASSINO", "ATIVA", 4, "PE",
                 null, "O ataque ignora qualquer Cobertura Parcial do alvo e adiciona +2 de dano por cada 5 pontos de Furtividade.");
         hab("PASSO_DE_SOMBRA", "Passo de Sombra", "ASSASSINO,SOMBRA", "ATIVA", 3, "PE",
                 "Sombra", "Permite que o usuário se mova até seu Deslocamento total sem provocar ataques de oportunidade enquanto estiver em sombras.");
         hab("ANALISE_DE_PONTO_CEGO", "Análise de Ponto Cego", "ARQUEIRO,ASSASSINO", "PASSIVA", 0, null,
-                "ARQUEIRO, Assassino", "Se o Assassino estiver em um nível superior (terreno alto), sua margem de crítico aumenta em +2.");
+                "ARQUEIRO, Assassino", "Se o usuário estiver em um nível superior (terreno alto), sua margem de crítico aumenta em +2.");
         hab("EXECUCAO_SILENCIOSA", "Execução Silenciosa", "ASSASSINO", "ATIVA", 15, "PE",
                 null, "Se o alvo estiver com o dobro de sua constituição, o Assassino pode gastar toda sua energia para tentar um golpe fatal (DT de Vigor do alvo).");
         hab("SALTO_ESMAGADOR", "Salto Esmagador", "BARBARO", "ATIVA", 6, "PE",
@@ -779,9 +803,12 @@ public class DataSeeder implements CommandLineRunner {
         hab("LUZ_DE_PURIFICACAO", "Luz de Purificação", "CLERIGO", "ATIVA", 4, "PM",
                 "Curandeiro tbm", "Remove um efeito de status negativo (Sangramento, Envenenamento ou Confusão) de até dois aliados próximos.");
         hab("MARTELO_DIVINO", "Martelo Divino", "CLERIGO,PALADINO", "ATIVA", 8, "PE",
-                "Trilha Paladino", "Impregna a arma própria com fé, causando dano mágico adicional baseado na perícia Fé, este dano impregna a arma com a mana de sua divindade.");
+                "Trilha Paladino", "Impregna a arma própria com fé, causando dano mágico adicional baseado na perícia Fé, este dano "
+                        + "impregna a arma com a mana de sua divindade. O efeito permanece na arma por 3 Turnos. Enquanto "
+                        + "com efeito ativo, a arma não pode receber outras Magias.");
         hab("AURA_DE_SANTIDADE", "Aura de Santidade", "CLERIGO,SANTO", "PASSIVA", 0, null,
-                "Trilha Santo", "Aliados em alcance curto recebem um bônus de +2 a cada 5 níveis em todos os testes de resistência contra feitiços.");
+                "Trilha Santo", "Aliados em alcance curto recebem um bônus de +2 a cada 5 níveis em todos os testes de reação "
+                        + "contra magias.");
         hab("VINCULO_ESPIRITUAL_CURANDEIRO_L", "Vínculo Espiritual (CURANDEIRO)l", "CLERIGO", "ATIVA", 5, "PM",
                 null, "O Clérigo escolhe um aliado; metade da cura recebida pelo Clérigo é transferida para esse aliado.");
         hab("SENTENCA_CELESTIAL", "Sentença Celestial", "CLERIGO", "ATIVA", 4, "PM",
@@ -789,13 +816,18 @@ public class DataSeeder implements CommandLineRunner {
         hab("FORMA_DE_CARVALHO", "Forma de Carvalho", "DRUIDA", "ATIVA", 6, "PE",
                 null, "Aumenta a Constituição em +2 (a cada 5 niveis) e concede 5 (a cada 10 niveis) de armadura verdadeira enquanto estiver em ambiente de floresta.");
         hab("ESPINHOS_APRISIONADORES", "Espinhos Aprisionadores", "DRUIDA", "ATIVA", 6, "PM",
-                "feitiço; Trilha Arauto", "Cria raízes que surgem do solo, deixando os alvos na área com o estado Paralisado (Teste de Esquiva para evitar).");
+                "feitiço; Trilha Arauto", "O usuário faz raízes espinhosas emergirem do solo, prendendo tudo em seu caminho. Escolha um "
+                        + "ponto em alcance médio. As raízes cobrem uma área durante 3 turnos. Criaturas que entrarem na "
+                        + "área ou iniciarem seu turno nela devem realizar um teste de Esquiva. Em caso de falha, ficam "
+                        + "Imobilizadas, sofrem 1d6 de dano perfurante e consideram a área como terreno difícil. Caso uma "
+                        + "criatura já Imobilizada falhe novamente, fica Paralisada até o fim do turno.");
         hab("COMANDO_DA_MATILHA", "Comando da Matilha", "DRUIDA", "ATIVA", 6, "PE",
                 "Trilha Domador", "Concede uma ação padrão extra para seu companheiro animal sendo um gasto para cada animal neste turno.");
         hab("SIMBIOSE_NATURAL", "Simbiose Natural", "DRUIDA", "ATIVA", 8, "PE",
                 null, "O Druida pode transferir metade do dano recebido para uma planta ou árvore próxima(nível 20).");
         hab("PALMA_DE_VACUO", "Palma de Vácuo", "MONGE", "ATIVA", 4, "PE",
-                null, "Um ataque desarmado que empurra o inimigo 5 metros para trás e causa o estado atordoado se ele atingir uma parede ou objeto grande e duro (meu pinto).");
+                null, "Um ataque desarmado que empurra o inimigo 5 metros para trás. Se ele colidir com uma parede ou "
+                        + "outro objeto grande e rígido, ficará atordoado.");
         hab("MEDITACAO_DE_COMBATE", "Meditação de Combate", "MONGE,SABIO", "PASSIVA", 0, null,
                 "Trilha Sábio", "O Monge gasta sua ação para recuperar PE igual ao seu bônus de metade da sabedoria (1 vez por dia) .");
         hab("PASSOS_DE_VENTO", "Passos de Vento", "MONGE", "ATIVA", 15, "PE",
@@ -803,37 +835,45 @@ public class DataSeeder implements CommandLineRunner {
         hab("REFLEXO_BLINDADO", "Reflexo Blindado", "MONGE", "ATIVA", 2, "PE",
                 null, "Permite usar a perícia Combate para bloquear projéteis físicos (flechas, facas).");
         hab("FLECHA_DE_RASTREIO", "Flecha de Rastreio", "ARQUEIRO", "ATIVA", 3, "PE",
-                null, "Marca um alvo; o Arqueiro e seus aliados ganham Vantagem em testes de Percepção contra este alvo por toda a cena(teste de percepção contra).");
+                null, "Marca um alvo; o Arqueiro e seus aliados ganham Vantagem em testes de Percepção contra este "
+                        + "alvo por toda a cena.");
         hab("TIRO_DE_INTERDICAO", "Tiro de Interdição", "ARQUEIRO", "ATIVA", 4, "PE",
                 null, "Atira nas pernas do alvo, reduzindo seu deslocamento pela metade na próxima rodada.");
         hab("ARMADILHA_DE_CACADOR", "Armadilha de Caçador", "ARQUEIRO,CACADOR", "ATIVA", 5, "PE",
                 "Trilha Caçador", "suas armadilhas são especiais, causando o dobro de efeito ou dano dependendo da armadilha.");
         hab("CHUVA_DE_PROJETEIS", "Chuva de Projéteis", "ARQUEIRO", "ATIVA", 8, "PE",
-                null, "O Arqueiro dispara várias flechas em uma área, causando dano reduzido a todos os inimigos nela -2 de dano para cada flecha.");
-        hab("OLHO_DO_PREDADOR", "Olho do Predador", "ARQUEIRO,MERCENARIO", "ATIVA", 8, "PE",
-                "Trilha Mercenário", "Adicione a metade da Inteligência à margem de acerto para o próximo disparo.");
+                null, "Dispara uma chuva de flechas em uma área curta. Cada inimigo na área sofre 1 golpe. Para cada "
+                        + "inimigo adicional atingido, o dano de todas as flechas é reduzido em 1.");
+        hab("OLHO_DO_PREDADOR", "Olho do Predador", "MERCENARIO", "ATIVA", 8, "PE",
+                "Trilha Mercenário", "Adicione 1 a cada 10 pontos de inteligência na margem de crítico para o próximo disparo.");
         hab("BARREIRA_ARCANA", "Barreira Arcana", "MAGO", "ATIVA", 6, "PM",
                 null, "Cria um escudo de mana que absorve dano mágico igual a duas vezes o bônus de Inteligência.");
         hab("SOBRECARGA_MAGICA", "Sobrecarga Mágica", "ARQUIMAGO,MAGO", "ATIVA", 6, "PM",
                 "Trilha Arquimago", "O próximo feitiço causa o dobro de dano, mas o Mago fica Vulnerável por 1 rodada.");
         hab("ESCRITA_DE_RUNA", "Escrita de Runa", "MAGO,RUNICISTA", "ATIVA", 6, "PM",
-                "Trilha Runicista", "Grava uma runa em um objeto que explode quando tocado por um inimigo causando 4d6 de dano aumentando 2 dados a cada 10 niveis.");
+                "Trilha Runicista", "O usuário inscreve uma runa mágica em um alvo, aliado ou superfície. Escolha um atributo, a "
+                        + "runa concede 2 ao atributo escolhido por 3 turnos. A cada 15 níveis, o limite de runas que "
+                        + "podem ser inscritas no mesmo alvo ou superfície aumenta em 1.");
         hab("TRANSMUTACAO_DE_MANA", "Transmutação de Mana", "MAGO", "PASSIVA", 0, null,
                 null, "O Mago pode converter 10 pontos de PE em 10 pontos de PM 3 vezes por dia (a cada 10 niveis) (ou vice-versa).");
         hab("MENTE_LIMPIDA", "Mente Límpida", "MAGO", "ATIVA", 3, "PM",
                 null, "Concede imunidade a efeitos de origem mágica por 3 rodadas.");
-        hab("DESAFIO_DE_HONRA", "Desafio de Honra", "CAVALEIRO,ESPADACHIM,LUTADOR", "ATIVA", 4, "PE",
-                "LUTADOR, ESPADACHIM, CAVALEIRO", "Força um inimigo a focar seus ataques apenas no Espadachim por 1 rodada 1 vez por alvo.");
+        hab("DESAFIO_DE_HONRA", "Desafio de Honra", "CAVALEIRO,ESPADACHIM,CAMPEAO", "ATIVA", 4, "PE",
+                "Espadachim, Cavaleiro, Campeão", "Força um inimigo a focar seus ataques apenas no Espadachim por 1 rodada 1 vez por alvo.");
         hab("CORTE_DE_RETENCAO", "Corte de Retenção", "ESPADACHIM,SAMURAI", "ATIVA", 6, "PE",
                 "Trilha Samurai", "Um ataque rápido que, se acertar, impede o alvo de realizar reações neste turno.");
         hab("DANCA_DAS_LAMINAS", "Dança das Lâminas", "ESPADACHIM,SAMURAI", "PASSIVA", 0, null,
-                "samurai, nivel 10", "O usuário ganha +1 de Armadura para cada inimigo adjacente.");
+                "samurai, nivel 10", "O usuário recebe 1 de Armadura Física para cada inimigo adjacente, aumentando esse bônus em 1 a "
+                        + "cada 15 níveis. Além disso, ao empunhar uma espada média, seus ataques causam 2 de dano para "
+                        + "cada inimigo adjacente.");
         hab("LAMINA_RESSONANTE", "Lâmina Ressonante", "ESPADACHIM", "ATIVA", 5, "PE",
-                null, "O Espadachim faz vibrar sua arma, causando dano de impacto adicional de +2 a cada 5 niveis do personagem em alvos que usam armaduras pesadas.");
+                null, "Faça sua arma vibrar em alta frequência. Seus ataques corpo a corpo causam 4 de dano de "
+                        + "impacto, aumentando em 2 a cada 5 níveis, e ignoram a redução de dano concedida por armaduras.");
         hab("GATUNO_AGIL", "Gatuno Ágil", "LADRAO", "ATIVA", 2, "PE",
                 null, "Permite realizar a ação de \"Roubar\" como uma Ação Secundária durante o combate.");
         hab("SAQUE_DO_PIRATA", "Saque do Pirata", "LADRAO,PIRATA", "PASSIVA", 0, null,
-                "Trilha Pirata", "Ao derrotar um inimigo, o Ladrão recupera 5 PE a cada 10 niveis instantaneamente (3 vezes por dia).");
+                "Trilha Pirata", "Ao derrotar um inimigo, o Ladrão recupera 5 PE, aumentando em 5 PE a cada 10 níveis. Este "
+                        + "efeito pode ser ativado até 3 vezes por dia.");
         hab("BOMBA_DE_FUMACA", "Bomba de fumaça", "LADRAO", "ATIVA", 5, "PE",
                 null, "Cria uma nuvem que concede Cobertura Total em um raio curto por 1 rodada.");
         hab("SORTE_DO_CRIMINOSO", "Sorte do Criminoso", "LADRAO", "ATIVA", 5, "PE",
@@ -843,23 +883,29 @@ public class DataSeeder implements CommandLineRunner {
         hab("PRECE_DE_ALIVIO", "Prece de Alívio", "CURANDEIRO,SACERDOTE", "ATIVA", 6, "PM",
                 "Trilha Sacerdote", "tira os efeitos de todos os aliados podendo usar 3 vezes por dia (esse limite aumenta em 1 a cada 5 niveis).");
         hab("TOXINA_PARALISANTE", "Toxina Paralisante", "CURANDEIRO,MESTRE_TOXINAS", "ATIVA", 4, "PE",
-                "Trilha Mestre de Toxinas", "Cobre uma arma com veneno que deixa o alvo Paralisado por 2 rodadas caso acerte o ataque .");
+                "Trilha Mestre de Toxinas", "Cobre uma arma com veneno que deixa o alvo Paralisado por 2 rodadas caso acerte o ataque . O "
+                        + "alvo deve realizar um teste de Vigor contra a Inteligência do usuário, caso passe ainda fica 1 "
+                        + "Turno lento.");
         hab("DIAGNOSTICO_RAPIDO", "Diagnóstico Rápido", "CURANDEIRO", "ATIVA", 8, "PM",
                 null, "Identifica instantaneamente o HP atual e as fraquezas elementais de um inimigo (duas vezes por dia, podendo aumentar esse limite em 1 a cada 5 niveis).");
         hab("ESTABILIZAR_SINAIS", "Estabilizar Sinais", "CURANDEIRO", "ATIVA", 8, "PM",
                 null, "Garante que um aliado que chegou a 0 HP não precise fazer testes de morte por 3 rodadas.");
         hab("DRENO_DE_VITALIDADE", "Dreno de Vitalidade", "BRUXO", "ATIVA", 6, "PE",
-                null, "Causa dano necrótico ao alvo e cura o Bruxo em metade do valor causado.");
+                null, "A próxima magia ofensiva do usuário passa a causar dano do elemento Morte em vez de seu "
+                        + "elemento original. Além disso, o usuário recupera PV equivalentes à metade do dano causado.");
         hab("SERVO_PUTREFATO", "Servo Putrefato", "BRUXO,NECROMANTE", "ATIVA", 6, "PE",
                 "Trilha Necromante", "Fortalece um morto-vivo invocado, concedendo-lhe +2 em qualquer atributo (aumentando em +2 essa quantidade a cada 5 níveis) por 3 rodadas uma vez por cena.");
         hab("MAO_DO_MEDO", "Mão do Medo", "BRUXO", "ATIVA", 4, "PM",
-                null, "Um ataque de toque que deixa o alvo com o estado amedrontado (impede de se aproximar do Bruxo) teste de vigor para não funcionar ou esquivar.");
+                null, "Ataque de toque. Se atingir o alvo, ele fica Amedrontado, tornando-se incapaz de se aproximar "
+                        + "do Bruxo. O alvo pode evitar o efeito com um teste de Vigor ou Esquiva.");
         hab("PACTO_DE_SANGUE", "Pacto de Sangue", "BRUXO", "ATIVA", 10, "PE",
                 null, "O Bruxo sacrifica 10 HP para recuperar 10PM ou 10 PE (2 vezes por dia) podendo aumentar o limite para + 10 de vida a cada 10 níveis.");
         hab("GRANADA_QUIMICA", "Granada Química", "ALQUIMISTA", "ATIVA", 4, "PE",
                 null, "Lança um frasco que causa dano de fogo ou ácido em uma área curta, se causar algum efeito será dobrado.");
         hab("INFUSAO_ARCANA", "Infusão Arcana", "ALQUIMISTA,QUIMICO_ARCANO", "ATIVA", 6, "PM",
-                "Trilha Químico Arcano", "Adiciona dano elemental temporário à arma de um aliado por toda a cena.");
+                "Trilha Químico Arcano", "Escolha um elemento natural ao ativar esta habilidade. Até o fim da cena, a arma de um aliado "
+                        + "fica imbuída com esse elemento, fazendo com que seus ataques causem 5 de dano elemental "
+                        + "adicional, aumentando em 5 a cada 10 Níveis do Personagem.");
         hab("ENGRENAGEM_DE_DEFESA", "Engrenagem de Defesa", "ALQUIMISTA,INVENTOR", "ATIVA", 4, "PE",
                 "Trilha Inventor", "Conecta um dispositivo à armadura que concede +2 de bônus em Bloqueio (aumentando em +2 a cada 5 niveis) só pode ser utilizado em um dos aliados, não acumulativo.");
         hab("ANTIDOTO_RAPIDO", "Antídoto Rápido", "ALQUIMISTA", "ATIVA", 3, "PE",
@@ -867,30 +913,41 @@ public class DataSeeder implements CommandLineRunner {
         hab("NEVOA_DE_ESTASE", "Névoa de Estase", "ALQUIMISTA", "ATIVA", 5, "PE",
                 null, "Lança um gás que reduz a Iniciativa pela metade de todos os inimigos afetados.");
         hab("ESTOCADA_DE_ALCANCE", "Estocada de Alcance", "LANCEIRO", "ATIVA", 3, "PE",
-                null, "O Lanceiro pode atacar um inimigo a até 3 metros de distância com bônus de +2 em Combate ( a cada 5 níveis esse bônus aumenta +2).");
+                null, "O usuário realiza uma estocada precisa, aumentando em um passe o seu alcance. O ataque recebe 2 "
+                        + "em Combate, aumentando em 2 a cada 5 Níveis do Personagem.");
         hab("SALTO_DO_GENERAL", "Salto do General", "GENERAL_CEUS,LANCEIRO", "ATIVA", 5, "PE",
-                "Trilha General dos Céus", "O usuário salta alto e cai sobre um inimigo, causando dano dobrado se o alvo estiver no ar, devendo fazer um teste de acrobacia com a DT sendo a esquiva do inimigo, caso erre estará VULNERÁVEL.");
+                "Trilha General dos Céus", "O usuário salta em direção a um inimigo, realizando um teste de Acrobacia contra a Esquiva do "
+                        + "alvo. Em caso de sucesso, desfere um ataque com 2 em Combate. Se o alvo estiver no ar, o ataque "
+                        + "causa dano dobrado. Em caso de falha, o usuário aterrissa desequilibrado e recebe o estado "
+                        + "Vulnerável até o início de seu próximo turno.");
         hab("INVESTIDA_DA_VALQUIRIA", "Investida da Valquíria", "LANCEIRO,VALQUIRIA", "ATIVA", 6, "PE",
                 "Trilha Valquíria", "O usuário avança em linha reta, atacando todos os inimigos em seu caminho, caso não acerte mais que 1, irá tomar ataque de oportunidade (máximo 3).");
-        hab("BARREIRA_GIRATORIA_LANCEIRO", "Barreira Giratória", "LANCEIRO", "ATIVA", 3, "PE",
-                null, "Usa a lança para bloquear projéteis, ganhando +5 em testes de Bloqueio contra ataques à distância(aumentando em +2 a cadaass5 niveis).");
+        hab("BARREIRA_GIRATORIA_LANCEIRO", "Postura Defensiva", "LANCEIRO", "ATIVA", 3, "PE",
+                null, "Até o início do seu próximo turno, criaturas que entrarem no alcance de sua lança provocam um "
+                        + "ataque de oportunidade, mesmo que normalmente não o fariam.");
         hab("PONTA_ROMPEDORA", "Ponta Rompedora", "LANCEIRO", "ATIVA", 6, "PE",
                 null, "O ataque ignora a resistência a dano perfurante do alvo por 3 rodadas, uma vez por cena.");
         hab("GANCHO_ASCENDENTE", "Gancho Ascendente", "LUTADOR", "ATIVA", 5, "PE",
                 null, "Um soco potente que joga o alvo para cima, deixando-o Vulnerável por 1 rodada.");
         hab("POSTURA_DO_CAMPEAO", "Postura do Campeão", "CAMPEAO,LUTADOR", "PASSIVA", 0, null,
                 "Trilha Campeão", "Enquanto estiver cercado inimigos, o Lutador ganha +2 de Dano Extra por cada inimigo (aumentando em +2 a cada 5 níveis).");
-        hab("CONTRA_ATAQUE_FLUIDO", "Contra-Ataque Fluído", "ARTISTA_MARCIAL,LUTADOR", "ATIVA", 5, "PE",
+        hab("CONTRA_ATAQUE_FLUIDO", "Contra-Ataque Fluído", "ARTISTA_MARCIAL,LUTADOR", "ATIVA", 3, "PE",
                 "Trilha Artista Marcial", "Ao desviar de um ataque, o Lutador pode realizar um ataque desarmado imediato como reação.");
         hab("AGARRAO_BRUTAL", "Agarrão Brutal", "LUTADOR", "ATIVA", 5, "PE",
                 null, "O Lutador imobiliza o alvo; ambos ficam sob o estado Agarrado, mas o alvo recebe dano de sufocamento a cada turno (2d8) +1 dado a cada 5 níveis.");
         hab("FOCO_INABALAVEL", "Foco Inabalável", "LUTADOR", "PASSIVA", 0, null,
                 null, "O lutador ignora qualquer penalidade de movimento causada por terrenos difíceis, gerando +2 em testes físicos em terrenos difíceis (aumentando em +2 a cada 5 níveis).");
         hab("DEMPSEY_ROLL_DANCA_DO_PUNHO_DEMOLIDOR", "DEMPSEY ROLL - Dança do Punho Demolidor", "LUTADOR", "PASSIVA", 0, null,
-                null, "Sempre que se deslocar pelo menos 1 passo antes de atacar, você ganha 1 Acúmulo de Impulso (máx. 4), lembrando que só pode atacar depois que quiser parar a habilidade, ficando limitado somente à esquiva. Para cada Acúmulo de Impulso, você recebe: +1 dado de dano desarmado +1 na margem de ameaça (aumentando em +1 ambos, essa habilidade pode ser escolhida várias vezes porém a cada 10 níveis do personagem) Se você desviar um ataque inimigo enquanto a habilidade estiver ativa, pode gastar 1 Reação para gerar mais um ataque no final da habilidade, CASO LEVE UM ATAQUE A HABILIDADE É CESSADA. Ao final do turno, faça um teste de Atletismo (DT 16 + 4 por Acúmulo de Impulso).");
-        hab("FALHA", "Falha", "LUTADOR", "PASSIVA", 0, null,
-                null, "você fica paralisado e vulnerável até o próximo turno e perde todos os Acúmulos.• Sucesso: a próxima vez que usar terá mais um ataque extra. (Custo 5 PE + 2 PE por Acúmulo de Impulso gerado) Requisitos: [artista marcial], [Sequência Fluída], [Passos Leves ou Reforçar].");
-        hab("MELODIA_REVIGORANTE", "Melodia Revigorante", "BARDO,VIAJANTE", "ATIVA", 6, "PM",
+                null, "Sempre que gastar uma Ação de Movimento, o usuário recebe 1 Acúmulo de Impulso (máximo 4). "
+                        + "Enquanto possuir Acúmulos de Impulso, não pode realizar ataques, ficando limitado a ações de "
+                        + "Deslocamento e Esquiva. Ao encerrar a habilidade, realiza seus ataques normalmente. Para cada "
+                        + "Acúmulo de Impulso, recebe 1 dado de dano desarmado e 1 na margem de ameaça. Caso Esquive de um "
+                        + "ataque enquanto a habilidade estiver ativa, pode gastar 1 Reação para realizar 1 ataque "
+                        + "adicional ao final da habilidade. Se sofrer dano durante esse período, todos os Acúmulos de "
+                        + "Impulso são perdidos e a habilidade é encerrada imediatamente. Ao final de cada turno em que "
+                        + "permanecer acumulando impulso, realize um teste de Vigor (DT 16 4 por Acúmulo de Impulso). Em "
+                        + "caso de falha, a habilidade é encerrada.");
+                hab("MELODIA_REVIGORANTE", "Melodia Revigorante", "BARDO,VIAJANTE", "ATIVA", 6, "PM",
                 "Trilha Bardo", "Toca uma música que recupera 5 PE de todos os aliados próximos por 2 turnos (uma vez por cena).");
         hab("VATICINIO_DO_DESTINO", "Vaticínio do Destino", "CIGANO,VIAJANTE", "ATIVA", 3, "PE",
                 "Trilha Cigano", "O Viajante prevê um golpe, concedendo bônus na próxima Esquiva de um aliado de +2 (aumentando em +2 a cada 5 NÍVEIS).");
@@ -899,7 +956,7 @@ public class DataSeeder implements CommandLineRunner {
         hab("RELATO_DE_VIAGEM", "Relato de Viagem", "SABIO,VIAJANTE", "ATIVA", 6, "PM",
                 "SÁBIO", "O Viajante compartilha uma história que concede +8 em testes de Conhecimento para todo o grupo por 1 hora.");
         hab("REFLETIR_IMPACTO", "Refletir Impacto", "ESCUDEIRO", "ATIVA", 5, "PE",
-                null, "Ao realizar um Bloqueio Crítico, devolve metade do dano ao atacante. [Requer: Nível 10].");
+                "Nível 15", "Ao realizar um Bloqueio Crítico, devolve metade do dano ao atacante. [Requer: Nível 15].");
         hab("ESCUDO_ESMAGADOR", "Escudo Esmagador", "ESCUDEIRO", "ATIVA", 4, "PE",
                 null, "Pode realizar um Ataque corpo a corpo usando a perícia Bloqueio em vez de Combate. .");
         hab("VONTADE_DO_PROTETOR", "Vontade do Protetor", "ESCUDEIRO", "PASSIVA", 0, null,
@@ -919,13 +976,15 @@ public class DataSeeder implements CommandLineRunner {
         hab("KAWARIMI", "Kawarimi", "NINJA", "ATIVA", 10, "PE",
                 "Substituição", "Reação para trocar de lugar com um objeto próximo, anulando o dano recebido, uma vez por cena. .");
         hab("LAMINAS_MULTIPLAS", "Lâminas Múltiplas", "NINJA", "ATIVA", 2, "PE",
-                null, "Arremessa até 3 armas leves (shurikens/facas) em uma única ação. .");
+                null, "Arremessa até 3 armas leves (shurikens/facas) em uma única ação. . A partir do nível 20, pode "
+                        + "lançar até 6 armas leves.");
         hab("FUMACA_CEGANTE", "Fumaça Cegante", "NINJA", "PASSIVA", 0, null,
                 null, "Ao utilizar uma bomba de fumaça o inimigo também ficará ofuscado. .");
         hab("GOLPE_DE_LOTUS", "Golpe de Lótus", "MONGE,NINJA", "ATIVA", 5, "PE",
                 "monge", "Ataque que causa dano direto nos Pontos de Mana (PM) do alvo. .");
         hab("DILACERAR", "Dilacerar", "SICARIO", "ATIVA", 5, "PE",
-                null, "O próximo ataque adiciona +1 acúmulos de Sangramento. .");
+                null, "Seu próximo ataque adiciona 1 acúmulo de Sangramento. Se o alvo ainda não estiver Sangrando, "
+                        + "aplica 2 acúmulos em vez de 1.");
         hab("VENENO_DE_PARALISIA", "Veneno de Paralisia", "MESTRE_TOXINAS,SICARIO", "ATIVA", 4, "PE",
                 "Mestre de Toxinas", "Aplica veneno que reduz a Agilidade e destreza do alvo em -2 por 3 rodadas (bônus aumenta em +2 a cada 5 niveis). .");
         hab("SEDE_DE_SANGUE", "Sede de Sangue", "SICARIO", "PASSIVA", 0, null,
@@ -957,14 +1016,17 @@ public class DataSeeder implements CommandLineRunner {
         hab("INVESTIDA_SAGRADA", "Investida Sagrada", "ESCUDEIRO,PALADINO", "ATIVA", 5, "PE",
                 "escudeiro", "Avança em linha reta; o primeiro alvo atingido fica \"Atordoado\" ou derrubado. .");
         hab("BASTIAO_DA_LUZ", "Bastião da Luz", "PALADINO", "PASSIVA", 0, null,
-                null, "Aliados em alcance curto ganham 10 de Armadura a benção do mesmo panteão de deuses do usuário (+10 de Armadura a cada 20 Níveis do Personagem). (5 PE).");
+                null, "Aliados em alcance curto ganham 10 de Armadura Mágica contra bênçãos do panteão oposto ao deus "
+                        + "do usuário (+10 de Armadura a cada 20 Níveis do Personagem). (5 PE).");
         hab("LUZ_GUIA", "Luz Guia", "SANTO", "ATIVA", 5, "PE",
                 null, "Concede Bônus no próximo teste de ataque com bênção de um aliado, aumentando +2 para o seu acerto. (aumentando em +2 a cada 5 niveis). .");
         hab("SANTUARIO", "Santuário", "SANTO", "ATIVA", 5, "PE",
                 null, "Cria uma área de 5 metros onde inimigos que possuam divindades do panteão oposto ao usuário precisam passar em teste de Virtude para entrar ou passar algum ataque. .");
         hab("PALAVRAS_DE_PAZ", "Palavras de Paz", "SANTO", "ATIVA", 5, "PE",
-                null, "Para testes cujo objetivo seja evitar confrontos ou desavenças, o usuário recebe +15 de bônus em Diplomacia. .");
-        hab("MARTIR", "Mártir", "SANTO", "PASSIVA", 0, null,
+                null, "Para testes cujo objetivo seja evitar confrontos ou desavenças, o usuário recebe +15 de bônus "
+                        + "em Diplomacia. . Criaturas hostis devem passar em um teste de Mente contra a Diplomacia do "
+                        + "usuário para iniciar um combate.");
+        hab("MARTIR", "Mártir", "SANTO", "ATIVA", 3, "PE",
                 null, "Pode escolher receber os efeitos negativos destinados a um aliado próximo. (Reação - Gasto: 5 PE).");
         hab("CRESCIMENTO_ACELERADO", "Crescimento Acelerado", "ARAUTO_NATUREZA", "ATIVA", 5, "PE",
                 null, "Transforma o terreno em \"Terreno Difícil\" através de raízes. .");
@@ -974,7 +1036,7 @@ public class DataSeeder implements CommandLineRunner {
                 null, "Adiciona qualquer elemento de origem natural à escolha do usuário, para qualquer Feitiço que este possuir. .");
         hab("VOZ_DA_MATA", "Voz da Mata", "ARAUTO_NATUREZA", "ATIVA", 6, "PE",
                 null, "Pode \"ouvir\" as plantas para localizar inimigos em florestas em uma distância de 50 metros (caso esteja em floresta). .");
-        hab("CORPO_VEGETAL", "Corpo Vegetal", "ARAUTO_NATUREZA", "PASSIVA", 0, null,
+        hab("CORPO_VEGETAL", "Corpo Vegetal", "ARAUTO_NATUREZA", "ATIVA", 8, "PE",
                 null, "Você invoca raízes naturais para servir como sua armadura, elas possuem sua Sabedoria em PV e 5 de armadura (a cada 5 Níveis do Personagem). (8 PE).");
         hab("COMANDO_DE_REACAO", "Comando de Reação", "DOMADOR_FERAS", "ATIVA", 8, "PE",
                 null, "Quando o usuário for atacado, uma criatura aliada que possua pode realizar um ataque imediato como Reação. .");
@@ -989,24 +1051,29 @@ public class DataSeeder implements CommandLineRunner {
         hab("MENTE_DE_CRISTAL", "Mente de Cristal", "SABIO", "PASSIVA", 0, null,
                 null, "Torna-se imune ao estado \"Confuso\" e efeitos de leitura de mente. .");
         hab("PALMA_DA_SABEDORIA", "Palma da Sabedoria", "SABIO", "ATIVA", 6, "PE",
-                null, "Ataques desarmados somam o valor de Sabedoria ao dano. .");
+                null, "Inicia uma sequência de golpes corpo a corpo. Cada ataque corpo a corpo acertado "
+                        + "consecutivamente concede 1 de Sabedoria. O bônus é perdido ao errar um ataque corpo a corpo.");
         hab("FLUXO_DE_KI", "Fluxo de Ki", "SABIO", "PASSIVA", 0, null,
-                null, "Transfere metade dos Pontos de Energia gastos, para um aliado. .");
+                null, "Escolha quantos Pontos de Energia gastar, um aliado recebe metade desse valor. Por cena só pode "
+                        + "ser usado 1 vez por aliado.");
         hab("LEITURA_DE_COMBATE", "Leitura de Combate", "SABIO", "ATIVA", 5, "PE",
-                null, "Prevê a Esquiva do alvo, reduzindo-a em -5 no próximo ataque (aumentando em -5 a cada 10 níveis). .");
+                null, "Para cada golpe que errar, você recebe 2 no próximo ataque, o bônus aumenta em 1 a cada 10 "
+                        + "níveis do personagem.");
         hab("ESTADO_DE_NIRVANA", "Estado de Nirvana", "SABIO", "ATIVA", 12, "PE",
                 null, "Pelas próximas 1d4 de rodadas, o Monge tem o gasto de qualquer habilidade reduzido para metade. .");
         hab("IMPACTO_SISMICO", "Impacto Sísmico", "PUNHOS_ACO", "ATIVA", 6, "PE",
                 null, "Soco no solo que derruba todos os inimigos adjacentes, deixando-os derrubados, devem realizar um teste de Esquiva ou Vigor, contra o ataque do usuário. .");
         hab("BLINDAGEM_INTERNA", "Blindagem Interna", "PUNHOS_ACO", "ATIVA", 4, "PE",
-                null, "Recebe o valor de seu Vigor em Armadura Mágica. .");
+                null, "O usuário adiciona em sua Armadura Física atual a sua Armadura Mágica e em sua Armadura Mágica "
+                        + "atual a sua Armadura Física. Após sofrer um ataque físico, perde o bônus de Armadura Física e "
+                        + "após sofrer um ataque mágico, perde o bônus de Armadura Mágica.");
         hab("FOCO_DESTRUTIVO", "Foco Destrutivo", "PUNHOS_ACO", "PASSIVA", 0, null,
                 null, "Dobra o dano causado contra escudos e objetos inanimados. .");
         hab("ARMADILHA_DE_ESPINHOS", "Armadilha de Espinhos", "CACADOR", "ATIVA", 5, "PE",
                 null, "Cria uma armadilha que imobiliza o alvo por 1 rodada caso ele passe nela. .");
         hab("TIRO_DE_RASTREIO", "Tiro de Rastreio", "CACADOR", "ATIVA", 3, "PE",
                 null, "O inimigo atingido não pode se beneficiar de invisibilidade ou furtividade. .");
-        hab("ABATE_SILENCIOSO", "Abate Silencioso", "CACADOR", "PASSIVA", 0, null,
+        hab("ABATE_SILENCIOSO", "Abate Silencioso", "CACADOR", "ATIVA", 10, "PE",
                 null, "Adiciona +2 dados de dano contra alvos desprevenidos. (10 PE).");
         hab("CHAMADO_SELVAGEM", "Chamado Selvagem", "CACADOR,DRUIDA", "ATIVA", 6, "PE",
                 "Druida", "Atrai pequenos animais da região para distrair o inimigo. .");
@@ -1014,7 +1081,7 @@ public class DataSeeder implements CommandLineRunner {
                 null, "Fica invisível em ambientes naturais se permanecer imóvel por 1 turno. .");
         hab("TIRO_DE_OURO", "Tiro de Ouro", "MERCENARIO", "PASSIVA", 0, null,
                 null, "O passo de dano aumenta em +1 para cada 500 moedas de ouro que o Arqueiro carrega. .");
-        hab("VISAO_CALCULISTA", "Visão Calculista", "MERCENARIO", "ATIVA", 8, "PE",
+        hab("VISAO_CALCULISTA", "Visão Calculista", "MERCENARIO", "ATIVA", 12, "PE",
                 null, "Soma metade do atributo Inteligência no teste de Pontaria. .");
         hab("RETIRADA_AGIL", "Retirada Ágil", "LADRAO,MERCENARIO", "ATIVA", 5, "PE",
                 "Ladrão", "Pode fugir do alcance de um inimigo sem provocar ataques de oportunidade. .");
@@ -1027,11 +1094,14 @@ public class DataSeeder implements CommandLineRunner {
         hab("MENTE_EXPANDIDA", "Mente Expandida", "ARQUIMAGO", "PASSIVA", 0, null,
                 null, "Permite manter duas magias de \"Concentração\" ativas ao mesmo tempo. (8 PE).");
         hab("TORRENTE_ARCANA", "Torrente Arcana", "ARQUIMAGO", "ATIVA", 20, "PE",
-                null, "Dispara um raio que consome todo o PM atual para causar dano massivo. .");
+                null, "Consome todo o seu PM atual e dispara uma torrente de energia que causa 1d10 de Dano Arcano. "
+                        + "Para cada 10 PM consumidos, o ataque recebe 1 de dano e 1 no acerto. Se o ataque errar, metade "
+                        + "do PM consumido é restaurado.");
         hab("RUNA_DE_PROTECAO", "Runa de Proteção", "RUNICISTA", "ATIVA", 4, "PE",
                 null, "Grava uma runa em uma armadura, concedendo +4 de Armadura Mágica dura a cena (+2 a cada 5 níveis) . .");
         hab("RUNA_EXPLOSIVA", "Runa Explosiva", "RUNICISTA", "ATIVA", 6, "PE",
-                null, "O objeto tocado explode quando um inimigo se aproxima uma ação secundária para cada objeto, causando 4d6 de dano mágico. .");
+                null, "Grava uma runa em um objeto que explode quando tocado por um inimigo, causando 3d6 de dano "
+                        + "aumentando 3 dados a cada 10 níveis e o alcance em 1 passo a cada 15 níveis.");
         hab("ENCANTAMENTO_DE_LAMINA", "Encantamento de Lâmina", "RUNICISTA", "ATIVA", 3, "PE",
                 null, "Converte todo o dano de uma arma em mágico por 1d4 turnos. .");
         hab("MESTRE_DAS_GRAVURAS", "Mestre das Gravuras", "RUNICISTA", "PASSIVA", 0, null,
@@ -1049,7 +1119,8 @@ public class DataSeeder implements CommandLineRunner {
         hab("RESILIENCIA_BUSHIDO", "Resiliência Bushido", "SAMURAI", "PASSIVA", 0, null,
                 null, "Ignora condições não mágicas enquanto estiver com menos da metade do HP. .");
         hab("GOLPE_DE_HONRA", "Golpe de Honra", "SAMURAI", "ATIVA", 8, "PE",
-                null, "Depois de dois turnos Dano aumenta em dois dados se o Samurai não tiver recebido dano. .");
+                null, "Após permanecer 2 turnos sem receber dano, o Samurai pode realizar este ataque, causando 2 "
+                        + "dados de dano.");
         hab("PASSO_SOMBRIO", "Passo Sombrio", "SOMBRA", "ATIVA", 5, "PE",
                 null, "Teleporta-se entre sombras em alcance curto.");
         hab("GRILHOES_DA_PENUMBRA", "Grilhões da Penumbra", "ASSASSINO,SOMBRA", "ATIVA", 2, "PE",
@@ -1074,7 +1145,8 @@ public class DataSeeder implements CommandLineRunner {
         hab("AURA_DE_PUREZA", "Aura de Pureza", "SACERDOTE", "ATIVA", 4, "PE",
                 null, "Aliados próximos tornam-se imunes a efeitos mentais negativos. ).");
         hab("LUZ_DE_ALIVIO", "Luz de alívio", "SACERDOTE", "ATIVA", 5, "PE",
-                null, "O alvo recebe 1d12 de PE temporário e 1d12 de Armadura Mágica. .");
+                null, "O alvo recebe 1d12 de PE temporário e 1d12 de Armadura Mágica por 3 turnos. Ambos os valores "
+                        + "aumentam em 1d12 a cada 15 níveis.");
         hab("VINCULO_SAGRADO", "Vínculo Sagrado", "SACERDOTE", "PASSIVA", 0, null,
                 null, "O usuário pode escolher repartir qualquer cura mágica entre seus aliados. .");
         hab("NUVEM_TOXICA", "Nuvem Tóxica", "MESTRE_TOXINAS", "PASSIVA", 0, null,
@@ -1090,7 +1162,8 @@ public class DataSeeder implements CommandLineRunner {
         hab("EXPLOSAO_DE_CADAVER", "Explosão de Cadáver", "NECROMANTE", "ATIVA", 5, "PE",
                 null, "Explode um corpo no chão para causar 2d12 dano mágico em área curta, média ou grande, dependendo do corpo alvo( +1 dado a cada 10 níveis). .");
         hab("TOQUE_DA_MORTE", "Toque da Morte", "NECROMANTE", "ATIVA", 7, "PE",
-                null, "Reduz o PV máximo do inimigo em 1d20 pontos por 1 cena. (requisito nível 20).");
+                null, "Reduz o PV Máximo do alvo em 10, aumentando em 5 a cada 10 níveis, por 1 cena. Este efeito não "
+                        + "pode ser acumulado no mesmo alvo.");
         hab("EXERCITO_PUTREFATO", "Exército Putrefato", "NECROMANTE", "PASSIVA", 0, null,
                 null, "Pode controlar até 5 mortos-vivos simultaneamente(a cada 10 níveis). .");
         hab("CONSUMIR_MANANCIAL", "Consumir manancial", "NECROMANTE", "ATIVA", 4, "PE",
@@ -1100,7 +1173,7 @@ public class DataSeeder implements CommandLineRunner {
         hab("CORRENTE_DE_ALMAS", "Corrente de Almas", "MISTICO", "ATIVA", 10, "PE",
                 null, "Une a alma de dois alvos, fazendo que tudo que um receba, o outro receba também em dano mágico, podendo ser usado somente em inimigos. .");
         hab("ABSORCAO_DE_ESSENCIA", "Absorção de Essência", "MISTICO", "PASSIVA", 0, null,
-                null, "Recebe 4 PE temporárias toda vez que recebe dano mágico. .");
+                null, "Ao sofrer pela primeira vez dano mágico em uma rodada, recebe 4 PE temporários.");
         hab("INVOCACAO_ANCESTRAL", "Invocação Ancestral", "MISTICO", "ATIVA", 10, "PE",
                 null, "invoca um espírito local para atacar seus inimigos. .");
         hab("POCAO_EXPLOSIVA", "Poção Explosiva", "QUIMICO_ARCANO", "ATIVA", 2, "PE",
@@ -1110,25 +1183,47 @@ public class DataSeeder implements CommandLineRunner {
         hab("MUTACAO_QUIMICA", "Mutação Química", "QUIMICO_ARCANO", "ATIVA", 5, "PE",
                 null, "Aliados em alcance curto que consumirem poções feitas pelo usuário, recebem +2 em testes físicos (+2 a cada 10 Níveis). .");
         hab("SOLVENTE_UNIVERSAL", "Solvente Universal", "QUIMICO_ARCANO", "ATIVA", 4, "PE",
-                null, "Ataque que remove permanentemente 2 pontos de armadura de um objeto. .");
-        hab("MESTRE_DE_MISTURAS", "Mestre de Misturas", "QUIMICO_ARCANO", "PASSIVA", 0, null,
+                null, "Ao atingir um objeto, arma, armadura ou estrutura, o solvente remove permanentemente 2 pontos "
+                        + "de Armadura. Caso seja utilizado contra uma criatura, ela terá sua Armadura Física reduzida em "
+                        + "2 pelo resto do dia.");
+        hab("MESTRE_DE_MISTURAS", "Mestre de Misturas", "QUIMICO_ARCANO", "ATIVA", 2, "PE",
                 null, "Pode consumir ou lançar duas poções em uma única ação. (2 PE).");
         hab("TORRETA_PORTATIL", "Torreta Portátil", "INVENTOR", "ATIVA", 8, "PE",
-                null, "Posiciona um mecanismo que ataca automaticamente o inimigo mais próximo, causando 1d6 de dano variado (+1 dado a cada 10 Níveis). .");
+                null, "O usuário posiciona uma torreta mecânica construída durante um Descanso Longo, que ataca "
+                        + "automaticamente a criatura hostil mais próxima durante 5 turnos. Uma torreta Pequena ocupa 2 "
+                        + "espaços, possui 15 PV, 4 de Armadura e causa 1d6 de dano; uma Média ocupa 4 espaços, possui 30 "
+                        + "PV, 8 de Armadura e causa 1d8; e uma Grande ocupa 6 espaços, possui 45 PV, 12 de Armadura e "
+                        + "causa 1d10. O dano aumenta em 1 dado a cada 10 Níveis do Personagem. Caso a torreta seja "
+                        + "destruída, ela só poderá ser reconstruída ao final de outro Descanso Longo. Os materiais "
+                        + "utilizados em sua construção podem conceder capacidades adicionais.");
         hab("APRIMORAR_TORRETA", "Aprimorar Torreta", "INVENTOR", "ATIVA", 2, "PE",
-                null, "Melhora 1 “Torreta Portátil”, aumentando o seu dano em um passo. (+1 “Torreta Portátil” a cada 10 Níveis).");
+                null, "Ao gastar seu turno, o usuário instala em uma de suas Torretas Portáteis um mecanismo "
+                        + "construído durante um Descanso Longo, concedendo efeitos variados de acordo com sua construção. "
+                        + "Caso não possua um mecanismo preparado, poderá improvisar uma modificação temporária, "
+                        + "aumentando o dado de dano da torreta em um passo durante 2 turnos.");
         hab("DRONE_DE_RECONHECIMENTO", "Drone de Reconhecimento", "INVENTOR", "ATIVA", 4, "PE",
-                null, "Concede percepção em locais distantes sem se mover. .");
+                null, "O usuário ativa um pequeno drone mecânico capaz de explorar locais distantes. Durante 5 turnos, "
+                        + "pode enxergar e ouvir através dele enquanto o controla. O drone deve ser construído durante um "
+                        + "Descanso Longo e, caso seja destruído, só poderá ser reconstruído ao final de outro descanso. "
+                        + "Os materiais utilizados em sua construção podem conceder capacidades adicionais, a critério do "
+                        + "mestre ou de outras habilidades do Inventor.");
         hab("MAO_NA_MASSA", "Mão na Massa", "INVENTOR", "PASSIVA", 0, null,
-                null, "Ganha Vantagem em todos os testes de Atletismo durante seu processo de criação. .");
+                null, "Durante um Interlúdio, o usuário recebe Vantagem em todos os testes realizados para criar, "
+                        + "reparar ou aprimorar mecanismos, engenhocas e invenções. Além disso, uma vez a cada 3 dias, o "
+                        + "usuário pode abrir mão de sua necessidade de dormir para continuar trabalhando em seus projetos "
+                        + "durante a noite. Ao fazer isso, não recebe a Vantagem concedida por esta habilidade.");
         hab("SOBRECARGA_MECANICA", "Sobrecarga Mecânica", "INVENTOR", "ATIVA", 10, "PE",
-                null, "Faz um dispositivo trabalhar ao extremo, recebendo +2 ações principais mas destruindo-o no turno seguinte. .");
+                null, "O usuário força um de seus dispositivos mecânicos a operar além de seus limites. Durante este "
+                        + "turno, ele recebe 2 Ações Principais. Ao final do turno seguinte, o dispositivo é destruído e "
+                        + "só poderá ser reconstruído durante um Descanso Longo.");
         hab("COMANDO_DE_VOO", "Comando de Voo", "GENERAL_CEUS", "PASSIVA", 0, null,
                 null, "Aliados próximos ganham +2 (+2 a cada 5 níveis) de bônus em testes de Acrobacia e Salto. .");
         hab("LANCA_DE_JULGAMENTO", "Lança de Julgamento", "GENERAL_CEUS", "ATIVA", 5, "PE",
                 null, "Realiza um ataque, que causará dano no seu alvo e aqueles atrás dele. .");
         hab("ASAS_DO_COMANDO", "Asas do Comando", "GENERAL_CEUS", "PASSIVA", 0, null,
-                null, "O usuário realiza um ataque contra o solo ou o alvo, o dano causado irá reduzir o dano de queda. (2 PE).");
+                null, "Ao sofrer dano de queda, o usuário pode gastar sua ação para realizar imediatamente um ataque "
+                        + "contra o solo ou uma criatura dentro do alcance de sua arma. O dano causado por esse ataque "
+                        + "reduz o dano de queda na mesma quantidade.");
         hab("IMPACTO_METEORICO", "Impacto Meteórico", "GENERAL_CEUS", "PASSIVA", 0, null,
                 null, "O dano da lança aumenta em +1 de dano para cada metro de altura da queda. .");
         hab("BEIJO_DA_BATALHA", "Beijo da Batalha", "VALQUIRIA", "PASSIVA", 0, null,
@@ -1142,11 +1237,14 @@ public class DataSeeder implements CommandLineRunner {
         hab("POSTURA_INABALAVEL", "Postura Inabalável", "CAMPEAO", "PASSIVA", 0, null,
                 null, "Torna-se imune a ser derrubado ou empurrado por ataques físicos. .");
         hab("DESAFIO_DO_RINGUE", "Desafio do Ringue", "CAMPEAO", "ATIVA", 5, "PE",
-                null, "Ninguém em alcance curto pode sair de perto do Campeão por 1d4 rodadas (Virtude Anula). .");
+                null, "O usuário desafia todos os inimigos em alcance curto, realizando um teste de Carisma contra a "
+                        + "Virtude de cada alvo. As criaturas que falharem ficam impedidas de se afastar voluntariamente "
+                        + "do usuário durante 1d4 rodadas, podendo se mover normalmente dentro de seu alcance.");
         hab("GANCHO_DE_OURO", "Gancho de Ouro", "CAMPEAO", "ATIVA", 8, "PE",
                 null, "Se o ataque for crítico, o alvo fica \"Atordoado\" por 1d4 turnos. .");
         hab("IDOLO_DAS_MASSAS", "Ídolo das Massas", "CAMPEAO", "PASSIVA", 0, null,
-                null, "Soma o bônus de Carisma ao dano de ataques desarmados. .");
+                null, "Enquanto houver 2 ou mais criaturas conscientes observando o combate de fora, recebe 2 em "
+                        + "Carisma e 2 em Combate, aumentando ambos em 2 a cada 5 Níveis do Personagem.");
         hab("TROCAR_AS_MAOS_PELOS_PES", "Trocar as Mãos pelos Pés", "ARTISTA_MARCIAL", "ATIVA", 2, "PE",
                 null, "Pode trocar bônus de esquiva por combate e combate por esquiva. .");
         hab("PONTO_DE_PRESSAO", "Ponto de Pressão", "ARTISTA_MARCIAL,MONGE", "ATIVA", 6, "PE",
@@ -1156,7 +1254,9 @@ public class DataSeeder implements CommandLineRunner {
         hab("PASSO_DE_VENTO", "Passo de Vento", "ARTISTA_MARCIAL", "PASSIVA", 0, null,
                 null, "Permite esquivar de projéteis com bônus de +2 (+2 a cada 5 níveis). .");
         hab("COMBO_INFINITO", "Combo Infinito", "ARTISTA_MARCIAL", "PASSIVA", 0, null,
-                null, "Cada acerto consecutivo no mesmo alvo dá +2 ( +2 a cada 10 níveis) de dano cumulativo. .");
+                null, "Cada ataque consecutivo que acertar o mesmo alvo no mesmo turno concede 2 de dano cumulativo, "
+                        + "aumentando em 2 a cada 10 Níveis do Personagem. O bônus é perdido ao atacar outra criatura ou "
+                        + "ao término do turno.");
     }
 
     /** Reaplica as habilidades (catalogo) em banco ja existente. */
@@ -1216,23 +1316,23 @@ public class DataSeeder implements CommandLineRunner {
 
     private void seedRacas() {
         raca("HUMANO", "Humano", 5, 5, 5, "A raca mais antiga e populosa; versatil.",
-                "[{\"nivel\":1,\"nome\":\"Linhagem\",\"efeito\":\"Recebe 1 item ou bencao a escolha\"},"
-                + "{\"nivel\":20,\"nome\":\"Versatilidade Humana\",\"efeito\":\"+1 slot de habilidade por bonus de classe/trilha\"},"
-                + "{\"nivel\":40,\"nome\":\"Almejar Maestria\",\"efeito\":\"+50% de XP e melhora 1 habilidade de classe\"}]");
+                "[{\"nivel\":1,\"nome\":\"Linhagem\",\"efeito\":\"Sendo a raça mais numerosa, os humanos desenvolveram uma tradição de transmitir conhecimentos, objetos e bênçãos valiosas através das gerações. O personagem pode escolher 1 item ou 1 bênção para receber como herança. A escolha deve ser aprovada pelo Mestre.\"},"
+                + "{\"nivel\":20,\"nome\":\"Versatilidade Humana\",\"efeito\":\"Ao alcançar este nível, o personagem pode escolher 1 habilidade de classe ou trilha que não pertença à sua classe, desde que cumpra seus requisitos. A habilidade escolhida passa a fazer parte de seu conjunto de habilidades.\"},"
+                + "{\"nivel\":40,\"nome\":\"Almejar Maestria\",\"efeito\":\"A ambição humana permite que seus indivíduos continuem superando seus próprios limites. O personagem recebe um bônus de 50% na experiência adquirida, adicionando metade do valor recebido ao total. Além disso, pode aprimorar 1 habilidade de classe à sua escolha, desde que a alteração seja aprovada pelo Mestre.\"}]");
         raca("DEMONIO", "Demonio", 4, 6, 3, "Humanos mutados por mana intensa.",
-                "[{\"nivel\":1,\"nome\":\"Mutacao Demoniaca\",\"efeito\":\"Capacidade fisiologica unica\"},"
-                + "{\"nivel\":20,\"nome\":\"Pactos Demoniacos\",\"efeito\":\"Sela contratos magicos\"},"
-                + "{\"nivel\":40,\"nome\":\"Pacto Restritivo\",\"efeito\":\"Modifica a propria ficha por sacrificio\"}]");
+                "[{\"nivel\":1,\"nome\":\"Mutacao Demoniaca\",\"efeito\":\"O personagem pode escolher 1 característica fisiológica única para seu corpo, como quatro braços, pele escamada, cauda, chifres ou asas. A escolha deve ser aprovada pelo Mestre.\"},"
+                + "{\"nivel\":20,\"nome\":\"Pactos Demoniacos\",\"efeito\":\"O personagem pode estabelecer contratos mágicos com criaturas conscientes, desde que ambas concordem com seus termos. O pacto é gravado na alma de todos os envolvidos, e sua quebra resulta nas consequências determinadas pelo contrato ou pelo Mestre.\"},"
+                + "{\"nivel\":40,\"nome\":\"Pacto Restritivo\",\"efeito\":\"O personagem pode realizar contratos consigo mesmo para modificar aspectos de sua ficha, trocando um sacrifício proporcional por um benefício equivalente. Requer Ação Completa e, após realizado, o pacto é irreversível.\"}]");
         raca("GIGANTE", "Gigante", 9, 2, 3, "Enormes e resistentes.",
-                "[{\"nivel\":1,\"nome\":\"Gigantismo\",\"efeito\":\"+1 vida e +1 PE por ponto de Constituicao\"},"
-                + "{\"nivel\":20,\"nome\":\"Crescer Ainda Mais\",\"efeito\":\"Gasta 5 PE: +2 atributos fisicos/turno\"},"
-                + "{\"nivel\":40,\"nome\":\"Casca Grossa\",\"efeito\":\"+20 Armadura Verdadeira; imune a sangramento/veneno\"}]");
+                "[{\"nivel\":1,\"nome\":\"Gigantismo\",\"efeito\":\"A constituição física dos Gigantes lhes concede uma resistência e vigor superiores aos das demais raças. Recebe 1 PV e 1 PE para cada ponto de Constituição. Além disso, seu tamanho grande dobra sua capacidade de inventário e seu deslocamento natural. Devido ao seu porte, não pode utilizar equipamentos comuns nem entrar em edifícios convencionais.\"},"
+                + "{\"nivel\":20,\"nome\":\"Crescer Ainda Mais\",\"efeito\":\"O Gigante pode gastar uma Ação de Movimento e 5 PE para ampliar temporariamente sua força física e seu tamanho, recebendo 2 em todos os atributos físicos e 2 de Deslocamento para cada 15 Níveis do Personagem, por 1 turno.\"},"
+                + "{\"nivel\":40,\"nome\":\"Casca Grossa\",\"efeito\":\"O corpo do Gigante é extremamente resistente. Recebe 20 de Armadura Verdadeira e torna-se imune aos estados Sangramento e Envenenamento.\"}]");
         raca("GOBLIN", "Goblin", 3, 5, 6, "Pequenos, inteligentes e astutos.",
-                "[{\"nivel\":1,\"nome\":\"Desenvolvimento Rapido\",\"efeito\":\"Ganha o dobro de XP\"},"
-                + "{\"nivel\":20,\"nome\":\"Instintos de Sobrevivencia\",\"efeito\":\"2 vantagens p/ detectar perigo\"},"
-                + "{\"nivel\":40,\"nome\":\"Mimetismo\",\"efeito\":\"Copia tecnica observada (custo dobrado)\"}]");
+                "[{\"nivel\":1,\"nome\":\"Desenvolvimento Rapido\",\"efeito\":\"A mente ágil e a capacidade de adaptação dos Goblins permitem que aprendam mais rapidamente. O personagem recebe o dobro da experiência adquirida.\"},"
+                + "{\"nivel\":20,\"nome\":\"Instintos de Sobrevivencia\",\"efeito\":\"Os instintos naturais do Goblin o tornam extremamente atento aos perigos. Recebe 2 Vantagens em testes de Sobrevivência e Percepção para detectar armadilhas, criaturas furtivas e outras fontes de perigo.\"},"
+                + "{\"nivel\":40,\"nome\":\"Mimetismo\",\"efeito\":\"O Goblin pode copiar uma técnica que tenha observado diretamente, podendo utilizá-la a partir do turno seguinte. O uso da técnica copiada exige o dobro dos recursos normalmente necessários para utilizá-la.\"}]");
         raca("TIEFLING", "Tiefling", 4, 7, 4, "Demonios da mana; grandes pesquisadores.",
-                "[{\"nivel\":1,\"nome\":\"Aptidao Magica\",\"efeito\":\"+20 armadura magica; 1 magia sem custo/cena\"},"
+                "[{\"nivel\":1,\"nome\":\"Aptidao Magica\",\"efeito\":\"A natureza mágica dos Tieflings lhes concede 5 de Armadura Mágica. Além disso, pode conjurar 1 magia por cena sem gastar Mana.\"},"
                 + "{\"nivel\":20,\"nome\":\"Magia Inerente\",\"efeito\":\"Cria 1 magia unica sem slot\"},"
                 + "{\"nivel\":40,\"nome\":\"Ampliar Feiticaria\",\"efeito\":\"Usa Energia como Mana; excede limite de feitico\"}]");
         raca("MEIO_FERA", "Meio-Fera", 4, 4, 6, "Hibridos com aspectos animais.",
@@ -1417,72 +1517,64 @@ public class DataSeeder implements CommandLineRunner {
     private void seedClasses() {
         classe("CAVALEIRO", "Cavaleiro", null,
                 bonus("{\"forca\":2,\"constituicao\":2,\"carisma\":1}", "{\"vigor\":2,\"atletismo\":1,\"bloqueio\":2}", 1),
-                "Lealdade inabalável. O Cavaleiro é um símbolo de lealdade a sua conduta, causa e ideais. Quando "
-                        + "confrontado em uma situação que vise forçá-lo a trair sua lealdade, este ganha o atributo base "
-                        + "como bônus em quaisquer teste de resistência contra magia ou efeitos que buscam controlar sua "
-                        + "vontade.");
+                "Lealdade Inabalável. A lealdade do usuário é inabalável. Sempre que realizar um teste de "
+                        + "resistência contra efeitos que controlem sua mente ou o obriguem a agir contra sua lealdade, "
+                        + "recebe um bônus igual ao seu atributo base.");
         classe("ESCUDEIRO", "Escudeiro", "CAVALEIRO",
                 bonus("{\"constituicao\":8,\"forca\":2}", "{\"bloqueio\":5,\"vigor\":5}", 1),
-                "Escudo Protetor. O Escudeiro é o mestre da proteção para si e todos os seus aliados. Enquanto "
-                        + "estiver empunhando um escudo este ganha \"Vantagem\" ao tentar bloquear ataques direcionados "
-                        + "para seus aliados, caso este tenha um teste bem sucedido ganhará uma reação extra para proteger "
-                        + "a si mesmo.");
+                "Escudo Protetor. Enquanto empunhar um escudo, o usuário recebe Vantagem em testes para bloquear "
+                        + "ataques direcionados a aliados em alcance curto. Caso o bloqueio seja bem-sucedido, recebe 1 "
+                        + "Reação adicional até o fim da rodada, que pode ser utilizada apenas para realizar ações de "
+                        + "Bloqueio.");
         classe("COMANDANTE", "Comandante", "CAVALEIRO",
                 bonus("{\"constituicao\":4,\"forca\":3,\"carisma\":2,\"sabedoria\":1}", "{\"vigor\":3,\"atletismo\":3,\"diplomacia\":2,\"percepcao\":2}", 1),
-                "Presença Inspiradora. O comandante é uma figura de autoridade e liderança. Sua presença inspira "
-                        + "confiança e determinação em seus aliados, sendo assim uma vez por cena o Comandante pode gastar "
-                        + "sua ação secundária para motivar um de seus aliados, concedendo assim metade de sua "
-                        + "\"Diplomacia\" em bônus para o próximo teste de seu aliado.");
+                "Presença Inspiradora. Uma vez por cena, o usuário pode gastar uma Ação Secundária para inspirar "
+                        + "um aliado. Até o final da cena, o próximo teste realizado por esse aliado recebe um bônus igual "
+                        + "à metade do Carisma do usuário.");
 
         classe("ASSASSINO", "Assassino", null,
                 bonus("{\"destreza\":2,\"agilidade\":2,\"forca\":1}", "{\"combate\":2,\"acrobacia\":1,\"furtividade\":1,\"arremesso\":1}", 2),
-                "Golpe silencioso. O Assassino é um mestre na arte do ataque furtivo e letal. Quanto este ataca "
-                        + "um inimigo que não tenha percebido sua presença ou está incapacitado, seu golpe será um "
-                        + "crítico.");
+                "Golpe Silencioso. Sempre que atacar uma criatura que não tenha percebido sua presença ou que "
+                        + "esteja Incapacitada, o primeiro ataque realizado contra ela será considerado um Acerto Crítico.");
         classe("NINJA", "Ninja", "ASSASSINO",
                 bonus("{\"agilidade\":5,\"destreza\":3,\"forca\":2}", "{\"acrobacia\":4,\"furtividade\":3,\"arremesso\":3}", 3),
-                "Sombra ágil. O Ninja é um mestre na arte da furtividade e usa uma agilidade incomparável. "
-                        + "Enquanto este estiver no escuro da noite ou das sombras e fora de combate, ganhará um bônus de "
-                        + "sua \"Agilidade\" em sua \"Acrobacia\". Podendo se mover através de terreno difícil sem "
-                        + "desvantagem, porém caso esteja com uma armadura pesada o efeito da passiva é anulado.");
+                "Sombra Ágil. Enquanto estiver em áreas de escuridão ou sombras e fora de combate, o usuário "
+                        + "recebe um bônus em Acrobacia igual ao seu valor de Agilidade e ignora as penalidades de terreno "
+                        + "difícil. Este efeito não funciona enquanto estiver utilizando Armadura Pesada.");
         classe("SICARIO", "Sicario", "ASSASSINO",
                 bonus("{\"forca\":4,\"destreza\":4,\"agilidade\":2}", "{\"combate\":3,\"acrobacia\":3,\"iniciativa\":2,\"esquiva\":2}", 2),
-                "Hemorragia. O Sicário é um especialista em causar feridas dolorosas com sangramento em suas "
-                        + "vítimas. Quando este atacar com uma arma de perfuração leve causará \"Sangramento\".");
+                "Hemorragia. Sempre que acertar um ataque com uma arma leve de perfuração, o usuário aplica "
+                        + "automaticamente um acúmulo de Sangramento ao alvo.");
 
         classe("BARBARO", "Barbaro", null,
                 bonus("{\"forca\":3,\"constituicao\":2}", "{\"atletismo\":3,\"vigor\":2}", 2),
-                "Bruto. O Bárbaro é um símbolo de força bruta e resistência nunca fugindo de uma batalha. "
-                        + "Durante a batalha, quando seu HP chega em sua metade, este ganhará metade do seu atributo "
-                        + "\"Força\" em \"Armadura\" e \"Dano Extra\".");
+                "Bruto. Quando seus PV forem reduzidos para metade ou menos do máximo, o usuário recebe um bônus "
+                        + "em Armadura Física e Dano Extra igual à metade de sua Força. O efeito permanece enquanto "
+                        + "estiver nessa condição.");
         classe("BERSERKER", "Berserker", "BARBARO",
                 bonus("{\"forca\":8,\"constituicao\":2}", "{\"atletismo\":8,\"vigor\":2}", 2),
-                "Fúria incontrolável. O Berserker é capaz de entrar em estado de fúria selvagem que o torna "
-                        + "ainda mais mortal. Durante o combate, caso este venha a utilizar a habilidade \"Estado de "
-                        + "Fúria\" ganhará metade de sua perícia \"Atletismo\" em testes físicos.");
+                "Fúria Incontrolável. Enquanto estiver sob os efeitos da habilidade Estado de Fúria, o usuário "
+                        + "recebe 2 em testes físicos a cada 10 pontos de Atletismo.");
         classe("IMORTAL", "Imortal", "BARBARO",
                 bonus("{\"constituicao\":8,\"forca\":2}", "{\"vigor\":8,\"atletismo\":2}", 2),
-                "Sobrevivência Imortal. O Imortal possui uma resistência inigualável que lhe permite sobreviver "
-                        + "a desafios quase insuperáveis. Quando o seu HP chega em 0, em vez de ficar inconsciente ou "
-                        + "morrer, ele continuará de pé até que sofra dano algum. Durante esse estado o usuário ganha um "
-                        + "bônus de metade do seu atributo \"Vigor\" em testes de reação.");
+                "Sobrevivência Imortal. Quando seus Pontos de Vida forem reduzidos a 0, o usuário não fica "
+                        + "Inconsciente nem morre imediatamente, permanecendo de pé até sofrer dano novamente. Além disso, "
+                        + "recebe Vantagem em testes de Constituição enquanto estiver no estado Morrendo e atrasa em 1 "
+                        + "passo a progressão desse estado.");
 
         classe("CLERIGO", "Clerigo", null,
                 bonus("{\"sabedoria\":4,\"constituicao\":1}", "{\"fe\":4,\"conhecimento\":1}", 3),
-                "Julgamento Divino: em confronto com inimigo de divindade semelhante a sua, ganha "
-                + "Julgamento Divino. O Clérigo é um símbolo de fé atuando como um agente das divindades. Quando o "
-                        + "clérigo está em um confronto com um inimigo de divindade semelhante a sua, este terá +2 a cada "
-                        + "5 pontos em sua perícia de \"Fé\", adicionada ao seu ataque e defesas referente a bênçãos.");
+                "Julgamento Divino. Ao enfrentar um inimigo que possua uma divindade do mesmo panteão que a sua, "
+                        + "o usuário recebe 2 em ataques e defesas relacionadas a bênçãos dessa divindade a cada 10 pontos "
+                        + "em sua perícia Fé.");
         classe("PALADINO", "Paladino", "CLERIGO",
                 bonus("{\"constituicao\":6,\"sabedoria\":3,\"forca\":1}", "{\"vigor\":5,\"fe\":5}", 1),
-                "Escudo da Fé. O Paladino emana uma aura de proteção que envolve a si mesmo e seus aliados. "
-                        + "Durante um combate este poderá defender seus aliados utilizando a perícia \"Fé\" caso esteja "
-                        + "empunhando um escudo.");
+                "Escudo da Fé. Enquanto estiver empunhando um escudo, o usuário pode utilizar sua perícia Fé no "
+                        + "lugar de Bloqueio para defender ataques direcionados a aliados.");
         classe("SANTO", "Santo", "CLERIGO",
                 bonus("{\"sabedoria\":7,\"carisma\":2,\"constituicao\":1}", "{\"fe\":5,\"conhecimento\":3,\"diplomacia\":2}", 4),
-                "Aura Sagrada. O Santo irradia uma aura de bondade e santidade que afeta seu entorno. Todos os "
-                        + "seus aliados na presença do Santo tem resistência a efeitos negativos de qualquer Divindade, "
-                        + "ganhando \"Vantagem\" para os testes de resistência aos efeitos.");
+                "Aura Sagrada. Enquanto estiver consciente, todos os aliados em alcance curto recebem Vantagem "
+                        + "em testes de resistência contra efeitos negativos causados por Divindades.");
 
         classe("DRUIDA", "Druida", null,
                 bonus("{\"constituicao\":2,\"sabedoria\":2,\"carisma\":1}", "{\"adestrar\":2,\"vigor\":1,\"percepcao\":1,\"sobrevivencia\":1}", 3),
@@ -1504,193 +1596,170 @@ public class DataSeeder implements CommandLineRunner {
 
         classe("MONGE", "Monge", null,
                 bonus("{\"constituicao\":2,\"sabedoria\":1,\"forca\":1,\"destreza\":1}", "{\"combate\":2,\"virtude\":2,\"conhecimento\":1}", 2),
-                "Corpo Iluminado. O Monge é um mestre na arte do combate desarmado e no controle do próprio "
-                        + "corpo. Ele tem metade da sua perícia \"Vigor\" adicionado em sua resistência universal, além de "
-                        + "ser imune aos efeitos de \"Envenenamento, Sangramento, Confusão e Sonolência\". Uso de "
-                        + "armaduras pesadas anulam os efeitos.");
+                "Corpo Iluminado. O usuário adiciona metade do seu atributo Constituição à sua Armadura "
+                        + "Universal. Além disso, torna-se Imune aos estados Envenenado, Sangramento, Confusão e "
+                        + "Sonolência. Estes efeitos são anulados enquanto estiver utilizando Armadura Pesada.");
         classe("SABIO", "Sabio", "MONGE",
                 bonus("{\"sabedoria\":5,\"constituicao\":3,\"inteligencia\":2}", "{\"conhecimento\":4,\"virtude\":3,\"percepcao\":2,\"medicina\":1}", 2),
-                "Sabedoria Ancestral. O Sábio é uma fonte de conhecimento inestimável e é capaz de fornecer "
-                        + "conselhos valiosos aos seus aliados. Quando o Sábio está presente, todos os seus aliados ganham "
-                        + "\"Vantagem\" em testes de \"Percepção e Conhecimento\". Além disso, uma vez por dia, este pode "
-                        + "dar a um aliado a \"Inspiração Sábia\", concedendo ao aliado sua perícia de \"Virtude\" em "
-                        + "qualquer teste de \"Sabedoria\" que o alvo realizar.");
+                "Sabedoria Ancestral. Aliados em alcance curto recebem Vantagem em testes de Percepção e "
+                        + "Conhecimento. Além disso, uma vez por dia, o usuário pode conceder Inspiração Sábia a um "
+                        + "aliado, permitindo que ele adicione o atributo de Sabedoria do usuário ao próximo teste baseado "
+                        + "em Sabedoria.");
         classe("PUNHOS_ACO", "Punhos de Aco", "MONGE",
                 bonus("{\"constituicao\":3,\"forca\":3,\"destreza\":3,\"sabedoria\":1}", "{\"combate\":4,\"virtude\":3,\"bloqueio\":2,\"sobrevivencia\":1}", 1),
-                "Golpes Rígidos. Os Punhos de Aço são especialistas em combate desarmado e são capazes de "
-                        + "infligir golpes devastadores. Quando realizam um ataque desarmado, seus golpes ignoram os "
-                        + "efeitos da armadura de seu alvo, referente a redução de dano. Além disso, os ataques causam o "
-                        + "dobro de dano em testes para quebrar objetos.");
+                "Golpes Rígidos. Ataques desarmados ignoram a Armadura de equipamentos do alvo para fins de "
+                        + "redução de dano. Além disso, causam o dobro de dano em testes para quebrar objetos.");
 
         classe("ARQUEIRO", "Arqueiro", null,
                 bonus("{\"destreza\":3,\"agilidade\":2}", "{\"pontaria\":3,\"furtividade\":2}", 2),
-                "Olhos de Águia. O Arqueiro possui uma visão excepcional e uma habilidade notável para atingir "
-                        + "alvos à distância. Para alvos que estão muito distantes este causará dano crítico, e para alvos "
-                        + "próximos este anula cobertura parcial e transforma cobertura completa em parcial.");
+                "Olhos de Águia. Ao atacar um alvo em alcance além de longo, o usuário considera o ataque um "
+                        + "Acerto Crítico. Contra alvos em alcance menor que longo, o usuário ignora Cobertura Parcial e "
+                        + "considera Cobertura Completa como Cobertura Parcial.");
         classe("CACADOR", "Cacador", "ARQUEIRO",
                 bonus("{\"destreza\":5,\"agilidade\":4,\"sabedoria\":1}", "{\"pontaria\":4,\"iniciativa\":3,\"sobrevivencia\":3}", 3),
-                "Instinto de Caça. O Caçador possui um profundo conhecimento sobre suas presas e a natureza ao "
-                        + "seu redor. Ao escolher seu alvo principal entre bestas, dragões, monstros, ou humanóides, ele "
-                        + "recebe um bônus de +3 na sua margem de crítico contra esses alvos. Além disso, ele ganha "
-                        + "\"Vantagem\" em testes de \"Sobrevivência\", \"Rastreamento\" e \"Identificação\" contra sua "
-                        + "criatura alvo.");
+                "Instinto de Caça. O usuário escolhe uma categoria de criatura entre Bestas, Dragões, Monstros "
+                        + "ou Humanoides como seu Alvo Principal. Contra criaturas dessa categoria, recebe 2 na Margem de "
+                        + "Ameaça e Vantagem em testes de Sobrevivência, Rastreamento e Identificação.");
         classe("MERCENARIO", "Mercenario", "ARQUEIRO",
                 bonus("{\"destreza\":3,\"agilidade\":3,\"forca\":3,\"sabedoria\":1}", "{\"combate\":3,\"pontaria\":3,\"iniciativa\":2,\"sobrevivencia\":2}", 4),
-                "Instinto de Sobrevivência. O Mercenário é um sobrevivente habilidoso em situações difíceis. Ele "
-                        + "ganha \"Vantagem\" em testes contra emboscadas e armadilhas. Além disso, quando enfrenta "
-                        + "múltiplos inimigos, este ganhará 1 reação extra para cada inimigo lhe enfrentando.");
+                "Instinto de Sobrevivência. O usuário recebe Vantagem em testes para detectar ou resistir a "
+                        + "Emboscadas e Armadilhas. Enquanto enfrentar múltiplos inimigos, recebe 1 Reação adicional para "
+                        + "cada inimigo em combate.");
 
         classe("MAGO", "Mago", null,
                 bonus("{\"inteligencia\":4,\"sabedoria\":1}", "{\"magia\":3,\"conhecimento\":2}", 5),
-                "Mente Arcana: Vantagem em testes de Feiticaria para reagir e/ou identificar feiticos. "
-                + "Mente Arcana. O Mago possui uma compreensão profunda dos segredos da magia e do funcionamento "
-                        + "do mundo mágico. Este ganha \"Vantagem\" em testes de \"Magia\" para reação e/ou identificação "
-                        + "de feitiços. Também pode utilizar 1 vez ao dia o \"Foco Arcano\" que lhe permite utilizar +1 "
-                        + "feitiço em uma ação padrão, aumentando +1 a cada 10 níveis do personagem.");
+                "Mente Arcana. O usuário recebe Vantagem em testes de Feitiçaria para identificar ou reagir a "
+                        + "feitiços. Uma vez por dia, pode utilizar seu Foco Arcano para lançar 1 feitiço em uma Ação "
+                        + "Principal, aumentando em 1 feitiço adicional a cada 10 Níveis do Personagem. Os custos dos "
+                        + "feitiços devem ser considerados individualmente.");
         classe("ARQUIMAGO", "Arquimago", "MAGO",
                 bonus("{\"inteligencia\":8,\"sabedoria\":2}", "{\"magia\":8,\"conhecimento\":2}", 4),
-                "Maestria Arcana. O Arquimago é um mestre em todas as escolas de magia e é capaz de fundir e "
-                        + "aprimorar feitiços de diferentes naturezas. Ele pode lançar até 2 feitiços diferentes ao mesmo "
-                        + "tempo, se feito este recebe +2 em \"Magia\" a cada 5 níveis do personagem. E caso este seja "
-                        + "atacado por um feitiço que possua, poderá realizar um embate de \"Magia\" que anula o feitiço "
-                        + "do inimigo.");
+                "Maestria Arcana. O usuário pode conjurar até 2 feitiços diferentes simultaneamente, porém o "
+                        + "feitiço secundário custa 4 PE adicionais. Ao realizar essa conjuração, recebe 2 em Feitiçaria, "
+                        + "aumentando em 2 a cada 10 Níveis do Personagem, para o seu próximo feitiço secundário. Além "
+                        + "disso, ao ser alvo de um feitiço que conheça, pode realizar um embate de Magia contra o "
+                        + "conjurador. Em caso de sucesso, o feitiço é anulado.");
         classe("RUNICISTA", "Runicista", "MAGO",
                 bonus("{\"inteligencia\":7,\"sabedoria\":3}", "{\"magia\":7,\"conhecimento\":3}", 4),
-                "Maestria Rúnica. O Mago Rúnico é um especialista na criação e uso de runas mágicas. Este pode "
-                        + "anular temporariamente a runa de um objeto, ou pode criar 1 runa para objetos. E caso esteja "
-                        + "empunhando um objeto com feitiçaria rúnica, ganhará 5 em testes de ataque e reação físicos, a "
-                        + "cada 10 de \"Inteligência\" do personagem.");
+                "Maestria Rúnica. O usuário pode fazer um teste de Feitiçaria para desfazer uma runa presente em "
+                        + "um objeto ou criar uma nova runa em um objeto. Enquanto empunhar um objeto rúnico, recebe 5 em "
+                        + "testes de Ataque e Reação Físicos a cada 10 pontos de Inteligência.");
 
         classe("ESPADACHIM", "Espadachim", null,
                 bonus("{\"destreza\":3,\"agilidade\":2}", "{\"combate\":2,\"iniciativa\":2,\"esquiva\":1}", 2),
-                "Mestre de Lâminas. O Espadachim é um mestre no manuseio de espadas e armas de corte. Durante um "
-                        + "combate que este venha a ser atacado por alguém utilizando uma lâmina, poderá então defender o "
-                        + "ataque de seu oponente utilizando \"Combate\" ao invés de seu \"Bloqueio\".");
+                "Mestre de Lâminas. Quando for atacado por uma criatura utilizando uma arma de corte, o usuário "
+                        + "pode realizar o teste de defesa utilizando Combate no lugar de Bloqueio.");
         classe("DUELISTA", "Duelista", "ESPADACHIM",
                 bonus("{\"destreza\":5,\"agilidade\":3,\"forca\":2}", "{\"combate\":4,\"iniciativa\":3,\"esquiva\":3}", 3),
-                "Duelo Exímio. O Duelista é especialista em combate individual e em duelos mano a mano. Ele "
-                        + "ganha um bônus de +2 de bônus a cada 10 níveis do personagem, para qualquer teste envolvendo o "
-                        + "combate, caso este esteja no 1 contra 1, também tem \"Vantagem\" contra qualquer tentativa ou "
-                        + "efeito que possa impedir seu duelo de acontecer.");
+                "Duelo Exímio. Enquanto estiver enfrentando apenas uma criatura e sozinho, o usuário recebe 2 em "
+                        + "Combate a cada 10 Níveis do Personagem. Além disso, recebe Vantagem em testes para resistir a "
+                        + "qualquer tentativa ou efeito que impeça, interrompa ou encerre seu duelo. Caso outra criatura "
+                        + "interfira diretamente no combate, os benefícios do Duelo Exímio são perdidos até o fim da cena.");
         classe("SAMURAI", "Samurai", "ESPADACHIM",
                 bonus("{\"destreza\":4,\"agilidade\":3,\"constituicao\":3}", "{\"combate\":4,\"iniciativa\":3,\"vigor\":3}", 3),
-                "Caminho da Lâmina. O Samurai é um mestre no manejo de katanas e uma figura de forte conduta. "
-                        + "Este recebe um bônus de +2 a cada 10 de \"Destreza\" do personagem, para o seu \"Combate\" caso "
-                        + "sua lâmina seja uma Katana, além de que a vitória em um duelo de Honra, ou seja, um contra um "
-                        + "até a morte, irá gerar o dobro de XP.");
+                "Caminho da Lâmina. Enquanto utilizar uma Katana, o usuário recebe 2 em Combate a cada 10 pontos "
+                        + "de Destreza. Ao declarar um Duelo de Honra antes do combate, o confronto deve ocorrer em 1 "
+                        + "contra 1 até a morte, sem interferência externa. Ao vencer o duelo, recebe o dobro da "
+                        + "Experiência concedida pelo combate.");
 
         classe("LADRAO", "Ladrao", null,
                 bonus("{\"agilidade\":4,\"destreza\":1}", "{\"furtividade\":4,\"esquiva\":1}", 5),
-                "Mão Leve. O Ladrão é especializado em furtos habilidosos e, quando interage com objetos de "
-                        + "valor, torna-se excepcionalmente ágil e astuto. Ele recebe \"Vantagem\" em um teste de "
-                        + "\"Crime\" caso este esteja furtivo. Além de que sempre que lootear, poderá rodar 1d5, onde se "
-                        + "cair 5 adiciona um item extra ao loot.");
+                "Mão Leve. O usuário recebe Vantagem em testes de Crime enquanto estiver Furtivo. Além disso, "
+                        + "sempre que realizar um Saque, pode rolar 1d5; com resultado 5, encontra 1 item adicional no "
+                        + "saque.");
         classe("SOMBRA", "Sombra", "LADRAO",
                 bonus("{\"agilidade\":7,\"destreza\":3}", "{\"furtividade\":7,\"acrobacia\":3}", 4),
-                "Ofuscado pela Escuridão. A Sombra é mestre em manipular as próprias sombras e se esconder nas "
-                        + "áreas mais escuras. Ela ganha uma habilidade natural de se camuflar nas sombras, tornando-se "
-                        + "parcialmente invisível em ambientes escuros e sombrios. Quando está em uma área escura, a "
-                        + "Sombra recebe um bônus de seu \"Deslocamento\" em testes de \"Furtividade\" e \"Esquiva\".");
+                "Ofuscado pela Escuridão. Enquanto estiver em áreas de escuridão, o usuário recebe um bônus em "
+                        + "Furtividade e Esquiva igual ao seu Deslocamento, tornando-se Parcialmente Invisível.");
         classe("PIRATA", "Pirata", "LADRAO",
                 bonus("{\"agilidade\":3,\"destreza\":3,\"forca\":3,\"constituicao\":1}", "{\"combate\":3,\"acrobacia\":3,\"vigor\":3,\"pontaria\":1}", 3),
-                "Olho Atento ao Mar. O Pirata desenvolveu uma habilidade excepcional em detectar riquezas "
-                        + "ocultas e tesouros. Ele recebe um bônus de +2 a cada 5 níveis do personagem, em testes de "
-                        + "\"Percepção\" para localizar itens de valor e tesouros escondidos. Caso este esteja em alto "
-                        + "mar, poderá 1 vez por Turno ganhar metade de sua \"Destreza\" como bônus em testes de \"Ataque "
-                        + "e Reação\"");
+                "Olho Atento ao Mar. O usuário recebe 2 em Percepção a cada 5 Níveis do Personagem em testes "
+                        + "para localizar itens de valor. Enquanto estiver em alto-mar, uma vez por turno, recebe um bônus "
+                        + "igual à metade de sua Destreza em testes de Ataque ou Reação.");
 
         classe("CURANDEIRO", "Curandeiro", null,
                 bonus("{\"sabedoria\":5}", "{\"medicina\":4,\"conhecimento\":1}", 3),
-                "Toque Curativo. O Curandeiro possui uma habilidade natural para acelerar a cicatrização de "
-                        + "feridas e recuperação de aliados. Todos os feitiços de cura, terão o dobro do PV recuperado se "
-                        + "usado em outras pessoas.");
+                "Toque Curativo. Quando utilizar uma Magia de cura em outra criatura, o valor de PV recuperado é "
+                        + "dobrado.");
         classe("SACERDOTE", "Sacerdote", "CURANDEIRO",
                 bonus("{\"sabedoria\":9,\"inteligencia\":1}", "{\"medicina\":9,\"conhecimento\":1}", 3),
-                "Aura de Cura. O Sacerdote emana uma aura de energia curativa que promove a regeneração. Toda a "
-                        + "Magia de cura que este utilizar terá efeito em área desde que seus alvos estejam próximos, "
-                        + "curando metade do valor do alvo principal aos seus aliados, além de limpar passivamente 1 "
-                        + "efeito negativo em seus aliados a cada turno.");
+                "Aura de Cura. Toda magia de cura utilizada pelo usuário também afeta aliados em alcance curto, "
+                        + "que recuperam metade dos PV restaurados ao alvo principal. Além disso, aliados em alcance curto "
+                        + "removem 1 efeito negativo no início de cada turno.");
         classe("MESTRE_TOXINAS", "Mestre de Toxinas", "CURANDEIRO",
                 bonus("{\"sabedoria\":6,\"inteligencia\":4}", "{\"medicina\":4,\"alquimia\":4,\"magia\":2}", 3),
-                "Mão Venenosa. O Mestre de Toxinas desenvolveu uma resistência natural às substâncias venenosas. "
-                        + "Ele é imune contra qualquer veneno e doença, além disso, quando este aplica veneno as suas "
-                        + "armas, estas causarão o dobro de efeito de envenenamento.");
+                "Mão Venenosa. O usuário é Imune a Veneno e Doença. Ao aplicar Veneno em uma arma, todos os "
+                        + "efeitos de Envenenamento causados por ela são dobrados.");
 
         classe("BRUXO", "Bruxo", null,
                 bonus("{\"forca\":3,\"inteligencia\":2}", "{\"combate\":2,\"magia\":2,\"conhecimento\":1}", 4),
-                "Pacto Sombrio. O Bruxo possui um pacto sombrio com uma entidade sobrenatural, concedendo-lhe "
-                        + "poderes únicos. Este pode realizar um pacto com um espírito animal chamado de Vínculo, que será "
-                        + "seu aliado podendo invocá-lo ou ocultá-lo quando bem desejar, caso o seu Vínculo morra em "
-                        + "combate este voltará em um tempo indeterminado dependendo do seu nível de força.");
+                "Pacto Sombrio. O usuário estabelece um pacto com um espírito bestial, chamado de Vínculo, que "
+                        + "se torna seu aliado. O Vínculo pode ser invocado ou ocultado livremente pelo usuário. Caso seja "
+                        + "morto, retorna após um período determinado por seu nível de poder.");
         classe("NECROMANTE", "Necromante", "BRUXO",
                 bonus("{\"inteligencia\":7,\"sabedoria\":3}", "{\"magia\":4,\"conhecimento\":3,\"virtude\":3}", 3),
-                "Liderança Putrefata. O Necromante possui uma influência inata sobre os mortos e é capaz de "
-                        + "comandar suas criações com maior eficácia. Ele pode escolher em especial um de seus mortos, "
-                        + "para conceder-lhe parte de sua alma, assim tornando-o um seguidor que não precisa de gastos "
-                        + "para invocá-lo.");
+                "Liderança Putrefata. O usuário pode escolher um de seus mortos-vivos para compartilhar parte de "
+                        + "sua alma, transformando-o em seu Seguidor, que pode ser invocado sem custo. Caso o Seguidor "
+                        + "morra em combate, retornará após um período determinado por seu nível de força. Se o Seguidor "
+                        + "for substituído ou seu corpo for destruído, não poderá mais retornar.");
         classe("MISTICO", "Mistico", "BRUXO",
                 bonus("{\"forca\":4,\"inteligencia\":4,\"destreza\":2}", "{\"combate\":5,\"magia\":4,\"esquiva\":1}", 2),
-                "Ligação Espiritual. O Místico é capaz de se conectar profundamente com os espíritos que o "
-                        + "cercam, tornando-se mais forte por meio dessa ligação. Este tem a capacidade de consumir "
-                        + "temporariamente espíritos para se tornar mais forte, recebendo um bônus em diferentes Perícias "
-                        + "dependendo da natureza do espírito.");
+                "Ligação Espiritual. O usuário pode consumir temporariamente um espírito, absorvendo sua "
+                        + "essência e recebendo um bônus determinado pela natureza do espírito. O efeito dura cena e o "
+                        + "usuário pode manter 1 a cada 5 Níveis do Personagem em espíritos ativos. O bônus concedido é "
+                        + "definido pelo Mestre de acordo com a natureza e a força dos Espíritos.");
 
         classe("ALQUIMISTA", "Alquimista", null,
                 bonus("{\"inteligencia\":5}", "{\"alquimia\":4,\"conhecimento\":1}", 3),
-                "Maestria Alquímica. O Alquimista é um mestre na criação e utilização de poções e elixires. Ele "
-                        + "recebe um bônus de +10 em \"Alquimia\" na criação de poções caso esteja fora de combate e pode "
-                        + "criar poções com 1 ingrediente comum ou incomum a menos. Além disso, quando consome uma poção, "
-                        + "elixir ou similar, o efeito dura 1 turno adicional.");
+                "Maestria Alquímica. O usuário recebe 10 na Perícia Alquimia ao criar poções e elixires fora de "
+                        + "combate. Além disso, pode criar poções utilizando 1 ingrediente a menos, mas nunca menos que 1, "
+                        + "desde que os ingredientes sejam Comuns ou Incomuns. Ao consumir uma poção ou elixir, sua "
+                        + "duração é aumentada em 1 turno.");
         classe("QUIMICO_ARCANO", "Quimico Arcano", "ALQUIMISTA",
                 bonus("{\"inteligencia\":7,\"sabedoria\":3}", "{\"alquimia\":7,\"magia\":2,\"engenharia\":1}", 2),
-                "Síntese Arcana. O Químico Arcano funde a alquimia tradicional com os princípios arcanos, "
-                        + "criando substâncias mágicas aprimoradas. Quando este estiver próximo de elementos orgânicos, "
-                        + "ele pode transmutar tais elementos para gerar 2 em Mana a cada 10 níveis do personagem, e/ou "
-                        + "utilizar para criar poções rapidamente.");
+                "Síntese Arcana. Enquanto estiver próximo de materiais orgânicos, o usuário pode transmutá-los "
+                        + "para gerar 1d10 PM a cada 10 Níveis do Personagem ou criar poções comuns ou incomuns "
+                        + "rapidamente, mesmo durante situações de pressão.");
         classe("INVENTOR", "Inventor", "ALQUIMISTA",
                 bonus("{\"inteligencia\":6,\"sabedoria\":4}", "{\"engenharia\":8,\"alquimia\":2}", 4),
-                "Engenharia Mecânica. O Inventor é um mestre na criação e manipulação de dispositivos mecânicos. "
-                        + "Ele recebe \"Vantagem\" em \"Engenharia\" para desarmar/desativar qualquer dispositivo "
-                        + "tecnológico, e caso use as peças desses mesmos dispositivos poderá criar uma versão ainda mais "
-                        + "avançada. Além disso, ao trabalhar em uma oficina, ganha um bônus de +10 em \"Engenharia\".");
+                "Engenharia Mecânica. O usuário recebe Vantagem em testes de Engenharia para desarmar ou "
+                        + "desativar dispositivos tecnológicos. As peças obtidas desses dispositivos podem ser utilizadas "
+                        + "na criação de versões aprimoradas de seus próprios mecanismos. Em uma Oficina, recebe 10 em "
+                        + "Engenharia para criar, reparar ou aprimorar mecanismos.");
 
         classe("LANCEIRO", "Lanceiro", null,
                 bonus("{\"forca\":3,\"destreza\":2}", "{\"combate\":4,\"atletismo\":1}", 3),
-                "Precisão de Lança. O Lanceiro é um exímio na arte de empunhar lanças e armas similares, "
-                        + "tornando-se um mestre em ataques precisos. Ele recebe um bônus +2 em \"Combate\" a cada 10 "
-                        + "pontos em sua \"Destreza\" caso esteja utilizando uma lança, além de poder lançar sua lança com "
-                        + "o seu \"Combate\" ao invés de seu \"Arremesso\".");
+                "Precisão de Lança. Enquanto utilizar uma lança, o usuário recebe 2 em Combate a cada 10 pontos "
+                        + "de Destreza. Além disso, pode realizar o arremesso de armas na categoria de lança utilizando "
+                        + "Combate no lugar de Arremesso.");
         classe("GENERAL_CEUS", "General dos Ceus", "LANCEIRO",
                 bonus("{\"forca\":4,\"destreza\":4,\"constituicao\":2}", "{\"combate\":5,\"atletismo\":3,\"vigor\":2}", 2),
-                "Domínio Aéreo. O General dos Céus é um mestre inigualável nos ataques aéreos com lanças e armas "
-                        + "de alcance. Ao lançar sua lança receberá bônus de +2 em \"Combate\" a cada 10 níveis do "
-                        + "personagem, acertos há distância causam sempre dano crítico e contra inimigos aéreos o dano "
-                        + "será dobrado.");
+                "Domínio Aéreo. Ao arremessar uma lança, o usuário recebe 2 em Combate a cada 10 Níveis do "
+                        + "Personagem. Além disso, seus ataques à distância com lanças são considerados Acertos Críticos, "
+                        + "e contra criaturas que estejam voando a uma distância longa ou superior, seus ataques causam "
+                        + "dano dobrado.");
         classe("VALQUIRIA", "Valquiria", "LANCEIRO",
                 bonus("{\"forca\":5,\"destreza\":5,\"constituicao\":5}", "{\"combate\":5,\"atletismo\":5,\"vigor\":5}", 3),
-                "Elegância de Guerra. A Valquíria personifica a combinação única de graciosidade e força, "
-                        + "utilizando seu charme e habilidades aprimoradas. Ela recebe um bônus de +2 a cada 10 pontos de "
-                        + "\"Força\" em qualquer teste de \"Ataque\" ou \"Reação\" desde que esteja utilizando uma Lança, "
-                        + "caso esteja empunhando duas lanças o bônus passa a ser +3.");
+                "Elegância de Guerra. Enquanto utilizar uma lança, o usuário recebe 2 em testes de Ataque e "
+                        + "Reação a cada 10 pontos de Força. Ao empunhar duas lanças, esse bônus é substituído por 3 a "
+                        + "cada 10 pontos de Força.");
 
         classe("LUTADOR", "Lutador", null,
                 bonus("{\"forca\":2,\"agilidade\":1,\"constituicao\":1,\"destreza\":1}", "{\"combate\":3,\"vigor\":1,\"bloqueio\":1}", 2),
-                "Tenacidade de Batalha. O Lutador é conhecido por sua resistência excepcional em combate. Caso "
-                        + "esse esteja utilizando uma armadura leve, a armadura terá os seus efeitos dobrados, e caso não "
-                        + "esteja utilizando nenhum tipo de arma, qualquer redução de status terá metade da potência e "
-                        + "durará metade do tempo.");
+                "Tenacidade de Batalha. Enquanto utilizar Armadura Leve, o usuário recebe o dobro dos benefícios "
+                        + "concedidos por sua armadura. Enquanto estiver desarmado, efeitos que reduzam seus atributos ou "
+                        + "características têm sua potência e duração reduzidas pela metade");
         classe("CAMPEAO", "Campeao", "LUTADOR",
                 bonus("{\"forca\":4,\"constituicao\":3,\"carisma\":3}", "{\"combate\":3,\"vigor\":3,\"aparencia\":3,\"diplomacia\":1}", 2),
-                "Habilidades: +2 SlotsEu sou o Campeão. O Campeão emana uma aura inspiradora que eleva o moral "
-                        + "de seus aliados. Caso esse esteja em um combate com seus aliados, ao vencer um inimigo sozinho "
-                        + "este ganhará um bônus de +2 a cada 10 pontos em \"Carisma\" adicionado ao seu dano desarmado, "
-                        + "para o resto da batalha. Efeito acumulável em até 3 vezes.");
+                "Eu sou o Campeão. Enquanto estiver em combate com aliados, sempre que derrotar sozinho um "
+                        + "inimigo, recebe 2 em Dano Desarmado a cada 10 pontos de Carisma até o fim da batalha. Esse "
+                        + "bônus pode ser acumulado até 3 vezes.");
         classe("ARTISTA_MARCIAL", "Artista Marcial", "LUTADOR",
                 bonus("{\"forca\":3,\"agilidade\":3,\"constituicao\":3,\"destreza\":1}", "{\"combate\":5,\"bloqueio\":2,\"esquiva\":2,\"iniciativa\":1}", 3),
-                "Harmonia do Combate. O Artista Marcial é habilidoso em sincronizar seus movimentos com a "
-                        + "fluidez de uma dança, resultando em uma defesa aprimorada. Este não sofre nerf algum de "
-                        + "lentidão ou paralisia, e caso este ataque inimigos diferentes na batalha irá ganhar +5 em "
-                        + "\"Combate\" e dano final a cada novo alvo, escalará até este repetir um inimigo.");
+                "Harmonia de Combate. O usuário ignora as penalidades de Lentidão e Paralisia. Além disso, "
+                        + "sempre que acertar um ataque contra uma nova criatura durante o combate, recebe 2 em Combate e "
+                        + "2 em Dano Final. Esses bônus são cumulativos até que o usuário ataque uma criatura que já tenha "
+                        + "atacado anteriormente, reiniciando a sequência.");
 
         classe("VIAJANTE", "Viajante", null,
                 bonus("{\"carisma\":3,\"sabedoria\":2}", "{\"enganacao\":2,\"aparencia\":2,\"conhecimento\":1}", 1),
