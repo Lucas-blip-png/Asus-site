@@ -1397,171 +1397,313 @@ public class DataSeeder implements CommandLineRunner {
     private void seedClasses() {
         classe("CAVALEIRO", "Cavaleiro", null,
                 bonus("{\"forca\":2,\"constituicao\":2,\"carisma\":1}", "{\"vigor\":2,\"atletismo\":1,\"bloqueio\":2}", 1),
-                "Lealdade inabalavel: atributo-base como bonus em resistencia a controle.");
+                "Lealdade inabalável. O Cavaleiro é um símbolo de lealdade a sua conduta, causa e ideais. Quando "
+                        + "confrontado em uma situação que vise forçá-lo a trair sua lealdade, este ganha o atributo base "
+                        + "como bônus em quaisquer teste de resistência contra magia ou efeitos que buscam controlar sua "
+                        + "vontade.");
         classe("ESCUDEIRO", "Escudeiro", "CAVALEIRO",
                 bonus("{\"constituicao\":8,\"forca\":2}", "{\"bloqueio\":5,\"vigor\":5}", 1),
-                "Escudo Protetor: vantagem ao bloquear por aliados.");
+                "Escudo Protetor. O Escudeiro é o mestre da proteção para si e todos os seus aliados. Enquanto "
+                        + "estiver empunhando um escudo este ganha \"Vantagem\" ao tentar bloquear ataques direcionados "
+                        + "para seus aliados, caso este tenha um teste bem sucedido ganhará uma reação extra para proteger "
+                        + "a si mesmo.");
         classe("COMANDANTE", "Comandante", "CAVALEIRO",
                 bonus("{\"constituicao\":4,\"forca\":3,\"carisma\":2,\"sabedoria\":1}", "{\"vigor\":3,\"atletismo\":3,\"diplomacia\":2,\"percepcao\":2}", 1),
-                "Presenca Inspiradora: motiva aliado com metade da Diplomacia.");
+                "Presença Inspiradora. O comandante é uma figura de autoridade e liderança. Sua presença inspira "
+                        + "confiança e determinação em seus aliados, sendo assim uma vez por cena o Comandante pode gastar "
+                        + "sua ação secundária para motivar um de seus aliados, concedendo assim metade de sua "
+                        + "\"Diplomacia\" em bônus para o próximo teste de seu aliado.");
 
         classe("ASSASSINO", "Assassino", null,
                 bonus("{\"destreza\":2,\"agilidade\":2,\"forca\":1}", "{\"combate\":2,\"acrobacia\":1,\"furtividade\":1,\"arremesso\":1}", 2),
-                "Golpe silencioso: ataque a alvo desavisado e critico.");
+                "Golpe silencioso. O Assassino é um mestre na arte do ataque furtivo e letal. Quanto este ataca "
+                        + "um inimigo que não tenha percebido sua presença ou está incapacitado, seu golpe será um "
+                        + "crítico.");
         classe("NINJA", "Ninja", "ASSASSINO",
                 bonus("{\"agilidade\":5,\"destreza\":3,\"forca\":2}", "{\"acrobacia\":4,\"furtividade\":3,\"arremesso\":3}", 3),
-                "Sombra agil: +Agilidade na Acrobacia nas sombras.");
+                "Sombra ágil. O Ninja é um mestre na arte da furtividade e usa uma agilidade incomparável. "
+                        + "Enquanto este estiver no escuro da noite ou das sombras e fora de combate, ganhará um bônus de "
+                        + "sua \"Agilidade\" em sua \"Acrobacia\". Podendo se mover através de terreno difícil sem "
+                        + "desvantagem, porém caso esteja com uma armadura pesada o efeito da passiva é anulado.");
         classe("SICARIO", "Sicario", "ASSASSINO",
                 bonus("{\"forca\":4,\"destreza\":4,\"agilidade\":2}", "{\"combate\":3,\"acrobacia\":3,\"iniciativa\":2,\"esquiva\":2}", 2),
-                "Hemorragia: arma de perfuracao leve causa Sangramento.");
+                "Hemorragia. O Sicário é um especialista em causar feridas dolorosas com sangramento em suas "
+                        + "vítimas. Quando este atacar com uma arma de perfuração leve causará \"Sangramento\".");
 
         classe("BARBARO", "Barbaro", null,
                 bonus("{\"forca\":3,\"constituicao\":2}", "{\"atletismo\":3,\"vigor\":2}", 2),
-                "Bruto: com metade do HP, +metade da Forca em Armadura e dano.");
+                "Bruto. O Bárbaro é um símbolo de força bruta e resistência nunca fugindo de uma batalha. "
+                        + "Durante a batalha, quando seu HP chega em sua metade, este ganhará metade do seu atributo "
+                        + "\"Força\" em \"Armadura\" e \"Dano Extra\".");
         classe("BERSERKER", "Berserker", "BARBARO",
                 bonus("{\"forca\":8,\"constituicao\":2}", "{\"atletismo\":8,\"vigor\":2}", 2),
-                "Furia incontrolavel: +metade do Atletismo em testes fisicos.");
+                "Fúria incontrolável. O Berserker é capaz de entrar em estado de fúria selvagem que o torna "
+                        + "ainda mais mortal. Durante o combate, caso este venha a utilizar a habilidade \"Estado de "
+                        + "Fúria\" ganhará metade de sua perícia \"Atletismo\" em testes físicos.");
         classe("IMORTAL", "Imortal", "BARBARO",
                 bonus("{\"constituicao\":8,\"forca\":2}", "{\"vigor\":8,\"atletismo\":2}", 2),
-                "Sobrevivencia Imortal: a 0 HP continua em pe ate sofrer dano.");
+                "Sobrevivência Imortal. O Imortal possui uma resistência inigualável que lhe permite sobreviver "
+                        + "a desafios quase insuperáveis. Quando o seu HP chega em 0, em vez de ficar inconsciente ou "
+                        + "morrer, ele continuará de pé até que sofra dano algum. Durante esse estado o usuário ganha um "
+                        + "bônus de metade do seu atributo \"Vigor\" em testes de reação.");
 
         classe("CLERIGO", "Clerigo", null,
                 bonus("{\"sabedoria\":4,\"constituicao\":1}", "{\"fe\":4,\"conhecimento\":1}", 3),
                 "Julgamento Divino: em confronto com inimigo de divindade semelhante a sua, ganha "
-                + "+2 a cada 5 pontos de Fe, somado ao ataque e as defesas referentes a bencaos.");
+                + "Julgamento Divino. O Clérigo é um símbolo de fé atuando como um agente das divindades. Quando o "
+                        + "clérigo está em um confronto com um inimigo de divindade semelhante a sua, este terá +2 a cada "
+                        + "5 pontos em sua perícia de \"Fé\", adicionada ao seu ataque e defesas referente a bênçãos.");
         classe("PALADINO", "Paladino", "CLERIGO",
                 bonus("{\"constituicao\":6,\"sabedoria\":3,\"forca\":1}", "{\"vigor\":5,\"fe\":5}", 1),
-                "Escudo da Fe: defende aliados com a pericia Fe.");
+                "Escudo da Fé. O Paladino emana uma aura de proteção que envolve a si mesmo e seus aliados. "
+                        + "Durante um combate este poderá defender seus aliados utilizando a perícia \"Fé\" caso esteja "
+                        + "empunhando um escudo.");
         classe("SANTO", "Santo", "CLERIGO",
                 bonus("{\"sabedoria\":7,\"carisma\":2,\"constituicao\":1}", "{\"fe\":5,\"conhecimento\":3,\"diplomacia\":2}", 4),
-                "Aura Sagrada: aliados resistem a efeitos divinos negativos.");
+                "Aura Sagrada. O Santo irradia uma aura de bondade e santidade que afeta seu entorno. Todos os "
+                        + "seus aliados na presença do Santo tem resistência a efeitos negativos de qualquer Divindade, "
+                        + "ganhando \"Vantagem\" para os testes de resistência aos efeitos.");
 
         classe("DRUIDA", "Druida", null,
                 bonus("{\"constituicao\":2,\"sabedoria\":2,\"carisma\":1}", "{\"adestrar\":2,\"vigor\":1,\"percepcao\":1,\"sobrevivencia\":1}", 3),
-                "Comunhao com a Natureza: bonus em pericias na natureza.");
+                "Comunhão com a Natureza. O Druida possui uma profunda ligação com a natureza e é capaz de "
+                        + "sentir as mudanças no ambiente natural. Enquanto este estiver em uma floresta ou ambiente "
+                        + "natural, terá +2 pontos a cada 10 Níveis do Personagem adicionado a quaisquer teste de "
+                        + "\"Furtividade, Percepção, Sobrevivência, Iniciativa, Adestrar, Virtude e Sanidade\".");
         classe("ARAUTO_NATUREZA", "Arauto da Natureza", "DRUIDA",
                 bonus("{\"sabedoria\":4,\"inteligencia\":4,\"carisma\":2}", "{\"magia\":4,\"conhecimento\":3,\"adestrar\":2,\"sobrevivencia\":1}", 4),
-                "Filho da Magia Natural: metade da mana com Magia Natural.");
+                "Filho da Magia Natural. O Arauto da Natureza é um verdadeiro intermediário entre o mundo "
+                        + "natural e os seres vivos. Ele é um exímio usuário de magia e sempre que está na natureza seu "
+                        + "vínculo com a mana é refinado, ao ponto de gastar metade da mana com \"Magia Natural\".");
         classe("DOMADOR_FERAS", "Domador de Feras", "DRUIDA",
                 bonus("{\"constituicao\":3,\"sabedoria\":3,\"carisma\":3,\"forca\":1}", "{\"adestrar\":5,\"sobrevivencia\":3,\"vigor\":2}", 3),
-                "Sintonia Animal: feras ganham Adestrar em HP.");
+                "Sintonia Animal. O Domador de Feras desenvolve uma conexão profunda com as criaturas que ele "
+                        + "comanda, tornando-as mais fortes e leais. Todas as feras sob o seu comando ganham a sua perícia "
+                        + "\"Adestrar\" em HP permanentemente. Além de que as suas criaturas tem \"Vantagem\" em testes de "
+                        + "resistência para trair o seu mestre.");
 
         classe("MONGE", "Monge", null,
                 bonus("{\"constituicao\":2,\"sabedoria\":1,\"forca\":1,\"destreza\":1}", "{\"combate\":2,\"virtude\":2,\"conhecimento\":1}", 2),
-                "Corpo Iluminado: +metade do Vigor em resistencia; imunidades.");
+                "Corpo Iluminado. O Monge é um mestre na arte do combate desarmado e no controle do próprio "
+                        + "corpo. Ele tem metade da sua perícia \"Vigor\" adicionado em sua resistência universal, além de "
+                        + "ser imune aos efeitos de \"Envenenamento, Sangramento, Confusão e Sonolência\". Uso de "
+                        + "armaduras pesadas anulam os efeitos.");
         classe("SABIO", "Sabio", "MONGE",
                 bonus("{\"sabedoria\":5,\"constituicao\":3,\"inteligencia\":2}", "{\"conhecimento\":4,\"virtude\":3,\"percepcao\":2,\"medicina\":1}", 2),
-                "Sabedoria Ancestral: aliados com vantagem em Percepcao/Conhecimento.");
+                "Sabedoria Ancestral. O Sábio é uma fonte de conhecimento inestimável e é capaz de fornecer "
+                        + "conselhos valiosos aos seus aliados. Quando o Sábio está presente, todos os seus aliados ganham "
+                        + "\"Vantagem\" em testes de \"Percepção e Conhecimento\". Além disso, uma vez por dia, este pode "
+                        + "dar a um aliado a \"Inspiração Sábia\", concedendo ao aliado sua perícia de \"Virtude\" em "
+                        + "qualquer teste de \"Sabedoria\" que o alvo realizar.");
         classe("PUNHOS_ACO", "Punhos de Aco", "MONGE",
                 bonus("{\"constituicao\":3,\"forca\":3,\"destreza\":3,\"sabedoria\":1}", "{\"combate\":4,\"virtude\":3,\"bloqueio\":2,\"sobrevivencia\":1}", 1),
-                "Golpes Rigidos: ataque desarmado ignora reducao de dano.");
+                "Golpes Rígidos. Os Punhos de Aço são especialistas em combate desarmado e são capazes de "
+                        + "infligir golpes devastadores. Quando realizam um ataque desarmado, seus golpes ignoram os "
+                        + "efeitos da armadura de seu alvo, referente a redução de dano. Além disso, os ataques causam o "
+                        + "dobro de dano em testes para quebrar objetos.");
 
         classe("ARQUEIRO", "Arqueiro", null,
                 bonus("{\"destreza\":3,\"agilidade\":2}", "{\"pontaria\":3,\"furtividade\":2}", 2),
-                "Olhos de Aguia: critico a longa distancia; anula cobertura.");
+                "Olhos de Águia. O Arqueiro possui uma visão excepcional e uma habilidade notável para atingir "
+                        + "alvos à distância. Para alvos que estão muito distantes este causará dano crítico, e para alvos "
+                        + "próximos este anula cobertura parcial e transforma cobertura completa em parcial.");
         classe("CACADOR", "Cacador", "ARQUEIRO",
                 bonus("{\"destreza\":5,\"agilidade\":4,\"sabedoria\":1}", "{\"pontaria\":4,\"iniciativa\":3,\"sobrevivencia\":3}", 3),
-                "Instinto de Caca: +3 margem de critico contra o alvo.");
+                "Instinto de Caça. O Caçador possui um profundo conhecimento sobre suas presas e a natureza ao "
+                        + "seu redor. Ao escolher seu alvo principal entre bestas, dragões, monstros, ou humanóides, ele "
+                        + "recebe um bônus de +3 na sua margem de crítico contra esses alvos. Além disso, ele ganha "
+                        + "\"Vantagem\" em testes de \"Sobrevivência\", \"Rastreamento\" e \"Identificação\" contra sua "
+                        + "criatura alvo.");
         classe("MERCENARIO", "Mercenario", "ARQUEIRO",
                 bonus("{\"destreza\":3,\"agilidade\":3,\"forca\":3,\"sabedoria\":1}", "{\"combate\":3,\"pontaria\":3,\"iniciativa\":2,\"sobrevivencia\":2}", 4),
-                "Instinto de Sobrevivencia: +1 reacao por inimigo enfrentando.");
+                "Instinto de Sobrevivência. O Mercenário é um sobrevivente habilidoso em situações difíceis. Ele "
+                        + "ganha \"Vantagem\" em testes contra emboscadas e armadilhas. Além disso, quando enfrenta "
+                        + "múltiplos inimigos, este ganhará 1 reação extra para cada inimigo lhe enfrentando.");
 
         classe("MAGO", "Mago", null,
                 bonus("{\"inteligencia\":4,\"sabedoria\":1}", "{\"magia\":3,\"conhecimento\":2}", 5),
                 "Mente Arcana: Vantagem em testes de Feiticaria para reagir e/ou identificar feiticos. "
-                + "1x/dia usa o Foco Arcano: +1 feitico em uma acao padrao (+1 a cada 10 niveis).");
+                + "Mente Arcana. O Mago possui uma compreensão profunda dos segredos da magia e do funcionamento "
+                        + "do mundo mágico. Este ganha \"Vantagem\" em testes de \"Magia\" para reação e/ou identificação "
+                        + "de feitiços. Também pode utilizar 1 vez ao dia o \"Foco Arcano\" que lhe permite utilizar +1 "
+                        + "feitiço em uma ação padrão, aumentando +1 a cada 10 níveis do personagem.");
         classe("ARQUIMAGO", "Arquimago", "MAGO",
                 bonus("{\"inteligencia\":8,\"sabedoria\":2}", "{\"magia\":8,\"conhecimento\":2}", 4),
-                "Maestria Arcana: lanca 2 feiticos ao mesmo tempo.");
+                "Maestria Arcana. O Arquimago é um mestre em todas as escolas de magia e é capaz de fundir e "
+                        + "aprimorar feitiços de diferentes naturezas. Ele pode lançar até 2 feitiços diferentes ao mesmo "
+                        + "tempo, se feito este recebe +2 em \"Magia\" a cada 5 níveis do personagem. E caso este seja "
+                        + "atacado por um feitiço que possua, poderá realizar um embate de \"Magia\" que anula o feitiço "
+                        + "do inimigo.");
         classe("RUNICISTA", "Runicista", "MAGO",
                 bonus("{\"inteligencia\":7,\"sabedoria\":3}", "{\"magia\":7,\"conhecimento\":3}", 4),
-                "Maestria Runica: cria/anula runas em objetos.");
+                "Maestria Rúnica. O Mago Rúnico é um especialista na criação e uso de runas mágicas. Este pode "
+                        + "anular temporariamente a runa de um objeto, ou pode criar 1 runa para objetos. E caso esteja "
+                        + "empunhando um objeto com feitiçaria rúnica, ganhará 5 em testes de ataque e reação físicos, a "
+                        + "cada 10 de \"Inteligência\" do personagem.");
 
         classe("ESPADACHIM", "Espadachim", null,
                 bonus("{\"destreza\":3,\"agilidade\":2}", "{\"combate\":2,\"iniciativa\":2,\"esquiva\":1}", 2),
-                "Mestre de Laminas: defende com Combate contra laminas.");
+                "Mestre de Lâminas. O Espadachim é um mestre no manuseio de espadas e armas de corte. Durante um "
+                        + "combate que este venha a ser atacado por alguém utilizando uma lâmina, poderá então defender o "
+                        + "ataque de seu oponente utilizando \"Combate\" ao invés de seu \"Bloqueio\".");
         classe("DUELISTA", "Duelista", "ESPADACHIM",
                 bonus("{\"destreza\":5,\"agilidade\":3,\"forca\":2}", "{\"combate\":4,\"iniciativa\":3,\"esquiva\":3}", 3),
-                "Duelo Eximio: +2/10 niveis em combate 1 contra 1.");
+                "Duelo Exímio. O Duelista é especialista em combate individual e em duelos mano a mano. Ele "
+                        + "ganha um bônus de +2 de bônus a cada 10 níveis do personagem, para qualquer teste envolvendo o "
+                        + "combate, caso este esteja no 1 contra 1, também tem \"Vantagem\" contra qualquer tentativa ou "
+                        + "efeito que possa impedir seu duelo de acontecer.");
         classe("SAMURAI", "Samurai", "ESPADACHIM",
                 bonus("{\"destreza\":4,\"agilidade\":3,\"constituicao\":3}", "{\"combate\":4,\"iniciativa\":3,\"vigor\":3}", 3),
-                "Caminho da Lamina: +2/10 Destreza no Combate com Katana.");
+                "Caminho da Lâmina. O Samurai é um mestre no manejo de katanas e uma figura de forte conduta. "
+                        + "Este recebe um bônus de +2 a cada 10 de \"Destreza\" do personagem, para o seu \"Combate\" caso "
+                        + "sua lâmina seja uma Katana, além de que a vitória em um duelo de Honra, ou seja, um contra um "
+                        + "até a morte, irá gerar o dobro de XP.");
 
         classe("LADRAO", "Ladrao", null,
                 bonus("{\"agilidade\":4,\"destreza\":1}", "{\"furtividade\":4,\"esquiva\":1}", 5),
-                "Mao Leve: vantagem em Crime furtivo; loot extra.");
+                "Mão Leve. O Ladrão é especializado em furtos habilidosos e, quando interage com objetos de "
+                        + "valor, torna-se excepcionalmente ágil e astuto. Ele recebe \"Vantagem\" em um teste de "
+                        + "\"Crime\" caso este esteja furtivo. Além de que sempre que lootear, poderá rodar 1d5, onde se "
+                        + "cair 5 adiciona um item extra ao loot.");
         classe("SOMBRA", "Sombra", "LADRAO",
                 bonus("{\"agilidade\":7,\"destreza\":3}", "{\"furtividade\":7,\"acrobacia\":3}", 4),
-                "Ofuscado pela Escuridao: invisibilidade parcial nas sombras.");
+                "Ofuscado pela Escuridão. A Sombra é mestre em manipular as próprias sombras e se esconder nas "
+                        + "áreas mais escuras. Ela ganha uma habilidade natural de se camuflar nas sombras, tornando-se "
+                        + "parcialmente invisível em ambientes escuros e sombrios. Quando está em uma área escura, a "
+                        + "Sombra recebe um bônus de seu \"Deslocamento\" em testes de \"Furtividade\" e \"Esquiva\".");
         classe("PIRATA", "Pirata", "LADRAO",
                 bonus("{\"agilidade\":3,\"destreza\":3,\"forca\":3,\"constituicao\":1}", "{\"combate\":3,\"acrobacia\":3,\"vigor\":3,\"pontaria\":1}", 3),
-                "Olho Atento ao Mar: +2/5 Percepcao p/ tesouros.");
+                "Olho Atento ao Mar. O Pirata desenvolveu uma habilidade excepcional em detectar riquezas "
+                        + "ocultas e tesouros. Ele recebe um bônus de +2 a cada 5 níveis do personagem, em testes de "
+                        + "\"Percepção\" para localizar itens de valor e tesouros escondidos. Caso este esteja em alto "
+                        + "mar, poderá 1 vez por Turno ganhar metade de sua \"Destreza\" como bônus em testes de \"Ataque "
+                        + "e Reação\"");
 
         classe("CURANDEIRO", "Curandeiro", null,
                 bonus("{\"sabedoria\":5}", "{\"medicina\":4,\"conhecimento\":1}", 3),
-                "Toque Curativo: cura dobrada em outros.");
+                "Toque Curativo. O Curandeiro possui uma habilidade natural para acelerar a cicatrização de "
+                        + "feridas e recuperação de aliados. Todos os feitiços de cura, terão o dobro do PV recuperado se "
+                        + "usado em outras pessoas.");
         classe("SACERDOTE", "Sacerdote", "CURANDEIRO",
                 bonus("{\"sabedoria\":9,\"inteligencia\":1}", "{\"medicina\":9,\"conhecimento\":1}", 3),
-                "Aura de Cura: cura em area e limpa efeitos negativos.");
+                "Aura de Cura. O Sacerdote emana uma aura de energia curativa que promove a regeneração. Toda a "
+                        + "Magia de cura que este utilizar terá efeito em área desde que seus alvos estejam próximos, "
+                        + "curando metade do valor do alvo principal aos seus aliados, além de limpar passivamente 1 "
+                        + "efeito negativo em seus aliados a cada turno.");
         classe("MESTRE_TOXINAS", "Mestre de Toxinas", "CURANDEIRO",
                 bonus("{\"sabedoria\":6,\"inteligencia\":4}", "{\"medicina\":4,\"alquimia\":4,\"magia\":2}", 3),
-                "Mao Venenosa: imune a venenos; veneno dobrado.");
+                "Mão Venenosa. O Mestre de Toxinas desenvolveu uma resistência natural às substâncias venenosas. "
+                        + "Ele é imune contra qualquer veneno e doença, além disso, quando este aplica veneno as suas "
+                        + "armas, estas causarão o dobro de efeito de envenenamento.");
 
         classe("BRUXO", "Bruxo", null,
                 bonus("{\"forca\":3,\"inteligencia\":2}", "{\"combate\":2,\"magia\":2,\"conhecimento\":1}", 4),
-                "Pacto Sombrio: vinculo com espirito invocavel.");
+                "Pacto Sombrio. O Bruxo possui um pacto sombrio com uma entidade sobrenatural, concedendo-lhe "
+                        + "poderes únicos. Este pode realizar um pacto com um espírito animal chamado de Vínculo, que será "
+                        + "seu aliado podendo invocá-lo ou ocultá-lo quando bem desejar, caso o seu Vínculo morra em "
+                        + "combate este voltará em um tempo indeterminado dependendo do seu nível de força.");
         classe("NECROMANTE", "Necromante", "BRUXO",
                 bonus("{\"inteligencia\":7,\"sabedoria\":3}", "{\"magia\":4,\"conhecimento\":3,\"virtude\":3}", 3),
-                "Lideranca Putrefata: morto-seguidor sem custo.");
+                "Liderança Putrefata. O Necromante possui uma influência inata sobre os mortos e é capaz de "
+                        + "comandar suas criações com maior eficácia. Ele pode escolher em especial um de seus mortos, "
+                        + "para conceder-lhe parte de sua alma, assim tornando-o um seguidor que não precisa de gastos "
+                        + "para invocá-lo.");
         classe("MISTICO", "Mistico", "BRUXO",
                 bonus("{\"forca\":4,\"inteligencia\":4,\"destreza\":2}", "{\"combate\":5,\"magia\":4,\"esquiva\":1}", 2),
-                "Ligacao Espiritual: consome espiritos por bonus.");
+                "Ligação Espiritual. O Místico é capaz de se conectar profundamente com os espíritos que o "
+                        + "cercam, tornando-se mais forte por meio dessa ligação. Este tem a capacidade de consumir "
+                        + "temporariamente espíritos para se tornar mais forte, recebendo um bônus em diferentes Perícias "
+                        + "dependendo da natureza do espírito.");
 
         classe("ALQUIMISTA", "Alquimista", null,
                 bonus("{\"inteligencia\":5}", "{\"alquimia\":4,\"conhecimento\":1}", 3),
-                "Maestria Alquimica: +10 Alquimia fora de combate.");
+                "Maestria Alquímica. O Alquimista é um mestre na criação e utilização de poções e elixires. Ele "
+                        + "recebe um bônus de +10 em \"Alquimia\" na criação de poções caso esteja fora de combate e pode "
+                        + "criar poções com 1 ingrediente comum ou incomum a menos. Além disso, quando consome uma poção, "
+                        + "elixir ou similar, o efeito dura 1 turno adicional.");
         classe("QUIMICO_ARCANO", "Quimico Arcano", "ALQUIMISTA",
                 bonus("{\"inteligencia\":7,\"sabedoria\":3}", "{\"alquimia\":7,\"magia\":2,\"engenharia\":1}", 2),
-                "Sintese Arcana: transmuta organicos em Mana.");
+                "Síntese Arcana. O Químico Arcano funde a alquimia tradicional com os princípios arcanos, "
+                        + "criando substâncias mágicas aprimoradas. Quando este estiver próximo de elementos orgânicos, "
+                        + "ele pode transmutar tais elementos para gerar 2 em Mana a cada 10 níveis do personagem, e/ou "
+                        + "utilizar para criar poções rapidamente.");
         classe("INVENTOR", "Inventor", "ALQUIMISTA",
                 bonus("{\"inteligencia\":6,\"sabedoria\":4}", "{\"engenharia\":8,\"alquimia\":2}", 4),
-                "Engenharia Mecanica: +10 Engenharia em oficina.");
+                "Engenharia Mecânica. O Inventor é um mestre na criação e manipulação de dispositivos mecânicos. "
+                        + "Ele recebe \"Vantagem\" em \"Engenharia\" para desarmar/desativar qualquer dispositivo "
+                        + "tecnológico, e caso use as peças desses mesmos dispositivos poderá criar uma versão ainda mais "
+                        + "avançada. Além disso, ao trabalhar em uma oficina, ganha um bônus de +10 em \"Engenharia\".");
 
         classe("LANCEIRO", "Lanceiro", null,
                 bonus("{\"forca\":3,\"destreza\":2}", "{\"combate\":4,\"atletismo\":1}", 3),
-                "Precisao de Lanca: +2/10 Destreza com lanca.");
+                "Precisão de Lança. O Lanceiro é um exímio na arte de empunhar lanças e armas similares, "
+                        + "tornando-se um mestre em ataques precisos. Ele recebe um bônus +2 em \"Combate\" a cada 10 "
+                        + "pontos em sua \"Destreza\" caso esteja utilizando uma lança, além de poder lançar sua lança com "
+                        + "o seu \"Combate\" ao invés de seu \"Arremesso\".");
         classe("GENERAL_CEUS", "General dos Ceus", "LANCEIRO",
                 bonus("{\"forca\":4,\"destreza\":4,\"constituicao\":2}", "{\"combate\":5,\"atletismo\":3,\"vigor\":2}", 2),
-                "Dominio Aereo: critico a distancia; dobro vs aereos.");
+                "Domínio Aéreo. O General dos Céus é um mestre inigualável nos ataques aéreos com lanças e armas "
+                        + "de alcance. Ao lançar sua lança receberá bônus de +2 em \"Combate\" a cada 10 níveis do "
+                        + "personagem, acertos há distância causam sempre dano crítico e contra inimigos aéreos o dano "
+                        + "será dobrado.");
         classe("VALQUIRIA", "Valquiria", "LANCEIRO",
                 bonus("{\"forca\":5,\"destreza\":5,\"constituicao\":5}", "{\"combate\":5,\"atletismo\":5,\"vigor\":5}", 3),
-                "Elegancia de Guerra: +2/10 Forca com lanca.");
+                "Elegância de Guerra. A Valquíria personifica a combinação única de graciosidade e força, "
+                        + "utilizando seu charme e habilidades aprimoradas. Ela recebe um bônus de +2 a cada 10 pontos de "
+                        + "\"Força\" em qualquer teste de \"Ataque\" ou \"Reação\" desde que esteja utilizando uma Lança, "
+                        + "caso esteja empunhando duas lanças o bônus passa a ser +3.");
 
         classe("LUTADOR", "Lutador", null,
                 bonus("{\"forca\":2,\"agilidade\":1,\"constituicao\":1,\"destreza\":1}", "{\"combate\":3,\"vigor\":1,\"bloqueio\":1}", 2),
-                "Tenacidade de Batalha: armadura leve dobrada.");
+                "Tenacidade de Batalha. O Lutador é conhecido por sua resistência excepcional em combate. Caso "
+                        + "esse esteja utilizando uma armadura leve, a armadura terá os seus efeitos dobrados, e caso não "
+                        + "esteja utilizando nenhum tipo de arma, qualquer redução de status terá metade da potência e "
+                        + "durará metade do tempo.");
         classe("CAMPEAO", "Campeao", "LUTADOR",
                 bonus("{\"forca\":4,\"constituicao\":3,\"carisma\":3}", "{\"combate\":3,\"vigor\":3,\"aparencia\":3,\"diplomacia\":1}", 2),
-                "Eu sou o Campeao: +2/10 Carisma em dano desarmado.");
+                "Habilidades: +2 SlotsEu sou o Campeão. O Campeão emana uma aura inspiradora que eleva o moral "
+                        + "de seus aliados. Caso esse esteja em um combate com seus aliados, ao vencer um inimigo sozinho "
+                        + "este ganhará um bônus de +2 a cada 10 pontos em \"Carisma\" adicionado ao seu dano desarmado, "
+                        + "para o resto da batalha. Efeito acumulável em até 3 vezes.");
         classe("ARTISTA_MARCIAL", "Artista Marcial", "LUTADOR",
                 bonus("{\"forca\":3,\"agilidade\":3,\"constituicao\":3,\"destreza\":1}", "{\"combate\":5,\"bloqueio\":2,\"esquiva\":2,\"iniciativa\":1}", 3),
-                "Harmonia do Combate: +5 Combate a cada novo alvo.");
+                "Harmonia do Combate. O Artista Marcial é habilidoso em sincronizar seus movimentos com a "
+                        + "fluidez de uma dança, resultando em uma defesa aprimorada. Este não sofre nerf algum de "
+                        + "lentidão ou paralisia, e caso este ataque inimigos diferentes na batalha irá ganhar +5 em "
+                        + "\"Combate\" e dano final a cada novo alvo, escalará até este repetir um inimigo.");
 
         classe("VIAJANTE", "Viajante", null,
                 bonus("{\"carisma\":3,\"sabedoria\":2}", "{\"enganacao\":2,\"aparencia\":2,\"conhecimento\":1}", 1),
-                "Conhecimento Itinerante: aprende habilidade local.");
+                "Conhecimento Itinerante. O Viajante é um observador astuto e um aprendiz constante, absorvendo "
+                        + "informações de diferentes culturas e terras. Quando esse visita uma nova localidade, após "
+                        + "passar uma noite em tal este receberá uma \"Habilidade\" aleatória de qualquer residente local "
+                        + "que encontrou, permanecendo com tal \"Habilidade\" até sair da localização.");
         classe("BARDO", "Bardo", "VIAJANTE",
                 bonus("{\"carisma\":8,\"destreza\":2}", "{\"artes\":8,\"aparencia\":2}", 2),
-                "Inspiracao Continua: dobra o efeito da proxima acao do aliado.");
+                "Inspiração Contínua. O Bardo é uma fonte constante de inspiração para seus aliados. O Bardo uma "
+                        + "vez por dia pode inspirar um aliado com \"Tudo de Si\" que irá causar com que a próxima "
+                        + "habilidade, feitiço ou passiva do seu aliado, cause o dobro de efeito. Também pode utilizar "
+                        + "instrumentos musicais como catalisadores para magia, se o fizer, adicione +1 turno de efeito a "
+                        + "magias de buff.");
         classe("CIGANO", "Cigano", "VIAJANTE",
                 bonus("{\"carisma\":5,\"destreza\":5}", "{\"artes\":5,\"acrobacia\":5}", 3),
-                "Leitura do Destino: +2/5 Destreza em reacao ao alvo.");
+                "Leitura do Destino. O Cigano é mestre na arte da astúcia e da leitura de situações. Quando este "
+                        + "toca em um alvo, poderá ter um leve vislumbre do que seu oponente fará, ganhando assim ganhando "
+                        + "+2 a cada 5 pontos de \"Destreza\" para testes de \"Reação\" contra aquele oponente. E se for "
+                        + "feito em um aliado no interlúdio, como passa tempo, será jogado um d20 para determinar o buff "
+                        + "que este receberá nos seus próximos 3 testes.");
         classe("CARTOMANTE", "Cartomante", "VIAJANTE",
                 bonus("{\"destreza\":7,\"inteligencia\":3}", "{\"enganacao\":5,\"arremesso\":5}", 4),
-                "Cartas Arcanas: cartas aplicam efeitos negativos (1d6).");
+                "Cartas Arcanas. O Cartomante possui uma afinidade única com as energias arcanas associadas às "
+                        + "suas cartas. Este pode imbuir cartas especiais para que estas afetam a mana de seus alvos, "
+                        + "causando os mais derivados efeitos negativos, determinados por 1d6 sendo os efeitos: "
+                        + "(1)Paralisia; (2)Fraqueza; (3)Ofuscado; (4)Surdo; (5)Fragilizado; (6)Ansioso. Para o efeito "
+                        + "funcionar é preciso passar em um teste de \"Jogatina\" contra a resistência do alvo.");
         classe("PINTOR", "Pintor", "VIAJANTE",
                 bonus("{\"destreza\":6,\"carisma\":4}", "{\"artes\":10}", 2),
-                "Inspiracao Artistica: obra concede metade de Artes em atributo.");
+                "Inspiração Artística. O pintor encontra beleza e poder em suas próprias criações visuais. "
+                        + "Sempre que o pintor conclui uma obra de arte significativa, ele e os aliados podem ganhar "
+                        + "metade da sua \"Arte\" em qualquer Atributo dependendo do tema da tela.");
     }
 
     // ---------------- Usuario / Organizacao / Campanha demo ----------------
