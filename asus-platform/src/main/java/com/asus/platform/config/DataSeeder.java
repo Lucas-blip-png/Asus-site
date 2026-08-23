@@ -727,7 +727,7 @@ public class DataSeeder implements CommandLineRunner {
         hab("BALANCA_MALDITA", "Balança Maldita", "CARTOMANTE", "ATIVA", 2, "PE",
                 "Cartomante", "Ao tocar em um alvo rouba toda a sorte dele, assim em seu próximo embate de testes, o usuário pegará o dado de valor mais alto para si.");
         hab("TRUCO", "Truco?", "CARTOMANTE", "ATIVA", 5, "PE",
-                "Cartomante & Nível 10", "O usuário puxa 3 cartas, deverá rodar 1d4 para cada uma delas, cada carta funciona como um bônus para seus próximos ataques, o usuário pode escolher quantas e quando usá-las: Espadas(1): Ignora 4 da Armadura do Alvo; Paus(2): Adiciona 5 de dano ao seu ataque; Copas(3): Adiciona 5 de Roubo de Vida ao seu ataque; Ouros(4): Causa -2 na Reação do seu Alvo. Cada um dos efeitos aumenta a cada 20 Níveis do Personagem.");
+                "Cartomante & Nível 10", "O usuário puxa 3 cartas, deverá rodar 1d4 para cada uma delas, cada carta funciona como um bônus para seus próximos ataques, o usuário pode escolher quantas e quando usá-las: Espadas(1): Ignora 4 da Armadura do Alvo; Paus(2): Adiciona +5 de dano ao seu ataque; Copas(3): Adiciona +5 de Roubo de Vida ao seu ataque; Ouros(4): Causa -2 na Reação do seu Alvo. Cada um dos efeitos aumenta a cada 20 Níveis do Personagem.");
         hab("CONSUMIR_FORCAS", "Consumir Forças", "BRUXO", "ATIVA", 6, "PE",
                 "Bruxo", "Ao tocar em um alvo pode drenar suas forças, do alvo “Força” do alvo, além disso recebe metade "
                         + "dos pontos reduzidos em Pontos de Energia.");
@@ -742,7 +742,7 @@ public class DataSeeder implements CommandLineRunner {
         hab("ALVOROCA_MALDICAO", "Alvoroça Maldição", "BRUXO", "ATIVA", 8, "PE",
                 "Bruxo", "Ao gastar uma Ação Completa, o usuário molda a mana do ambiente e lança uma maldição sobre um "
                         + "alvo. O usuário define uma condição para ativá-la; quando a condição for cumprida, a maldição "
-                        + "reduz 4 pontos de atributos, aumentando em 2 a cada 10 níveis. Os pontos podem ser distribuídos "
+                        + "reduz 4 pontos de atributos, aumentando em +2 a cada 10 níveis. Os pontos podem ser distribuídos "
                         + "entre diferentes atributos, mas nenhum atributo pode ser reduzido em mais de 4 pontos.");
         hab("RESGATAR_FAMILIAR", "Resgatar Familiar", "BRUXO", "ATIVA", 5, "PE",
                 "Bruxo", "O usuário absorve as capacidades de seu familiar para si, oque o faz entrar em seu intervalo de retorno, mas com isso, ganha +2 do maior atributo do seu familiar a cada 5 Níveis do Personagem e consegue utilizar as bênçãos do mesmo como se fossem suas, até o final da cena.");
@@ -914,11 +914,11 @@ public class DataSeeder implements CommandLineRunner {
                         + "cada inimigo adjacente.");
         hab("LAMINA_RESSONANTE", "Lâmina Ressonante", "ESPADACHIM", "ATIVA", 5, "PE",
                 null, "Faça sua arma vibrar em alta frequência. Seus ataques corpo a corpo causam 4 de dano de "
-                        + "impacto, aumentando em 2 a cada 5 níveis, e ignoram a redução de dano concedida por armaduras.");
+                        + "impacto, aumentando em +2 a cada 5 níveis, e ignoram a redução de dano concedida por armaduras.");
         hab("GATUNO_AGIL", "Gatuno Ágil", "LADRAO", "ATIVA", 2, "PE",
                 null, "Permite realizar a ação de \"Roubar\" como uma Ação Secundária durante o combate.");
         hab("SAQUE_DO_PIRATA", "Saque do Pirata", "LADRAO,PIRATA", "PASSIVA", 0, null,
-                "Trilha Pirata", "Ao derrotar um inimigo, o Ladrão recupera 5 PE, aumentando em 5 PE a cada 10 níveis. Este "
+                "Trilha Pirata", "Ao derrotar um inimigo, o Ladrão recupera 5 PE, aumentando em +5 PE a cada 10 níveis. Este "
                         + "efeito pode ser ativado até 3 vezes por dia.");
         hab("BOMBA_DE_FUMACA", "Bomba de fumaça", "LADRAO", "ATIVA", 5, "PE",
                 null, "Cria uma nuvem que concede Cobertura Total em um raio curto por 1 rodada.");
@@ -951,7 +951,7 @@ public class DataSeeder implements CommandLineRunner {
         hab("INFUSAO_ARCANA", "Infusão Arcana", "ALQUIMISTA,QUIMICO_ARCANO", "ATIVA", 6, "PM",
                 "Trilha Químico Arcano", "Escolha um elemento natural ao ativar esta habilidade. Até o fim da cena, a arma de um aliado "
                         + "fica imbuída com esse elemento, fazendo com que seus ataques causem 5 de dano elemental "
-                        + "adicional, aumentando em 5 a cada 10 Níveis do Personagem.");
+                        + "adicional, aumentando em +5 a cada 10 Níveis do Personagem.");
         hab("ENGRENAGEM_DE_DEFESA", "Engrenagem de Defesa", "ALQUIMISTA,INVENTOR", "ATIVA", 4, "PE",
                 "Trilha Inventor", "Conecta um dispositivo à armadura que concede +2 de bônus em Bloqueio (aumentando em +2 a cada 5 niveis) só pode ser utilizado em um dos aliados, não acumulativo.");
         hab("ANTIDOTO_RAPIDO", "Antídoto Rápido", "ALQUIMISTA", "ATIVA", 3, "PE",
@@ -960,7 +960,7 @@ public class DataSeeder implements CommandLineRunner {
                 null, "Lança um gás que reduz a Iniciativa pela metade de todos os inimigos afetados.");
         hab("ESTOCADA_DE_ALCANCE", "Estocada de Alcance", "LANCEIRO", "ATIVA", 3, "PE",
                 null, "O usuário realiza uma estocada precisa, aumentando em um passe o seu alcance. O ataque recebe 2 "
-                        + "em Combate, aumentando em 2 a cada 5 Níveis do Personagem.");
+                        + "em Combate, aumentando em +2 a cada 5 Níveis do Personagem.");
         hab("SALTO_DO_GENERAL", "Salto do General", "GENERAL_CEUS,LANCEIRO", "ATIVA", 5, "PE",
                 "Trilha General dos Céus", "O usuário salta em direção a um inimigo, realizando um teste de Acrobacia contra a Esquiva do "
                         + "alvo. Em caso de sucesso, desfere um ataque com 2 em Combate. Se o alvo estiver no ar, o ataque "
@@ -983,16 +983,16 @@ public class DataSeeder implements CommandLineRunner {
                 null, "O Lutador imobiliza o alvo; ambos ficam sob o estado Agarrado, mas o alvo recebe dano de sufocamento a cada turno (2d8) +1 dado a cada 5 níveis.");
         hab("FOCO_INABALAVEL", "Foco Inabalável", "LUTADOR", "PASSIVA", 0, null,
                 null, "O lutador ignora qualquer penalidade de movimento causada por terrenos difíceis, gerando +2 em testes físicos em terrenos difíceis (aumentando em +2 a cada 5 níveis).");
-        hab("DEMPSEY_ROLL_DANCA_DO_PUNHO_DEMOLIDOR", "DEMPSEY ROLL - Dança do Punho Demolidor", "LUTADOR", "PASSIVA", 0, null,
+        hab("DEMPSEY_ROLL_DANCA_DO_PUNHO_DEMOLIDOR", "DEMPSEY ROLL - Dança do Punho Demolidor", "LUTADOR", "ATIVA", 5, "PE",
                 null, "Sempre que gastar uma Ação de Movimento, o usuário recebe 1 Acúmulo de Impulso (máximo 4). "
                         + "Enquanto possuir Acúmulos de Impulso, não pode realizar ataques, ficando limitado a ações de "
                         + "Deslocamento e Esquiva. Ao encerrar a habilidade, realiza seus ataques normalmente. Para cada "
-                        + "Acúmulo de Impulso, recebe 1 dado de dano desarmado e 1 na margem de ameaça. Caso Esquive de um "
+                        + "Acúmulo de Impulso, recebe 1 dado de dano desarmado e +1 na margem de ameaça. Caso Esquive de um "
                         + "ataque enquanto a habilidade estiver ativa, pode gastar 1 Reação para realizar 1 ataque "
                         + "adicional ao final da habilidade. Se sofrer dano durante esse período, todos os Acúmulos de "
                         + "Impulso são perdidos e a habilidade é encerrada imediatamente. Ao final de cada turno em que "
-                        + "permanecer acumulando impulso, realize um teste de Vigor (DT 16 4 por Acúmulo de Impulso). Em "
-                        + "caso de falha, a habilidade é encerrada.");
+                        + "permanecer acumulando impulso, realize um teste de Atletismo (DT 16 +4 por Acúmulo de Impulso). Em "
+                        + "caso de falha, a habilidade é encerrada. Custo: 5 PE para ativar, mais 2 PE por Acúmulo de Impulso gasto.");
                 hab("MELODIA_REVIGORANTE", "Melodia Revigorante", "BARDO,VIAJANTE", "ATIVA", 6, "PM",
                 "Trilha Bardo", "Toca uma música que recupera 5 PE de todos os aliados próximos por 2 turnos (uma vez por cena).");
         hab("VATICINIO_DO_DESTINO", "Vaticínio do Destino", "CIGANO,VIAJANTE", "ATIVA", 3, "PE",
@@ -1103,7 +1103,7 @@ public class DataSeeder implements CommandLineRunner {
                 null, "Escolha quantos Pontos de Energia gastar, um aliado recebe metade desse valor. Por cena só pode "
                         + "ser usado 1 vez por aliado.");
         hab("LEITURA_DE_COMBATE", "Leitura de Combate", "SABIO", "ATIVA", 5, "PE",
-                null, "Para cada golpe que errar, você recebe 2 no próximo ataque, o bônus aumenta em 1 a cada 10 "
+                null, "Para cada golpe que errar, você recebe +2 no próximo ataque, o bônus aumenta em 1 a cada 10 "
                         + "níveis do personagem.");
         hab("ESTADO_DE_NIRVANA", "Estado de Nirvana", "SABIO", "ATIVA", 12, "PE",
                 null, "Pelas próximas 1d4 de rodadas, o Monge tem o gasto de qualquer habilidade reduzido para metade. .");
@@ -1208,7 +1208,7 @@ public class DataSeeder implements CommandLineRunner {
         hab("EXPLOSAO_DE_CADAVER", "Explosão de Cadáver", "NECROMANTE", "ATIVA", 5, "PE",
                 null, "Explode um corpo no chão para causar 2d12 dano mágico em área curta, média ou grande, dependendo do corpo alvo( +1 dado a cada 10 níveis). .");
         hab("TOQUE_DA_MORTE", "Toque da Morte", "NECROMANTE", "ATIVA", 7, "PE",
-                null, "Reduz o PV Máximo do alvo em 10, aumentando em 5 a cada 10 níveis, por 1 cena. Este efeito não "
+                null, "Reduz o PV Máximo do alvo em 10, aumentando em +5 a cada 10 níveis, por 1 cena. Este efeito não "
                         + "pode ser acumulado no mesmo alvo.");
         hab("EXERCITO_PUTREFATO", "Exército Putrefato", "NECROMANTE", "PASSIVA", 0, null,
                 null, "Pode controlar até 5 mortos-vivos simultaneamente(a cada 10 níveis). .");
@@ -1289,7 +1289,7 @@ public class DataSeeder implements CommandLineRunner {
         hab("GANCHO_DE_OURO", "Gancho de Ouro", "CAMPEAO", "ATIVA", 8, "PE",
                 null, "Se o ataque for crítico, o alvo fica \"Atordoado\" por 1d4 turnos. .");
         hab("IDOLO_DAS_MASSAS", "Ídolo das Massas", "CAMPEAO", "PASSIVA", 0, null,
-                null, "Enquanto houver 2 ou mais criaturas conscientes observando o combate de fora, recebe 2 em "
+                null, "Enquanto houver 2 ou mais criaturas conscientes observando o combate de fora, recebe +2 em "
                         + "Carisma e 2 em Combate, aumentando ambos em 2 a cada 5 Níveis do Personagem.");
         hab("TROCAR_AS_MAOS_PELOS_PES", "Trocar as Mãos pelos Pés", "ARTISTA_MARCIAL", "ATIVA", 2, "PE",
                 null, "Pode trocar bônus de esquiva por combate e combate por esquiva. .");
@@ -1301,7 +1301,7 @@ public class DataSeeder implements CommandLineRunner {
                 null, "Permite esquivar de projéteis com bônus de +2 (+2 a cada 5 níveis). .");
         hab("COMBO_INFINITO", "Combo Infinito", "ARTISTA_MARCIAL", "PASSIVA", 0, null,
                 null, "Cada ataque consecutivo que acertar o mesmo alvo no mesmo turno concede 2 de dano cumulativo, "
-                        + "aumentando em 2 a cada 10 Níveis do Personagem. O bônus é perdido ao atacar outra criatura ou "
+                        + "aumentando em +2 a cada 10 Níveis do Personagem. O bônus é perdido ao atacar outra criatura ou "
                         + "ao término do turno.");
     }
 
@@ -1600,7 +1600,7 @@ public class DataSeeder implements CommandLineRunner {
         classe("BERSERKER", "Berserker", "BARBARO",
                 bonus("{\"forca\":8,\"constituicao\":2}", "{\"atletismo\":8,\"vigor\":2}", 2),
                 "Fúria Incontrolável. Enquanto estiver sob os efeitos da habilidade Estado de Fúria, o usuário "
-                        + "recebe 2 em testes físicos a cada 10 pontos de Atletismo.");
+                        + "recebe +2 em testes físicos a cada 10 pontos de Atletismo.");
         classe("IMORTAL", "Imortal", "BARBARO",
                 bonus("{\"constituicao\":8,\"forca\":2}", "{\"vigor\":8,\"atletismo\":2}", 2),
                 "Sobrevivência Imortal. Quando seus Pontos de Vida forem reduzidos a 0, o usuário não fica "
@@ -1611,7 +1611,7 @@ public class DataSeeder implements CommandLineRunner {
         classe("CLERIGO", "Clerigo", null,
                 bonus("{\"sabedoria\":4,\"constituicao\":1}", "{\"fe\":4,\"conhecimento\":1}", 3),
                 "Julgamento Divino. Ao enfrentar um inimigo que possua uma divindade do mesmo panteão que a sua, "
-                        + "o usuário recebe 2 em ataques e defesas relacionadas a bênçãos dessa divindade a cada 10 pontos "
+                        + "o usuário recebe +2 em ataques e defesas relacionadas a bênçãos dessa divindade a cada 10 pontos "
                         + "em sua perícia Fé.");
         classe("PALADINO", "Paladino", "CLERIGO",
                 bonus("{\"constituicao\":6,\"sabedoria\":3,\"forca\":1}", "{\"vigor\":5,\"fe\":5}", 1),
@@ -1664,7 +1664,7 @@ public class DataSeeder implements CommandLineRunner {
         classe("CACADOR", "Cacador", "ARQUEIRO",
                 bonus("{\"destreza\":5,\"agilidade\":4,\"sabedoria\":1}", "{\"pontaria\":4,\"iniciativa\":3,\"sobrevivencia\":3}", 3),
                 "Instinto de Caça. O usuário escolhe uma categoria de criatura entre Bestas, Dragões, Monstros "
-                        + "ou Humanoides como seu Alvo Principal. Contra criaturas dessa categoria, recebe 2 na Margem de "
+                        + "ou Humanoides como seu Alvo Principal. Contra criaturas dessa categoria, recebe +2 na Margem de "
                         + "Ameaça e Vantagem em testes de Sobrevivência, Rastreamento e Identificação.");
         classe("MERCENARIO", "Mercenario", "ARQUEIRO",
                 bonus("{\"destreza\":3,\"agilidade\":3,\"forca\":3,\"sabedoria\":1}", "{\"combate\":3,\"pontaria\":3,\"iniciativa\":2,\"sobrevivencia\":2}", 4),
@@ -1676,19 +1676,19 @@ public class DataSeeder implements CommandLineRunner {
                 bonus("{\"inteligencia\":4,\"sabedoria\":1}", "{\"magia\":3,\"conhecimento\":2}", 5),
                 "Mente Arcana. O usuário recebe Vantagem em testes de Feitiçaria para identificar ou reagir a "
                         + "feitiços. Uma vez por dia, pode utilizar seu Foco Arcano para lançar 1 feitiço em uma Ação "
-                        + "Principal, aumentando em 1 feitiço adicional a cada 10 Níveis do Personagem. Os custos dos "
+                        + "Principal, aumentando em +1 feitiço adicional a cada 10 Níveis do Personagem. Os custos dos "
                         + "feitiços devem ser considerados individualmente.");
         classe("ARQUIMAGO", "Arquimago", "MAGO",
                 bonus("{\"inteligencia\":8,\"sabedoria\":2}", "{\"magia\":8,\"conhecimento\":2}", 4),
                 "Maestria Arcana. O usuário pode conjurar até 2 feitiços diferentes simultaneamente, porém o "
-                        + "feitiço secundário custa 4 PE adicionais. Ao realizar essa conjuração, recebe 2 em Feitiçaria, "
-                        + "aumentando em 2 a cada 10 Níveis do Personagem, para o seu próximo feitiço secundário. Além "
+                        + "feitiço secundário custa 4 PE adicionais. Ao realizar essa conjuração, recebe +2 em Feitiçaria, "
+                        + "aumentando em +2 a cada 10 Níveis do Personagem, para o seu próximo feitiço secundário. Além "
                         + "disso, ao ser alvo de um feitiço que conheça, pode realizar um embate de Magia contra o "
                         + "conjurador. Em caso de sucesso, o feitiço é anulado.");
         classe("RUNICISTA", "Runicista", "MAGO",
                 bonus("{\"inteligencia\":7,\"sabedoria\":3}", "{\"magia\":7,\"conhecimento\":3}", 4),
                 "Maestria Rúnica. O usuário pode fazer um teste de Feitiçaria para desfazer uma runa presente em "
-                        + "um objeto ou criar uma nova runa em um objeto. Enquanto empunhar um objeto rúnico, recebe 5 em "
+                        + "um objeto ou criar uma nova runa em um objeto. Enquanto empunhar um objeto rúnico, recebe +5 em "
                         + "testes de Ataque e Reação Físicos a cada 10 pontos de Inteligência.");
 
         classe("ESPADACHIM", "Espadachim", null,
@@ -1697,13 +1697,13 @@ public class DataSeeder implements CommandLineRunner {
                         + "pode realizar o teste de defesa utilizando Combate no lugar de Bloqueio.");
         classe("DUELISTA", "Duelista", "ESPADACHIM",
                 bonus("{\"destreza\":5,\"agilidade\":3,\"forca\":2}", "{\"combate\":4,\"iniciativa\":3,\"esquiva\":3}", 3),
-                "Duelo Exímio. Enquanto estiver enfrentando apenas uma criatura e sozinho, o usuário recebe 2 em "
+                "Duelo Exímio. Enquanto estiver enfrentando apenas uma criatura e sozinho, o usuário recebe +2 em "
                         + "Combate a cada 10 Níveis do Personagem. Além disso, recebe Vantagem em testes para resistir a "
                         + "qualquer tentativa ou efeito que impeça, interrompa ou encerre seu duelo. Caso outra criatura "
                         + "interfira diretamente no combate, os benefícios do Duelo Exímio são perdidos até o fim da cena.");
         classe("SAMURAI", "Samurai", "ESPADACHIM",
                 bonus("{\"destreza\":4,\"agilidade\":3,\"constituicao\":3}", "{\"combate\":4,\"iniciativa\":3,\"vigor\":3}", 3),
-                "Caminho da Lâmina. Enquanto utilizar uma Katana, o usuário recebe 2 em Combate a cada 10 pontos "
+                "Caminho da Lâmina. Enquanto utilizar uma Katana, o usuário recebe +2 em Combate a cada 10 pontos "
                         + "de Destreza. Ao declarar um Duelo de Honra antes do combate, o confronto deve ocorrer em 1 "
                         + "contra 1 até a morte, sem interferência externa. Ao vencer o duelo, recebe o dobro da "
                         + "Experiência concedida pelo combate.");
@@ -1719,7 +1719,7 @@ public class DataSeeder implements CommandLineRunner {
                         + "Furtividade e Esquiva igual ao seu Deslocamento, tornando-se Parcialmente Invisível.");
         classe("PIRATA", "Pirata", "LADRAO",
                 bonus("{\"agilidade\":3,\"destreza\":3,\"forca\":3,\"constituicao\":1}", "{\"combate\":3,\"acrobacia\":3,\"vigor\":3,\"pontaria\":1}", 3),
-                "Olho Atento ao Mar. O usuário recebe 2 em Percepção a cada 5 Níveis do Personagem em testes "
+                "Olho Atento ao Mar. O usuário recebe +2 em Percepção a cada 5 Níveis do Personagem em testes "
                         + "para localizar itens de valor. Enquanto estiver em alto-mar, uma vez por turno, recebe um bônus "
                         + "igual à metade de sua Destreza em testes de Ataque ou Reação.");
 
@@ -1757,7 +1757,7 @@ public class DataSeeder implements CommandLineRunner {
 
         classe("ALQUIMISTA", "Alquimista", null,
                 bonus("{\"inteligencia\":5}", "{\"alquimia\":4,\"conhecimento\":1}", 3),
-                "Maestria Alquímica. O usuário recebe 10 na Perícia Alquimia ao criar poções e elixires fora de "
+                "Maestria Alquímica. O usuário recebe +10 na Perícia Alquimia ao criar poções e elixires fora de "
                         + "combate. Além disso, pode criar poções utilizando 1 ingrediente a menos, mas nunca menos que 1, "
                         + "desde que os ingredientes sejam Comuns ou Incomuns. Ao consumir uma poção ou elixir, sua "
                         + "duração é aumentada em 1 turno.");
@@ -1770,23 +1770,23 @@ public class DataSeeder implements CommandLineRunner {
                 bonus("{\"inteligencia\":6,\"sabedoria\":4}", "{\"engenharia\":8,\"alquimia\":2}", 4),
                 "Engenharia Mecânica. O usuário recebe Vantagem em testes de Engenharia para desarmar ou "
                         + "desativar dispositivos tecnológicos. As peças obtidas desses dispositivos podem ser utilizadas "
-                        + "na criação de versões aprimoradas de seus próprios mecanismos. Em uma Oficina, recebe 10 em "
+                        + "na criação de versões aprimoradas de seus próprios mecanismos. Em uma Oficina, recebe +10 em "
                         + "Engenharia para criar, reparar ou aprimorar mecanismos.");
 
         classe("LANCEIRO", "Lanceiro", null,
                 bonus("{\"forca\":3,\"destreza\":2}", "{\"combate\":4,\"atletismo\":1}", 3),
-                "Precisão de Lança. Enquanto utilizar uma lança, o usuário recebe 2 em Combate a cada 10 pontos "
+                "Precisão de Lança. Enquanto utilizar uma lança, o usuário recebe +2 em Combate a cada 10 pontos "
                         + "de Destreza. Além disso, pode realizar o arremesso de armas na categoria de lança utilizando "
                         + "Combate no lugar de Arremesso.");
         classe("GENERAL_CEUS", "General dos Ceus", "LANCEIRO",
                 bonus("{\"forca\":4,\"destreza\":4,\"constituicao\":2}", "{\"combate\":5,\"atletismo\":3,\"vigor\":2}", 2),
-                "Domínio Aéreo. Ao arremessar uma lança, o usuário recebe 2 em Combate a cada 10 Níveis do "
+                "Domínio Aéreo. Ao arremessar uma lança, o usuário recebe +2 em Combate a cada 10 Níveis do "
                         + "Personagem. Além disso, seus ataques à distância com lanças são considerados Acertos Críticos, "
                         + "e contra criaturas que estejam voando a uma distância longa ou superior, seus ataques causam "
                         + "dano dobrado.");
         classe("VALQUIRIA", "Valquiria", "LANCEIRO",
                 bonus("{\"forca\":5,\"destreza\":5,\"constituicao\":5}", "{\"combate\":5,\"atletismo\":5,\"vigor\":5}", 3),
-                "Elegância de Guerra. Enquanto utilizar uma lança, o usuário recebe 2 em testes de Ataque e "
+                "Elegância de Guerra. Enquanto utilizar uma lança, o usuário recebe +2 em testes de Ataque e "
                         + "Reação a cada 10 pontos de Força. Ao empunhar duas lanças, esse bônus é substituído por 3 a "
                         + "cada 10 pontos de Força.");
 
@@ -1798,12 +1798,12 @@ public class DataSeeder implements CommandLineRunner {
         classe("CAMPEAO", "Campeao", "LUTADOR",
                 bonus("{\"forca\":4,\"constituicao\":3,\"carisma\":3}", "{\"combate\":3,\"vigor\":3,\"aparencia\":3,\"diplomacia\":1}", 2),
                 "Eu sou o Campeão. Enquanto estiver em combate com aliados, sempre que derrotar sozinho um "
-                        + "inimigo, recebe 2 em Dano Desarmado a cada 10 pontos de Carisma até o fim da batalha. Esse "
+                        + "inimigo, recebe +2 em Dano Desarmado a cada 10 pontos de Carisma até o fim da batalha. Esse "
                         + "bônus pode ser acumulado até 3 vezes.");
         classe("ARTISTA_MARCIAL", "Artista Marcial", "LUTADOR",
                 bonus("{\"forca\":3,\"agilidade\":3,\"constituicao\":3,\"destreza\":1}", "{\"combate\":5,\"bloqueio\":2,\"esquiva\":2,\"iniciativa\":1}", 3),
                 "Harmonia de Combate. O usuário ignora as penalidades de Lentidão e Paralisia. Além disso, "
-                        + "sempre que acertar um ataque contra uma nova criatura durante o combate, recebe 2 em Combate e "
+                        + "sempre que acertar um ataque contra uma nova criatura durante o combate, recebe +2 em Combate e "
                         + "2 em Dano Final. Esses bônus são cumulativos até que o usuário ataque uma criatura que já tenha "
                         + "atacado anteriormente, reiniciando a sequência.");
 
