@@ -200,10 +200,16 @@ public class DataSeeder implements CommandLineRunner {
      * da classe e raca. Marco de 5 niveis (5,15,25,35,45): so o bonus de PV/PM/PE da classe e raca.
      * Demais niveis: 2 pontos de atributo.
      */
+    /** Nivel em que se escolhe a trilha (ganha habilidade da trilha no lugar de atributo). */
+    private static final int NIVEL_TRILHA = 11;
+
     private String recompensaDoNivel(int n) {
         if (n == 1) return "Classe, Bônus e Atributos";
         if (n % 10 == 0) return "20 pontos de perícia, 10 pontos de Atributo, PV, PM e PE da classe e raça";
         if (n % 5 == 0) return "PV, PM e PE da classe e raça";
+        // Nivel da trilha: em vez dos 2 pontos de atributo, ganha uma habilidade da trilha
+        // (e a passiva da trilha escolhida entra sozinha na ficha).
+        if (n == NIVEL_TRILHA) return "Trilha: habilidade da trilha (sem pontos de atributo)";
         return "Atributos (2 pontos)";
     }
 

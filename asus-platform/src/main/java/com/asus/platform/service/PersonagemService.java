@@ -624,7 +624,7 @@ public class PersonagemService {
             throw new IllegalArgumentException(
                     "Trilha so pode ser escolhida a partir do nivel " + NIVEL_MINIMO_TRILHA + ".");
         }
-        int maxAtr = 5 + 2 * niveisComPontos(nivel);
+        int maxAtr = 5 + 2 * niveisComAtributo(nivel);
         if (a != null) {
             int soma = somaAtributos(a);
             if (soma > maxAtr) {
@@ -648,6 +648,16 @@ public class PersonagemService {
     /** Niveis que dao pontos: cada nivel, exceto multiplos de 5 (que dao o bonus de classe+raca). */
     private int niveisComPontos(int nivel) {
         return Math.max(0, (nivel - 1) - (nivel / 5));
+    }
+
+    /**
+     * Niveis que dao ATRIBUTO. Igual aos que dao pontos, menos o nivel da trilha
+     * ({@value #NIVEL_MINIMO_TRILHA}): nele o personagem ganha uma habilidade da
+     * trilha no lugar dos 2 pontos de atributo.
+     */
+    private int niveisComAtributo(int nivel) {
+        int n = niveisComPontos(nivel);
+        return Math.max(0, nivel >= NIVEL_MINIMO_TRILHA ? n - 1 : n);
     }
 
     /** Orcamento de pericias no nivel: base 5 + 4 por nivel com pontos. */
