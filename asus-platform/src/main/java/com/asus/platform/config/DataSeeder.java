@@ -477,6 +477,40 @@ public class DataSeeder implements CommandLineRunner {
                 "Místico", "Uma habilidade desenvolvida por aqueles que possuem um bom uso para almas, é capaz de guardá-las em um espaço que somente o usuário tem acesso. O limite de almas é de 4 a cada 10 Níveis do Personagem.");
         hab("AUMENTO_DE_ATRIBUTO", "Aumento de Atributo", "GERAL", "PASSIVA", 0, null,
                 "Todas as Classes", "Você recebe +2 pontos de atributo para distribuir como desejar. Você pode escolher várias vezes essa habilidade e o valor ganho aumenta de acordo com o Nível de Personagem atual. Sendo +2 a cada 10 níveis de Personagem.");
+        // Habilidades novas de Lutador (revisao enviada pelo autor).
+        hab("RITMO_DO_RINGUE", "Ritmo do Ringue", "ARTISTA_MARCIAL", "ATIVA", 4, "PE",
+                "Artista Marcial", "“Esquerda pra abrir a guarda. Direita pra fechar a conta.” O Lutador entra na cadência de quem "
+                        + "cresceu trocando golpes no ringue, onde cada soco já prepara o seguinte e a guarda nunca para "
+                        + "de se mover. Ativação: Ação Livre. O Lutador entra em Ritmo até o fim do combate ou até ficar 1 "
+                        + "turno sem desferir um ataque desarmado. Durante o Ritmo, seus ataques desarmados alternam "
+                        + "entre: Jab (golpes ímpares), golpe rápido que concede +1 em Esquiva até o início do seu próximo "
+                        + "turno; e Direto (golpes pares), golpe pesado que causa dano extra de +2 a cada 5 de Força e "
+                        + "empurra o alvo em 1 metro. Funciona apenas desarmado e com armadura leve.");
+        hab("INVESTIDA_ESMAGADORA", "Investida Esmagadora", "LUTADOR", "ATIVA", 6, "PE",
+                "Agilidade 10", "“Corre. Não vai adiantar, mas corre.” Aproveitando o impulso da corrida, o Lutador transforma o "
+                        + "próprio peso em dois golpes que desabam sobre o inimigo antes que ele perceba a distância "
+                        + "encurtando. Ativação: Ação Principal. O Lutador se move em linha reta em direção a um inimigo, "
+                        + "recebendo metade do valor de Deslocamento nesse movimento. Ao alcançá-lo, seus dois próximos "
+                        + "ataques desarmados causam dano extra igual ao seu deslocamento total. Se percorreu pelo menos o "
+                        + "seu deslocamento total antes de acertar, o primeiro golpe é crítico.");
+        hab("ESMAGA_CRANIOS", "Esmaga-Crânios", "LUTADOR", "ATIVA", 5, "PE",
+                null, "“De um lado e do outro. Agora vão se conhecer de bem perto.” Técnica brutal de quem aprendeu a "
+                        + "lutar cercado: o Lutador agarra dois oponentes pelos lados e os arremessa um contra o outro num "
+                        + "único impacto. Ativação: Ação Principal. O Lutador puxa até 2 inimigos adjacentes (um de cada "
+                        + "lado) para junto de si, exigindo um teste de Atletismo contra a resistência de cada alvo. Ambos "
+                        + "sofrem dano igual ao seu ataque desarmado, com dano extra de +2 a cada 5 de Força. Se os dois "
+                        + "colidirem (estavam em lados opostos), ambos ficam Confusos por 1 turno. Contra um único alvo, "
+                        + "em vez disso ele fica com Lentidão até o fim do seu próximo turno.");
+        hab("CRATERA", "Cratera", "CAMPEAO", "ATIVA", 6, "PE",
+                "Campeão", "“Eu não venço a luta. Eu encerro o assunto.” A finalização do Lutador: ele ergue o inimigo "
+                        + "acima da cabeça e o esmaga contra o chão com todo o peso do corpo, abrindo um buraco no ponto "
+                        + "de impacto. Ativação: Ação Completa. O Lutador agarra um inimigo (teste de Atletismo contra a "
+                        + "resistência do alvo). Se bem-sucedido, ergue e arremessa o alvo no chão, causando dano igual ao "
+                        + "seu ataque desarmado somado à superfície: mole, +2 a cada 5 pontos de Força mais o dano da "
+                        + "altura da queda; comum, +4 a cada 5 pontos de Força mais o dano da queda; rígida, +8 a cada 5 "
+                        + "pontos de Força mais o dano da queda. Todos os inimigos adjacentes ao ponto de impacto sofrem "
+                        + "metade desse dano. Quanto maior o alvo agarrado (maior que o Lutador), maior a área de impacto, "
+                        + "a critério do Mestre.");
         // Novas habilidades do Patch v0.1 (secao "Novidades").
         hab("MINUCIOSO", "Minucioso", "GERAL", "PASSIVA", 0, null,
                 "Destreza 10", "Você domina armas pequenas com extrema precisão, transformando velocidade e técnica em golpes "
