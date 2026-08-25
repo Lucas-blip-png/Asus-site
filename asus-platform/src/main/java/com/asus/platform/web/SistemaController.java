@@ -172,7 +172,8 @@ public class SistemaController {
                                 efeito("Paralisado", "Perde a ação de movimento e não pode agir com esforço físico."),
                                 efeito("Caído", "No chão: -5 em ataques e -5 em Esquiva. Levantar exige Ação Secundária."),
                                 efeito("Congelado", "-5 em Esquiva e Iniciativa; deslocamento reduzido pela metade."),
-                                efeito("Confusão", "Toda vez que realizar um ataque, role 1d4: ao cair 4, erra automaticamente."))),
+                                efeito("Confusão", "Toda vez que realizar um ataque, role 1d4: ao cair 4, erra automaticamente."),
+                                efeito("Lentidão", "Deslocamento reduzido à metade."))),
                 "efeitosPositivos", Map.of(
                         "acumulaveis", List.of(
                                 efeito("Fortalecido", "+2 em Testes Físicos."),

@@ -493,7 +493,7 @@ public class DataSeeder implements CommandLineRunner {
                         + "recebendo metade do valor de Deslocamento nesse movimento. Ao alcançá-lo, seus dois próximos "
                         + "ataques desarmados causam dano extra igual ao seu deslocamento total. Se percorreu pelo menos o "
                         + "seu deslocamento total antes de acertar, o primeiro golpe é crítico.");
-        hab("ESMAGA_CRANIOS", "Esmaga-Crânios", "LUTADOR", "ATIVA", 5, "PE",
+        hab("ESMAGA_CRANIOS", "Esmaga-Crânios", "LUTADOR,MONGE,BARBARO", "ATIVA", 5, "PE",
                 null, "“De um lado e do outro. Agora vão se conhecer de bem perto.” Técnica brutal de quem aprendeu a "
                         + "lutar cercado: o Lutador agarra dois oponentes pelos lados e os arremessa um contra o outro num "
                         + "único impacto. Ativação: Ação Principal. O Lutador puxa até 2 inimigos adjacentes (um de cada "

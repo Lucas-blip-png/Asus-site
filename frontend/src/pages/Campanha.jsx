@@ -30,6 +30,7 @@ const CONDICOES = [
   ['Caído', 'No chão: -5 em ataques e -5 em Esquiva. Levantar exige Ação Secundária.'],
   ['Congelado', '-5 em Esquiva e Iniciativa; deslocamento reduzido pela metade.'],
   ['Confusão', 'Toda vez que realizar um ataque, role 1d4: ao cair 4, erra automaticamente.'],
+  ['Lentidão', 'Deslocamento reduzido à metade.'],
 ]
 
 // Tabela oficial de efeitos positivos (Patch v0.1).
