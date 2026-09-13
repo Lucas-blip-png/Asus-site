@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { api } from '../api.js'
 import { inscrever } from '../ws.js'
+import { parseCritico, fmtCritico, rotuloCritico } from '../critico.js'
 import { useAuth } from '../auth.jsx'
 import Heptagono from '../components/Heptagono.jsx'
 import ResultadosPanel from '../components/ResultadosPanel.jsx'
@@ -56,26 +57,6 @@ function rolarDanoLocal({ qtd, faces, mod }) {
   for (let i = 0; i < qtd; i++) rolls.push(1 + Math.floor(Math.random() * faces))
   return { total: rolls.reduce((a, b) => a + b, 0) + mod, rolls }
 }
-// Interpreta o crítico: "18/x2" -> {alvo:18,mult:2}; "18" -> {alvo:18,mult:2}; "x3" -> {alvo:20,mult:3}.
-function parseCritico(critStr) {
-  const s = String(critStr || '').toLowerCase()
-  let mult = 2
-  let alvo = 20
-  const mMult = s.match(/x\s*(\d+)/)
-  if (mMult) mult = Math.max(1, Number(mMult[1]))
-  const mAlvo = s.replace(/x\s*\d+/g, '').match(/(\d+)/)
-  if (mAlvo) alvo = Math.min(20, Math.max(2, Number(mAlvo[1])))
-  return { alvo, mult }
-}
-// Forma canonica gravada no campo `critico`: margem de ameaca + multiplicador ("19/x2").
-const fmtCritico = (alvo, mult) => `${Math.min(20, Math.max(2, alvo))}/x${Math.max(1, mult)}`
-// Rotulo amigavel do critico: "19" -> "19+ x2"; "x3" -> "20+ x3".
-function rotuloCritico(critStr) {
-  if (!String(critStr || '').trim()) return ''
-  const { alvo, mult } = parseCritico(critStr)
-  return `${alvo}+ x${mult}`
-}
-
 // Dois campos para o critico: margem de ameaca (2-20) e multiplicador (x2, x3...).
 // Le/grava a mesma string `critico` de sempre, entao fichas e catalogo antigos
 // ("19", "x3", "18/x2") continuam funcionando sem migracao.

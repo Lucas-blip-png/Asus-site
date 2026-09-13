@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { api } from '../api.js'
 import Heptagono from '../components/Heptagono.jsx'
+import { rotuloCritico } from '../critico.js'
 
 const ATRIBS = [
   ['forca', 'For'], ['constituicao', 'Con'], ['destreza', 'Des'], ['agilidade', 'Agi'],
@@ -115,7 +116,7 @@ export default function FichaPublica() {
 
         {/* Direita: listas */}
         <div className="ficha-col">
-          {[['⚔ Ataques', d.ataques, (a) => `${a.nome} — ${a.dano || ''} ${a.critico ? `(${a.critico})` : ''}`],
+          {[['⚔ Ataques', d.ataques, (a) => `${a.nome} — ${a.dano || ''} ${a.critico ? `(${rotuloCritico(a.critico)})` : ''}`],
             ['✦ Habilidades', d.habilidades, (h) => `${h.nome}${h.custo > 0 ? ` — ${h.custo} ${h.custoTipo}` : ''}`],
             ['🔮 Feitiços', d.feiticos, (f) => `${f.nome}${f.circulo ? ` — ${f.circulo}º` : ''}${f.custoPm ? ` · ${f.custoPm} PM` : ''}`],
             ['✨ Bênçãos', d.bencaos, (b) => `${b.nome}${b.divindade ? ` — ${b.divindade}` : ''}`],
