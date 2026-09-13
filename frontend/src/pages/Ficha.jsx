@@ -67,6 +67,36 @@ function parseCritico(critStr) {
   if (mAlvo) alvo = Math.min(20, Math.max(2, Number(mAlvo[1])))
   return { alvo, mult }
 }
+// Forma canonica gravada no campo `critico`: margem de ameaca + multiplicador ("19/x2").
+const fmtCritico = (alvo, mult) => `${Math.min(20, Math.max(2, alvo))}/x${Math.max(1, mult)}`
+// Rotulo amigavel do critico: "19" -> "19+ x2"; "x3" -> "20+ x3".
+function rotuloCritico(critStr) {
+  if (!String(critStr || '').trim()) return ''
+  const { alvo, mult } = parseCritico(critStr)
+  return `${alvo}+ x${mult}`
+}
+
+// Dois campos para o critico: margem de ameaca (2-20) e multiplicador (x2, x3...).
+// Le/grava a mesma string `critico` de sempre, entao fichas e catalogo antigos
+// ("19", "x3", "18/x2") continuam funcionando sem migracao.
+function CriticoCampos({ value, onChange }) {
+  const vazio = !String(value || '').trim()
+  const { alvo, mult } = parseCritico(value)
+  return (
+    <span className="crit-campos">
+      <input className="crit-marg" type="number" min="2" max="20" placeholder="Margem"
+        title="Margem de ameaça: o d20 critica a partir deste valor"
+        value={vazio ? '' : alvo}
+        onChange={(e) => onChange(fmtCritico(Number(e.target.value) || 20, mult))} />
+      <select className="crit-mult" title="Multiplicador: quantas vezes os dados de dano são rolados"
+        value={vazio ? '' : mult}
+        onChange={(e) => onChange(fmtCritico(vazio ? 20 : alvo, Number(e.target.value) || 2))}>
+        {vazio && <option value="">mult.</option>}
+        {[2, 3, 4, 5].map((m) => <option key={m} value={m}>x{m}</option>)}
+      </select>
+    </span>
+  )
+}
 
 function ItemInvRow({ it, onQtd, onEquip, onDelete, onEdit, onCombate }) {
   const [open, setOpen] = useState(false)
@@ -84,7 +114,7 @@ function ItemInvRow({ it, onQtd, onEquip, onDelete, onEdit, onCombate }) {
         <div className="cris-body">
           <div className="row" style={{ gap: 6, flexWrap: 'wrap' }}>
             {it.categoria && <span className="tag">{it.categoria}</span>}
-            {it.dano && <span className="tag">Dano {it.dano}{it.critico ? ` (${it.critico})` : ''}</span>}
+            {it.dano && <span className="tag">Dano {it.dano}{it.critico ? ` (${rotuloCritico(it.critico)})` : ''}</span>}
             {it.bonusDefesa != null && <span className="tag">Defesa +{it.bonusDefesa}</span>}
             {it.alcance && <span className="tag">{it.alcance}</span>}
             <span className="tag">Espaços {fmtEsp(it.espacos)}</span>
@@ -112,7 +142,7 @@ function ItemInvRow({ it, onQtd, onEquip, onDelete, onEdit, onCombate }) {
 
 function AtaqueRow({ a, onRoll, onEdit, onDelete }) {
   const [open, setOpen] = useState(false)
-  const resumo = [a.dano && `Dano ${a.dano}`, a.critico && `Crít ${a.critico}`].filter(Boolean).join(' · ')
+  const resumo = [a.dano && `Dano ${a.dano}`, a.critico && `Crít ${rotuloCritico(a.critico)}`].filter(Boolean).join(' · ')
   return (
     <div className={`cris-row${open ? ' open' : ''}`}>
       <div className="cris-head" onClick={() => setOpen((o) => !o)}>
@@ -128,7 +158,7 @@ function AtaqueRow({ a, onRoll, onEdit, onDelete }) {
         <div className="cris-body">
           <div className="row" style={{ gap: 6, flexWrap: 'wrap' }}>
             {a.dano && <span className="tag">Dano {a.dano}</span>}
-            {a.critico && <span className="tag">Crítico {a.critico}</span>}
+            {a.critico && <span className="tag">Crítico {rotuloCritico(a.critico)}</span>}
             {a.alcance && <span className="tag">{a.alcance}</span>}
             {a.pericia && <span className="tag">{a.pericia}</span>}
           </div>
@@ -1361,8 +1391,8 @@ export default function Ficha() {
                   onChange={(e) => setNovoAtaque((s) => ({ ...s, nome: e.target.value }))} />
                 <input placeholder="Dano (1d8)" value={novoAtaque.dano}
                   onChange={(e) => setNovoAtaque((s) => ({ ...s, dano: e.target.value }))} />
-                <input placeholder="Crít (x2, x3…)" value={novoAtaque.critico}
-                  onChange={(e) => setNovoAtaque((s) => ({ ...s, critico: e.target.value }))} />
+                <CriticoCampos value={novoAtaque.critico}
+                  onChange={(v) => setNovoAtaque((s) => ({ ...s, critico: v }))} />
                 <input placeholder="Alcance" value={novoAtaque.alcance}
                   onChange={(e) => setNovoAtaque((s) => ({ ...s, alcance: e.target.value }))} />
                 <button className="mini" onClick={addAtaque}>+ Ataque</button>
@@ -1584,8 +1614,8 @@ export default function Ficha() {
                   onChange={(e) => setNovoItem((s) => ({ ...s, nome: e.target.value }))} />
                 <input placeholder="Dano (1d8)" style={{ maxWidth: 100 }} value={novoItem.dano || ''}
                   onChange={(e) => setNovoItem((s) => ({ ...s, dano: e.target.value }))} />
-                <input placeholder="Crít (x2, x3…)" style={{ maxWidth: 110 }} value={novoItem.critico || ''}
-                  onChange={(e) => setNovoItem((s) => ({ ...s, critico: e.target.value }))} />
+                <CriticoCampos value={novoItem.critico || ''}
+                  onChange={(v) => setNovoItem((s) => ({ ...s, critico: v }))} />
                 <input type="number" min="0" step="0.5" placeholder="Espaços" style={{ maxWidth: 90 }} value={novoItem.espacos}
                   onChange={(e) => setNovoItem((s) => ({ ...s, espacos: e.target.value }))} />
                 <button className="mini" onClick={addItemProprio}>+ Próprio</button>
@@ -1676,10 +1706,10 @@ export default function Ficha() {
                 <input placeholder="1d8" value={editItem.dano || ''}
                   onChange={(e) => setEditItem((s) => ({ ...s, dano: e.target.value }))} />
               </div>
-              <div style={{ width: 90 }}>
+              <div style={{ width: 172 }}>
                 <label>Crítico</label>
-                <input placeholder="x2, x3…" value={editItem.critico || ''}
-                  onChange={(e) => setEditItem((s) => ({ ...s, critico: e.target.value }))} />
+                <CriticoCampos value={editItem.critico || ''}
+                  onChange={(v) => setEditItem((s) => ({ ...s, critico: v }))} />
               </div>
               <div style={{ width: 100 }}>
                 <label>Defesa +</label>
@@ -1715,10 +1745,10 @@ export default function Ficha() {
                 <input placeholder="1d8" value={editAtaque.dano || ''}
                   onChange={(e) => setEditAtaque((s) => ({ ...s, dano: e.target.value }))} />
               </div>
-              <div style={{ width: 110 }}>
+              <div style={{ width: 172 }}>
                 <label>Crítico</label>
-                <input placeholder="x2, x3…" value={editAtaque.critico || ''}
-                  onChange={(e) => setEditAtaque((s) => ({ ...s, critico: e.target.value }))} />
+                <CriticoCampos value={editAtaque.critico || ''}
+                  onChange={(v) => setEditAtaque((s) => ({ ...s, critico: v }))} />
               </div>
             </div>
             <div className="row" style={{ gap: 8 }}>

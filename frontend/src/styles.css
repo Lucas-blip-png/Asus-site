@@ -693,3 +693,8 @@ button.ghost.mini.ativo { background: var(--gold); color: #1a1206; border-color:
   .muted { color: #444 !important; }
   * { text-shadow: none !important; }
 }
+
+/* --- Critico em dois campos: margem de ameaca + multiplicador --- */
+.crit-campos { display: inline-flex; gap: 6px; align-items: center; }
+.crit-campos input.crit-marg { flex: 0 0 auto; width: 98px; min-width: 0; margin: 0; }
+.crit-campos select.crit-mult { flex: 0 0 auto; width: 80px; min-width: 0; margin: 0; padding-right: 4px; }
