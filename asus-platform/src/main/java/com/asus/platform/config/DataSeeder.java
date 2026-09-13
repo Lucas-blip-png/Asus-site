@@ -222,39 +222,40 @@ public class DataSeeder implements CommandLineRunner {
 
     private void seedItens() {
         // ===== ARMAS SIMPLES ===== (codigo, nome, grupo, preco, dano, critico, alcance, tipoDano, espacos)
+        // O critico vai sempre completo, "margem/xMult": "19/x2" critica a partir de 19 e dobra os dados.
         String simples = "ARMA_SIMPLES", marcial = "ARMA_MARCIAL";
-        arma("ADAGA", "Adaga", simples, "Corpo a Corpo - Leves", "2", "1d4", "19", "Curto", "Perfuração", 1);
-        arma("ESPADA_CURTA", "Espada curta", simples, "Corpo a Corpo - Leves", "10", "1d6", "19", "", "Perfuração", 1);
-        arma("FOICE", "Foice", simples, "Corpo a Corpo - Leves", "4", "1d6", "x3", "", "Corte", 1);
-        arma("CLAVA", "Clava", simples, "Corpo a Corpo - Uma Mão", "0", "1d6", "x2", "", "Impacto", 1);
-        arma("LANCA", "Lança", simples, "Corpo a Corpo - Uma Mão", "2", "1d6", "x2", "Curto", "Perfuração", 1);
-        arma("MACA", "Maça", simples, "Corpo a Corpo - Uma Mão", "12", "1d8", "x2", "", "Impacto", 1);
-        arma("BORDAO", "Bordão", simples, "Corpo a Corpo - Duas Mãos", "0", "1d6/1d6", "x2", "", "Impacto", 2);
-        arma("PIQUE", "Pique", simples, "Corpo a Corpo - Duas Mãos", "2", "1d8", "x2", "", "Perfuração", 2);
-        arma("TACAPE", "Tacape", simples, "Corpo a Corpo - Duas Mãos", "0", "1d10", "x2", "", "Impacto", 2);
-        arma("AZAGAIA", "Azagaia", simples, "Ataque à Distância", "1", "1d6", "x2", "Médio", "Perfuração", 1);
-        arma("BESTA_LEVE", "Besta leve", simples, "Ataque à Distância", "35", "1d8", "19", "Médio", "Perfuração", 1);
-        arma("FUNDA", "Funda", simples, "Ataque à Distância", "0", "1d4", "x2", "Médio", "Impacto", 1);
-        arma("ARCO_CURTO", "Arco curto", simples, "Ataque à Distância", "30", "1d6", "x3", "Médio", "Perfuração", 2);
+        arma("ADAGA", "Adaga", simples, "Corpo a Corpo - Leves", "2", "1d4", "19/x2", "Curto", "Perfuração", 1);
+        arma("ESPADA_CURTA", "Espada curta", simples, "Corpo a Corpo - Leves", "10", "1d6", "19/x2", "", "Perfuração", 1);
+        arma("FOICE", "Foice", simples, "Corpo a Corpo - Leves", "4", "1d6", "20/x3", "", "Corte", 1);
+        arma("CLAVA", "Clava", simples, "Corpo a Corpo - Uma Mão", "0", "1d6", "20/x2", "", "Impacto", 1);
+        arma("LANCA", "Lança", simples, "Corpo a Corpo - Uma Mão", "2", "1d6", "20/x2", "Curto", "Perfuração", 1);
+        arma("MACA", "Maça", simples, "Corpo a Corpo - Uma Mão", "12", "1d8", "20/x2", "", "Impacto", 1);
+        arma("BORDAO", "Bordão", simples, "Corpo a Corpo - Duas Mãos", "0", "1d6/1d6", "20/x2", "", "Impacto", 2);
+        arma("PIQUE", "Pique", simples, "Corpo a Corpo - Duas Mãos", "2", "1d8", "20/x2", "", "Perfuração", 2);
+        arma("TACAPE", "Tacape", simples, "Corpo a Corpo - Duas Mãos", "0", "1d10", "20/x2", "", "Impacto", 2);
+        arma("AZAGAIA", "Azagaia", simples, "Ataque à Distância", "1", "1d6", "20/x2", "Médio", "Perfuração", 1);
+        arma("BESTA_LEVE", "Besta leve", simples, "Ataque à Distância", "35", "1d8", "19/x2", "Médio", "Perfuração", 1);
+        arma("FUNDA", "Funda", simples, "Ataque à Distância", "0", "1d4", "20/x2", "Médio", "Impacto", 1);
+        arma("ARCO_CURTO", "Arco curto", simples, "Ataque à Distância", "30", "1d6", "20/x3", "Médio", "Perfuração", 2);
 
         // ===== ARMAS MARCIAIS =====
-        arma("CIMITARRA", "Cimitarra", marcial, "Corpo a Corpo - Uma Mão", "15", "1d6", "18", "", "Corte", 1);
-        arma("ESPADA_LONGA", "Espada longa", marcial, "Corpo a Corpo - Uma Mão", "15", "1d8", "19", "", "Corte", 1);
-        arma("FLORETE", "Florete", marcial, "Corpo a Corpo - Uma Mão", "20", "1d6", "18", "", "Perfuração", 1);
-        arma("MACHADO_BATALHA", "Machado de batalha", marcial, "Corpo a Corpo - Uma Mão", "10", "1d8", "x3", "", "Corte", 1);
-        arma("MANGUAL", "Mangual", marcial, "Corpo a Corpo - Uma Mão", "8", "1d8", "x2", "", "Impacto", 1);
-        arma("MARTELO_GUERRA", "Martelo de guerra", marcial, "Corpo a Corpo - Uma Mão", "12", "1d8", "x3", "", "Impacto", 1);
-        arma("PICARETA", "Picareta", marcial, "Corpo a Corpo - Uma Mão", "8", "1d6", "x4", "", "Perfuração", 1);
-        arma("TRIDENTE", "Tridente", marcial, "Corpo a Corpo - Uma Mão", "15", "1d8", "x2", "", "Perfuração", 1);
-        arma("ALABARDA", "Alabarda", marcial, "Corpo a Corpo - Duas Mãos", "10", "1d10", "x3", "", "Corte/Perfuração", 2);
-        arma("ALFANGE", "Alfange", marcial, "Corpo a Corpo - Duas Mãos", "75", "2d4", "18", "", "Corte", 2);
-        arma("GADANHO", "Gadanho", marcial, "Corpo a Corpo - Duas Mãos", "18", "2d4", "x4", "", "Corte", 2);
-        arma("LANCA_MONTADA", "Lança montada", marcial, "Corpo a Corpo - Duas Mãos", "10", "1d8", "x3", "", "Perfuração", 2);
-        arma("MACHADO_GUERRA", "Machado de guerra", marcial, "Corpo a Corpo - Duas Mãos", "20", "1d12", "x3", "", "Corte", 2);
-        arma("MARRETA", "Marreta", marcial, "Corpo a Corpo - Duas Mãos", "20", "3d4", "x2", "", "Impacto", 2);
-        arma("MONTANTE", "Montante", marcial, "Corpo a Corpo - Duas Mãos", "50", "2d6", "19", "", "Corte", 2);
-        arma("ARCO_LONGO", "Arco longo", marcial, "Distância - Duas Mãos", "100", "1d8", "x3", "Médio", "Perfuração", 2);
-        arma("BESTA_PESADA", "Besta pesada", marcial, "Distância - Duas Mãos", "50", "1d12", "19", "Médio", "Perfuração", 2);
+        arma("CIMITARRA", "Cimitarra", marcial, "Corpo a Corpo - Uma Mão", "15", "1d6", "18/x2", "", "Corte", 1);
+        arma("ESPADA_LONGA", "Espada longa", marcial, "Corpo a Corpo - Uma Mão", "15", "1d8", "19/x2", "", "Corte", 1);
+        arma("FLORETE", "Florete", marcial, "Corpo a Corpo - Uma Mão", "20", "1d6", "18/x2", "", "Perfuração", 1);
+        arma("MACHADO_BATALHA", "Machado de batalha", marcial, "Corpo a Corpo - Uma Mão", "10", "1d8", "20/x3", "", "Corte", 1);
+        arma("MANGUAL", "Mangual", marcial, "Corpo a Corpo - Uma Mão", "8", "1d8", "20/x2", "", "Impacto", 1);
+        arma("MARTELO_GUERRA", "Martelo de guerra", marcial, "Corpo a Corpo - Uma Mão", "12", "1d8", "20/x3", "", "Impacto", 1);
+        arma("PICARETA", "Picareta", marcial, "Corpo a Corpo - Uma Mão", "8", "1d6", "20/x4", "", "Perfuração", 1);
+        arma("TRIDENTE", "Tridente", marcial, "Corpo a Corpo - Uma Mão", "15", "1d8", "20/x2", "", "Perfuração", 1);
+        arma("ALABARDA", "Alabarda", marcial, "Corpo a Corpo - Duas Mãos", "10", "1d10", "20/x3", "", "Corte/Perfuração", 2);
+        arma("ALFANGE", "Alfange", marcial, "Corpo a Corpo - Duas Mãos", "75", "2d4", "18/x2", "", "Corte", 2);
+        arma("GADANHO", "Gadanho", marcial, "Corpo a Corpo - Duas Mãos", "18", "2d4", "20/x4", "", "Corte", 2);
+        arma("LANCA_MONTADA", "Lança montada", marcial, "Corpo a Corpo - Duas Mãos", "10", "1d8", "20/x3", "", "Perfuração", 2);
+        arma("MACHADO_GUERRA", "Machado de guerra", marcial, "Corpo a Corpo - Duas Mãos", "20", "1d12", "20/x3", "", "Corte", 2);
+        arma("MARRETA", "Marreta", marcial, "Corpo a Corpo - Duas Mãos", "20", "3d4", "20/x2", "", "Impacto", 2);
+        arma("MONTANTE", "Montante", marcial, "Corpo a Corpo - Duas Mãos", "50", "2d6", "19/x2", "", "Corte", 2);
+        arma("ARCO_LONGO", "Arco longo", marcial, "Distância - Duas Mãos", "100", "1d8", "20/x3", "Médio", "Perfuração", 2);
+        arma("BESTA_PESADA", "Besta pesada", marcial, "Distância - Duas Mãos", "50", "1d12", "19/x2", "Médio", "Perfuração", 2);
 
         // ===== ARMADURAS E ESCUDOS ===== (codigo, nome, cat, grupo, preco, defesa, penalidade, espacos)
         protecao("ARM_ACOLCHOADA", "Acolchoada", "ARMADURA", "Leves", "5", 1, 0, 2);
