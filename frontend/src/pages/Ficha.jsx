@@ -59,10 +59,14 @@ function rolarDanoLocal({ qtd, faces, mod }) {
 }
 // Dois campos para o critico: margem de ameaca (2-20) e multiplicador (x2, x3...).
 // Le/grava a mesma string `critico` de sempre, entao fichas e catalogo antigos
-// ("19", "x3", "18/x2") continuam funcionando sem migracao.
+// ("19", "x3", "3x", "18/x2") continuam funcionando sem migracao.
+const MULTS = [2, 3, 4, 5]
 function CriticoCampos({ value, onChange }) {
   const vazio = !String(value || '').trim()
   const { alvo, mult } = parseCritico(value)
+  // Um multiplicador fora da lista (ficha antiga, valor digitado a mao) entra
+  // como opcao: sem isso o select abriria vazio e engoliria o valor ao salvar.
+  const mults = MULTS.includes(mult) ? MULTS : [...MULTS, mult].sort((a, b) => a - b)
   return (
     <span className="crit-campos">
       <input className="crit-marg" type="number" min="2" max="20" placeholder="Margem"
@@ -73,7 +77,7 @@ function CriticoCampos({ value, onChange }) {
         value={vazio ? '' : mult}
         onChange={(e) => onChange(fmtCritico(vazio ? 20 : alvo, Number(e.target.value) || 2))}>
         {vazio && <option value="">mult.</option>}
-        {[2, 3, 4, 5].map((m) => <option key={m} value={m}>x{m}</option>)}
+        {mults.map((m) => <option key={m} value={m}>x{m}</option>)}
       </select>
     </span>
   )
