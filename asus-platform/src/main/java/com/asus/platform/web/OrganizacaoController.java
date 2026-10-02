@@ -1,5 +1,6 @@
 package com.asus.platform.web;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import com.asus.platform.domain.OrganizacaoMembro;
 import com.asus.platform.security.UsuarioPrincipal;
 import com.asus.platform.service.OrganizacaoService;
@@ -14,6 +15,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 /** Organizacoes e membros (plano, secao 21.1). */
+@Tag(name = "Organizações", description = "Organizações (multi-tenant)")
 @RestController
 @RequestMapping("/api/organizacoes")
 public class OrganizacaoController {

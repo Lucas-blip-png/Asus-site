@@ -25,8 +25,8 @@ jobs:
           distribution: temurin
           java-version: "21"
           cache: maven
-      - name: Roda os testes (H2 em memória)
-        run: ./mvnw -B -ntp test
+      - name: Roda os testes (H2 + PostgreSQL via Testcontainers)
+        run: ./mvnw -B -ntp verify
 
   frontend:
     name: Frontend — build (Vite)
