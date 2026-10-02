@@ -1,73 +1,75 @@
 # ASUS RPG Platform
 
-Plataforma comercial de RPG de mesa tendo o **ASUS** como sistema oficial e padrão,
-implementada a partir do *plano de implementação v4 comercial*.
+[![CI](https://github.com/Lucas-blip-png/Asus-site/actions/workflows/ci.yml/badge.svg)](https://github.com/Lucas-blip-png/Asus-site/actions/workflows/ci.yml)
 
-O monorepo tem duas partes:
+Full-stack virtual tabletop (VTT) for tabletop RPGs, built around **ASUS**, a homebrew system with automated character sheets, campaigns and real-time dice rolls.
 
-| Pasta | O que é | Stack |
-|-------|---------|-------|
-| [`asus-platform/`](asus-platform) | Backend / API REST + WebSocket | Java 21, Spring Boot 3.3, JPA, Spring Security + JWT |
-| [`frontend/`](frontend) | SPA / VTT web (inclui Overlay OBS) | React + Vite |
+> 🇧🇷 Versão em português: [README.pt-BR.md](README.pt-BR.md)
 
-O **ASUS** é o sistema oficial: 7 atributos, 13 raças, 16 classes (+ trilhas),
-26 perícias, progressão de 50 níveis, itens em T$, habilidades e regras de
-construção de feitiços — o conteúdo real extraído dos documentos-fonte.
+<!-- Demo GIF and screenshots coming soon. -->
 
-## Fases / seções do plano implementadas
+## Features
 
-- **1** Núcleo SaaS (orgs, personagens, ficha automatizada, auditoria, snapshots, export/debug)
-- **2** Frontend React (VTT: ficha com heptágono de atributos, barras de PV/PM/PE, perícias)
-- **3** Importação, edição com snapshot, histórico de auditoria
-- **4** Campanhas, membros, convites, permissões
-- **5** Rolagens (NdF+M, crítico/falha, ocultas)
-- **6** Tempo real (WebSocket/STOMP)
-- **7** Autenticação JWT (login/refresh), Spring Security, CORS, rate limit
-- **8** Escudo do Mestre
-- **9** Overlay OBS
-- **10** Planos e limites + assinatura manual
-- **11** Assets (upload local + whitelist de MIME)
-- **12** Marketplace e templates
-- **13** LGPD (export, consentimento, exclusão/anonimização, termos)
-- **16** Analytics de eventos por organização
-- **17** Notificações do usuário (lidas/não-lidas)
-- **18** Sessões/Calendário (agenda + presença)
-- **20.1** Sanitização de HTML em descrições
-- **21.1** Membros da organização (renomear, listar/adicionar/remover)
+- **Automated character sheet** — 7 attributes, 13 races, 16 classes (+ paths), 26 skills and 50 levels; the backend is the single source of truth for every rule (HP/MP/EP, movement, skill bonuses, carrying capacity).
+- **Campaigns** with members, invites and per-role permissions (owner, game master, player).
+- **Real-time dice rolls** over WebSocket (STOMP): `NdF+M` expressions, critical/fumble, hidden GM rolls.
+- **GM screen**, **bestiary**, inventory with the item catalog, abilities, spells and attacks.
+- **Audit history and snapshots** of every sheet change, with import/export.
+- **LGPD (Brazilian GDPR)**: data export, consent records, account deletion/anonymization.
+- **OBS overlay** for streaming sessions, marketplace and sheet templates, plans and usage limits.
 
-Ficha com **Ataques** (Combate) e **Feitiços** (Magias) por personagem, e um
-**Bestiário** de criaturas.
+## Architecture
 
-Pendências que dependem de credenciais/infra do cliente: **Google OAuth**, **gateway
-de pagamento** e **storage em nuvem** (S3/R2/GCS).
-
-## Rodar tudo
-
-```bash
-# 1) Backend (precisa de JDK 21; o Maven vem via wrapper)
-cd asus-platform
-./mvnw spring-boot:run        # Windows: .\mvnw.cmd spring-boot:run   → http://localhost:8080
-
-# 2) Frontend (precisa de Node 18+), em outro terminal
-cd frontend
-npm install
-npm run dev                   # http://localhost:5173
+```mermaid
+flowchart LR
+    SPA["React SPA (Vite)"] -->|REST + JWT| API["Spring Boot API"]
+    SPA <-->|WebSocket / STOMP| WS["Real-time rolls"]
+    WS --- API
+    API --> DB[(PostgreSQL)]
+    API --> FS["Asset storage<br/>(local / S3-ready)"]
+    OBS["OBS overlay"] -->|public read-only| API
 ```
 
-Login dev: **dev@asus.local / dev12345**.
+In production the React build is bundled into the Spring Boot jar, so API, WebSocket and SPA ship as **one Docker service** on the same origin.
 
-## Deploy (Railway)
+## Tech stack
 
-O projeto sobe como **um serviço só**: o `Dockerfile` builda o React, embute no
-Spring Boot e roda o `.jar` (API + WebSocket + SPA na mesma origem). Passo a passo
-completo, variáveis e banco PostgreSQL em **[`DEPLOY.md`](DEPLOY.md)**. Resumo:
+| Layer | Tech |
+|-------|------|
+| Back-end | Java 21, Spring Boot 3.3, Spring Data JPA, Spring Security + JWT (jjwt), WebSocket/STOMP, springdoc-openapi |
+| Front-end | React, Vite |
+| Database | PostgreSQL (production), H2 (zero-setup local dev) |
+| Tests | JUnit 5, Mockito, MockMvc, Testcontainers (PostgreSQL) |
+| Delivery | Docker (multi-stage), GitHub Actions, Railway |
 
-1. Railway → *Deploy from GitHub repo* → `Asus-site` (usa o `Dockerfile` da raiz).
-2. *New → Database → PostgreSQL*.
-3. Variáveis do app (modelo em [`.env.example`](.env.example)):
-   `SPRING_PROFILES_ACTIVE=postgres`, `DB_URL/DB_USER/DB_PASSWORD`,
-   `ASUS_SECURITY_ENFORCE=true`, `ASUS_JWT_SECRET`, `ASUS_CORS_ORIGINS`.
-4. *Generate Domain* → abra a URL. (Opcional: Volume em `/app/uploads`.)
+## API documentation
 
-Detalhes e walkthrough de cada parte: veja os READMEs em
-[`asus-platform/`](asus-platform/README.md) e [`frontend/`](frontend/README.md).
+Swagger UI is served at **`/swagger-ui.html`** (OpenAPI spec at `/v3/api-docs`). Log in through `POST /api/auth/login` and use the returned token with the **Authorize** button.
+
+## Running locally
+
+```bash
+# Back-end (JDK 21; Maven comes through the wrapper) → http://localhost:8080
+cd asus-platform
+./mvnw spring-boot:run            # Windows: .\mvnw.cmd spring-boot:run
+
+# Front-end (Node 18+), in another terminal → http://localhost:5173
+cd frontend
+npm install
+npm run dev
+```
+
+Dev login: **dev@asus.local / dev12345**. To run against PostgreSQL, activate the `postgres` profile and set `DB_URL`, `DB_USER` and `DB_PASSWORD`.
+
+## Tests
+
+```bash
+cd asus-platform
+./mvnw verify
+```
+
+The suite covers the rules engine, full API flows with MockMvc (sheets, campaigns, rolls, LGPD, marketplace, plans), unit tests for authorization and sheet calculation, and an integration test that boots the whole app — schema and ASUS seed data — on a **real PostgreSQL container** via Testcontainers. Docker must be running for that one.
+
+## Deploy
+
+One Railway service built from the root `Dockerfile` plus a PostgreSQL database. Step by step, environment variables and production checklist in **[DEPLOY.md](DEPLOY.md)** (Portuguese).
