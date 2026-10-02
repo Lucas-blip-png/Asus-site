@@ -1,5 +1,6 @@
 package com.asus.platform.web;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import com.asus.platform.domain.Campanha;
 import com.asus.platform.domain.Personagem;
 import com.asus.platform.repository.AtaqueRepository;
@@ -34,6 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 /** Personagens (plano, secao 21.3). */
+@Tag(name = "Personagens", description = "Fichas, atributos, inventário e cálculo automático")
 @RestController
 @RequestMapping("/api")
 public class PersonagemController {

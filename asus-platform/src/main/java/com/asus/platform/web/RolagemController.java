@@ -1,5 +1,6 @@
 package com.asus.platform.web;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import com.asus.platform.security.UsuarioPrincipal;
 import com.asus.platform.service.RolagemService;
 import com.asus.platform.web.dto.RolagemResponse;
@@ -11,6 +12,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 /** Rolagens de uma campanha (plano, secao 21.5). */
+@Tag(name = "Rolagens", description = "Rolagens de dados em tempo real")
 @RestController
 @RequestMapping("/api/campanhas/{id}/rolagens")
 public class RolagemController {

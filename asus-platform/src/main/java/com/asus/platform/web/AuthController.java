@@ -1,5 +1,6 @@
 package com.asus.platform.web;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import com.asus.platform.security.UsuarioPrincipal;
 import com.asus.platform.service.AuthService;
 import com.asus.platform.web.dto.AuthResponse;
@@ -15,6 +16,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 /** Autenticacao: registro, login, refresh e perfil (plano, Fase 7). */
+@Tag(name = "Autenticação", description = "Login, cadastro e refresh de JWT")
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {

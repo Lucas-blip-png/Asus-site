@@ -1,5 +1,6 @@
 package com.asus.platform.web;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import com.asus.platform.security.UsuarioPrincipal;
 import com.asus.platform.service.CampanhaService;
 import com.asus.platform.web.dto.AdicionarPersonagemCampanhaRequest;
@@ -20,6 +21,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 /** Campanhas (plano, secao 21.4). */
+@Tag(name = "Campanhas", description = "Campanhas, membros e convites")
 @RestController
 @RequestMapping("/api")
 public class CampanhaController {
