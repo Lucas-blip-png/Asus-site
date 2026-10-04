@@ -38,7 +38,7 @@ In production the React build is bundled into the Spring Boot jar, so API, WebSo
 |-------|------|
 | Back-end | Java 21, Spring Boot 3.3, Spring Data JPA, Spring Security + JWT (jjwt), WebSocket/STOMP, springdoc-openapi |
 | Front-end | React, Vite |
-| Database | PostgreSQL (production), H2 (zero-setup local dev) |
+| Database | PostgreSQL with Flyway migrations (production), H2 (zero-setup local dev) |
 | Tests | JUnit 5, Mockito, MockMvc, Testcontainers (PostgreSQL) |
 | Delivery | Docker (multi-stage), GitHub Actions, Railway |
 

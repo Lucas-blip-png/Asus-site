@@ -17,6 +17,11 @@ spring:
       hibernate:
         format_sql: true
 
+  # H2 em memoria nasce do zero a cada boot e o Hibernate monta o schema.
+  # As migrations (SQL do PostgreSQL) rodam so no profile postgres.
+  flyway:
+    enabled: false
+
   h2:
     console:
       enabled: true

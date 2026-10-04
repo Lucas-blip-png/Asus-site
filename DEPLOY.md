@@ -109,8 +109,10 @@ openssl rand -base64 48
 Todo `git push` na branch conectada dispara um novo build/deploy automático.
 
 ## Notas
-- **Banco:** o schema é criado por `ddl-auto: update` (Hibernate). Para um histórico
-  de migrações no futuro, dá para plugar Flyway/Liquibase.
+- **Banco:** o schema é versionado com Flyway (`asus-platform/src/main/resources/db/migration`)
+  e o Hibernate só valida (`ddl-auto: validate`). Um banco que já existia antes do Flyway
+  recebe baseline na V1 no primeiro boot, sem rodar nada. Mudou uma entidade? Crie a
+  próxima migration (`V2__descricao.sql`) — sem ela a aplicação não sobe.
 - **Memória:** a imagem usa `-XX:MaxRAMPercentage=75` para caber no free/trial.
 - **Escala:** o broker WebSocket é em memória — perfeito para **1 instância**.
   Para várias instâncias, troque por um broker externo (ex.: RabbitMQ).

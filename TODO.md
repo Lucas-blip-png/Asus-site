@@ -6,8 +6,8 @@ Lista de pendências combinadas (para retomar depois).
 - [ ] **#1 — Volume no Railway para uploads persistentes.** Montar volume em `/app/uploads`
   e setar `ASUS_UPLOADS_DIR=/app/uploads`. Sem isso, avatares/mapas/imagens somem a cada
   deploy. (Passo no painel do Railway; alternativa robusta: R2/S3 via `ASUS_STORAGE_TIPO=s3`.)
-- [ ] **#2 — Migrations de banco (Flyway).** Hoje usa `ddl-auto=update` (arriscado). Congelar
-  o schema atual como V1 e evoluir versionado; trocar `ddl-auto` para `validate`.
+- [x] ~~#2 — Migrations de banco (Flyway).~~ Feito: schema congelado em `V1__schema_inicial.sql`,
+  `ddl-auto=validate` no profile postgres e baseline automático em bancos já existentes.
 - [x] ~~#3 — CI (GitHub Actions) rodando testes + build.~~ Feito.
 - [x] ~~#4 — Healthcheck real via Actuator (`/actuator/health`).~~ Feito.
 
