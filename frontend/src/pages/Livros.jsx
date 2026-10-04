@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { api } from '../api.js'
+import { rotuloCritico } from '../critico.js'
 
 const ABAS = ['Atributos', 'Classes', 'Raças', 'Perícias', 'Itens', 'Progressão', 'Feitiços', 'Regras']
 
@@ -75,7 +76,7 @@ function ItensView({ itens }) {
                     <td className="stat">{precoFmt(i)}</td>
                     {lay === 'arma' && <>
                       <td>{i.dano || '—'}</td>
-                      <td className="muted">{i.critico || '—'}</td>
+                      <td className="muted">{rotuloCritico(i.critico) || '—'}</td>
                       <td className="muted">{i.alcance || '—'}</td>
                       <td><span className={`td-badge ${tipoClasse(i.tipoDano)}`}>{i.tipoDano || '—'}</span></td>
                     </>}
