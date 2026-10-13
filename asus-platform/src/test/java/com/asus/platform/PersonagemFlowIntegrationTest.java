@@ -103,6 +103,17 @@ class PersonagemFlowIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status.pvAtual").value(10))
                 .andExpect(jsonPath("$.status.pvMax").value(19));
+
+        // Editar so o PM atual reenviando o teto automatico NAO pode congelar o maximo...
+        mockMvc.perform(patch("/api/personagens/" + personagemId + "/status")
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"pmAtual\":3,\"pmMax\":8}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status.pmAtual").value(3));
+        // ...entao ao subir para o nivel 5 o PM maximo recalcula: (5 + 3) x (1 + 1) + Int(0)x2 = 16
+        mockMvc.perform(patch("/api/personagens/" + personagemId + "/progresso")
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"nivel\":5}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.personagem.status.pmMax").value(16));
     }
 
     private long readId(MvcResult result) throws Exception {
