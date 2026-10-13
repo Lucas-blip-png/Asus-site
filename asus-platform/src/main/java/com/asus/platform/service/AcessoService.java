@@ -1,9 +1,11 @@
 package com.asus.platform.service;
 
 import com.asus.platform.domain.Campanha;
+import com.asus.platform.domain.PapelOrganizacao;
 import com.asus.platform.domain.Personagem;
 import com.asus.platform.repository.CampanhaPersonagemRepository;
 import com.asus.platform.repository.CampanhaRepository;
+import com.asus.platform.repository.OrganizacaoMembroRepository;
 import com.asus.platform.repository.PersonagemRepository;
 import com.asus.platform.security.UsuarioPrincipal;
 import com.asus.platform.web.AcessoNegadoException;
@@ -21,15 +23,18 @@ public class AcessoService {
     private final CampanhaPersonagemRepository campanhaPersonagemRepository;
     private final CampanhaRepository campanhaRepository;
     private final DonoService donoService;
+    private final OrganizacaoMembroRepository organizacaoMembroRepository;
 
     public AcessoService(PersonagemRepository personagemRepository,
                          CampanhaPersonagemRepository campanhaPersonagemRepository,
                          CampanhaRepository campanhaRepository,
-                         DonoService donoService) {
+                         DonoService donoService,
+                         OrganizacaoMembroRepository organizacaoMembroRepository) {
         this.personagemRepository = personagemRepository;
         this.campanhaPersonagemRepository = campanhaPersonagemRepository;
         this.campanhaRepository = campanhaRepository;
         this.donoService = donoService;
+        this.organizacaoMembroRepository = organizacaoMembroRepository;
     }
 
     /** Exige que o usuario autenticado seja dono do personagem (ou dono/dev). Nao bloqueia se anonimo. */
@@ -69,6 +74,30 @@ public class AcessoService {
             return;
         }
         throw new AcessoNegadoException("Ficha privada: só o dono e o mestre da campanha podem acessar.");
+    }
+
+    /** Exige DONO/ADMIN da organizacao (ou dono/dev do site). Nao bloqueia se anonimo. */
+    public void exigirGestorOrganizacao(Long organizacaoId, UsuarioPrincipal principal) {
+        exigirPapelOrganizacao(organizacaoId, principal, true);
+    }
+
+    /** Exige ser membro da organizacao (ou dono/dev do site). Nao bloqueia se anonimo. */
+    public void exigirMembroOrganizacao(Long organizacaoId, UsuarioPrincipal principal) {
+        exigirPapelOrganizacao(organizacaoId, principal, false);
+    }
+
+    private void exigirPapelOrganizacao(Long organizacaoId, UsuarioPrincipal principal, boolean gestor) {
+        if (principal == null || donoService.ehDono(principal.id())) {
+            return;
+        }
+        boolean ok = organizacaoMembroRepository.findByOrganizacaoId(organizacaoId).stream()
+                .anyMatch(m -> m.getUsuarioId().equals(principal.id())
+                        && (!gestor || m.getPapel() == PapelOrganizacao.DONO || m.getPapel() == PapelOrganizacao.ADMIN));
+        if (!ok) {
+            throw new AcessoNegadoException(gestor
+                    ? "Só o dono ou admin da organização pode fazer isso."
+                    : "Você não é membro desta organização.");
+        }
     }
 
     /** True se o usuario e mestre de alguma campanha em que o personagem esta vinculado. */

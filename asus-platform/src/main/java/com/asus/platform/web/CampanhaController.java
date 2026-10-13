@@ -140,7 +140,12 @@ public class CampanhaController {
     @PostMapping("/campanhas/{id}/convites")
     @ResponseStatus(HttpStatus.CREATED)
     public ConviteResponse criarConvite(@PathVariable Long id,
+                                        @AuthenticationPrincipal UsuarioPrincipal principal,
                                         @RequestBody(required = false) CriarConviteRequest req) {
+        // A permissao vem do usuario logado, nao do usuarioId do corpo (que o cliente pode omitir).
+        if (principal != null) {
+            service.exigirPermissao(id, principal.id(), com.asus.platform.domain.Permissao.CONVIDAR_JOGADORES);
+        }
         return service.criarConvite(id, req == null
                 ? new CriarConviteRequest(null, null, null, null) : req);
     }

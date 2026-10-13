@@ -45,4 +45,7 @@ public class Criatura {
     private String descricao;
 
     private boolean oficial;
+
+    /** Quem criou (null = oficial/legado: so o dono do site apaga). Sempre definido pelo servidor. */
+    private Long criadorId;
 }

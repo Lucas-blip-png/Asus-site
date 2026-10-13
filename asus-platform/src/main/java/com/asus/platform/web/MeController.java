@@ -1,11 +1,13 @@
 package com.asus.platform.web;
 
+import com.asus.platform.security.UsuarioPrincipal;
 import com.asus.platform.service.LgpdService;
 import com.asus.platform.web.dto.ConsentimentoResponse;
 import com.asus.platform.web.dto.RegistrarConsentimentoRequest;
 import jakarta.validation.Valid;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -24,21 +26,29 @@ public class MeController {
         this.service = service;
     }
 
+    /** Logado: sempre o proprio usuario (o ?usuarioId= e ignorado). Anonimo (dev aberto): usa o parametro. */
+    private static Long uid(UsuarioPrincipal principal, Long usuarioId) {
+        return principal != null ? principal.id() : usuarioId;
+    }
+
     @GetMapping("/export-data")
-    public Map<String, Object> exportData(@RequestParam Long usuarioId) {
-        return service.exportarDados(usuarioId);
+    public Map<String, Object> exportData(@AuthenticationPrincipal UsuarioPrincipal principal,
+                                          @RequestParam(required = false) Long usuarioId) {
+        return service.exportarDados(uid(principal, usuarioId));
     }
 
     @PostMapping("/consentimentos")
     @ResponseStatus(HttpStatus.CREATED)
-    public ConsentimentoResponse consentir(@RequestParam Long usuarioId,
+    public ConsentimentoResponse consentir(@AuthenticationPrincipal UsuarioPrincipal principal,
+                                           @RequestParam(required = false) Long usuarioId,
                                            @Valid @RequestBody RegistrarConsentimentoRequest req) {
-        return service.registrarConsentimento(usuarioId, req.tipo(), req.versaoDocumento(), req.aceito());
+        return service.registrarConsentimento(uid(principal, usuarioId), req.tipo(), req.versaoDocumento(), req.aceito());
     }
 
     @DeleteMapping("/delete-account")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteAccount(@RequestParam Long usuarioId) {
-        service.excluirConta(usuarioId);
+    public void deleteAccount(@AuthenticationPrincipal UsuarioPrincipal principal,
+                              @RequestParam(required = false) Long usuarioId) {
+        service.excluirConta(uid(principal, usuarioId));
     }
 }

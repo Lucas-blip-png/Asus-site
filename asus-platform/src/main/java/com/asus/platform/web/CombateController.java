@@ -2,12 +2,16 @@ package com.asus.platform.web;
 
 import com.asus.platform.domain.Combate;
 import com.asus.platform.domain.CombateParticipante;
+import com.asus.platform.domain.Permissao;
 import com.asus.platform.repository.CombateParticipanteRepository;
 import com.asus.platform.repository.CombateRepository;
+import com.asus.platform.security.UsuarioPrincipal;
+import com.asus.platform.service.CampanhaService;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,21 +22,45 @@ public class CombateController {
 
     private final CombateRepository combateRepository;
     private final CombateParticipanteRepository participanteRepository;
+    private final CampanhaService campanhaService;
 
     public CombateController(CombateRepository combateRepository,
-                             CombateParticipanteRepository participanteRepository) {
+                             CombateParticipanteRepository participanteRepository,
+                             CampanhaService campanhaService) {
         this.combateRepository = combateRepository;
         this.participanteRepository = participanteRepository;
+        this.campanhaService = campanhaService;
+    }
+
+    /** Ler = ser membro da campanha; alterar = gerenciar a campanha. Anonimo (dev aberto) nao e bloqueado. */
+    private void exigir(Long campanhaId, UsuarioPrincipal principal, Permissao permissao) {
+        if (principal != null) {
+            campanhaService.exigirPermissao(campanhaId, principal.id(), permissao);
+        }
+    }
+
+    private Combate carregar(Long id) {
+        return combateRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Combate " + id + " nao encontrado"));
+    }
+
+    private CombateParticipante carregarParticipante(Long pid) {
+        return participanteRepository.findById(pid)
+                .orElseThrow(() -> new NotFoundException("Participante " + pid + " nao encontrado"));
     }
 
     @GetMapping("/campanhas/{campanhaId}/combates")
-    public List<Combate> listar(@PathVariable Long campanhaId) {
+    public List<Combate> listar(@PathVariable Long campanhaId,
+                                @AuthenticationPrincipal UsuarioPrincipal principal) {
+        exigir(campanhaId, principal, Permissao.VER_FICHA);
         return combateRepository.findByCampanhaIdOrderByCriadoEmDesc(campanhaId);
     }
 
     @PostMapping("/campanhas/{campanhaId}/combates")
     @ResponseStatus(HttpStatus.CREATED)
-    public Combate criar(@PathVariable Long campanhaId, @RequestBody Map<String, Object> body) {
+    public Combate criar(@PathVariable Long campanhaId, @AuthenticationPrincipal UsuarioPrincipal principal,
+                         @RequestBody Map<String, Object> body) {
+        exigir(campanhaId, principal, Permissao.GERENCIAR_CAMPANHA);
         String nome = texto(body.get("nome"));
         if (nome == null) {
             nome = "Combate";
@@ -48,14 +76,17 @@ public class CombateController {
     }
 
     @GetMapping("/combates/{id}")
-    public Combate buscar(@PathVariable Long id) {
-        return combateRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Combate " + id + " nao encontrado"));
+    public Combate buscar(@PathVariable Long id, @AuthenticationPrincipal UsuarioPrincipal principal) {
+        Combate c = carregar(id);
+        exigir(c.getCampanhaId(), principal, Permissao.VER_FICHA);
+        return c;
     }
 
     @PutMapping("/combates/{id}")
-    public Combate atualizar(@PathVariable Long id, @RequestBody Map<String, Object> body) {
-        Combate c = buscar(id);
+    public Combate atualizar(@PathVariable Long id, @AuthenticationPrincipal UsuarioPrincipal principal,
+                             @RequestBody Map<String, Object> body) {
+        Combate c = carregar(id);
+        exigir(c.getCampanhaId(), principal, Permissao.GERENCIAR_CAMPANHA);
         if (body.containsKey("nome") && texto(body.get("nome")) != null) {
             c.setNome(texto(body.get("nome")));
         }
@@ -77,15 +108,17 @@ public class CombateController {
     @DeleteMapping("/combates/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Transactional
-    public void apagar(@PathVariable Long id) {
+    public void apagar(@PathVariable Long id, @AuthenticationPrincipal UsuarioPrincipal principal) {
+        exigir(carregar(id).getCampanhaId(), principal, Permissao.GERENCIAR_CAMPANHA);
         participanteRepository.deleteAll(participanteRepository.findByCombateIdOrderByIniciativaDescIdAsc(id));
         combateRepository.deleteById(id);
     }
 
     /** Avança o turno; ao passar do último participante, incrementa a rodada. */
     @PostMapping("/combates/{id}/proximo")
-    public Combate proximoTurno(@PathVariable Long id) {
-        Combate c = buscar(id);
+    public Combate proximoTurno(@PathVariable Long id, @AuthenticationPrincipal UsuarioPrincipal principal) {
+        Combate c = carregar(id);
+        exigir(c.getCampanhaId(), principal, Permissao.GERENCIAR_CAMPANHA);
         int total = participanteRepository.findByCombateIdOrderByIniciativaDescIdAsc(id).size();
         if (total == 0) {
             return c;
@@ -100,21 +133,26 @@ public class CombateController {
     }
 
     @PostMapping("/combates/{id}/reset")
-    public Combate reset(@PathVariable Long id) {
-        Combate c = buscar(id);
+    public Combate reset(@PathVariable Long id, @AuthenticationPrincipal UsuarioPrincipal principal) {
+        Combate c = carregar(id);
+        exigir(c.getCampanhaId(), principal, Permissao.GERENCIAR_CAMPANHA);
         c.setRodada(1);
         c.setTurnoAtual(0);
         return combateRepository.save(c);
     }
 
     @GetMapping("/combates/{id}/participantes")
-    public List<CombateParticipante> participantes(@PathVariable Long id) {
+    public List<CombateParticipante> participantes(@PathVariable Long id,
+                                                   @AuthenticationPrincipal UsuarioPrincipal principal) {
+        exigir(carregar(id).getCampanhaId(), principal, Permissao.VER_FICHA);
         return participanteRepository.findByCombateIdOrderByIniciativaDescIdAsc(id);
     }
 
     @PostMapping("/combates/{id}/participantes")
     @ResponseStatus(HttpStatus.CREATED)
-    public CombateParticipante adicionar(@PathVariable Long id, @RequestBody Map<String, Object> body) {
+    public CombateParticipante adicionar(@PathVariable Long id, @AuthenticationPrincipal UsuarioPrincipal principal,
+                                         @RequestBody Map<String, Object> body) {
+        exigir(carregar(id).getCampanhaId(), principal, Permissao.GERENCIAR_CAMPANHA);
         String nome = texto(body.get("nome"));
         if (nome == null) {
             throw new IllegalArgumentException("nome do participante e obrigatorio");
@@ -134,9 +172,11 @@ public class CombateController {
     }
 
     @PutMapping("/participantes/{pid}")
-    public CombateParticipante atualizarParticipante(@PathVariable Long pid, @RequestBody Map<String, Object> body) {
-        CombateParticipante p = participanteRepository.findById(pid)
-                .orElseThrow(() -> new NotFoundException("Participante " + pid + " nao encontrado"));
+    public CombateParticipante atualizarParticipante(@PathVariable Long pid,
+                                                     @AuthenticationPrincipal UsuarioPrincipal principal,
+                                                     @RequestBody Map<String, Object> body) {
+        CombateParticipante p = carregarParticipante(pid);
+        exigir(carregar(p.getCombateId()).getCampanhaId(), principal, Permissao.GERENCIAR_CAMPANHA);
         if (body.containsKey("nome") && texto(body.get("nome")) != null) {
             p.setNome(texto(body.get("nome")));
         }
@@ -168,7 +208,9 @@ public class CombateController {
 
     @DeleteMapping("/participantes/{pid}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void removerParticipante(@PathVariable Long pid) {
+    public void removerParticipante(@PathVariable Long pid, @AuthenticationPrincipal UsuarioPrincipal principal) {
+        exigir(carregar(carregarParticipante(pid).getCombateId()).getCampanhaId(), principal,
+                Permissao.GERENCIAR_CAMPANHA);
         participanteRepository.deleteById(pid);
     }
 

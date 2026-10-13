@@ -38,8 +38,7 @@ Dono do projeto: Lucas (`Lucas-blip-png`). Conversar em **português**.
 - **Flyway ainda NÃO está na `main`.** O PR #13 foi mergeado na branch `feat/testes-swagger-readme`, mas o `pom.xml` da `main` não tem Flyway e o perfil postgres ainda usa `ddl-auto: update`. Conferir se existe PR aberta antes de refazer.
 
 ## Pendências (ordem sugerida)
-1. **Segurança: 6 falhas IDOR críticas.** Foram provadas por exploração local numa versão anterior; **não verifiquei se a `main` atual as corrigiu**, reconferir primeiro:
-   `DELETE /api/me/delete-account?usuarioId=X`, `GET /api/me/export-data?usuarioId=X`, `POST /api/organizacoes/{id}/membros`, `POST /api/campanhas/{id}/convites`, os 8 endpoints de `CombateController`, `DELETE /api/bestiario/{id}`. Revisar também ~11 endpoints mutantes e a assimetria de path traversal em `ArmazenamentoLocal.gravar()`.
+1. **Segurança: as 6 falhas IDOR foram corrigidas na branch `worktree-asus-handoff`** (cobertas por `IdorIntegrationTest`; vale só depois do merge). `/api/me/*` usa o id do JWT; organização exige DONO/ADMIN (membro para listar); convite e `CombateController` passam por `campanhaService.exigirPermissao`; `DELETE /api/bestiario/{id}` só para o criador (`Criatura.criadorId`) ou o dono do site, e criaturas antigas só o dono apaga; `gravar()` descarta diretórios do nome. Sem login (`enforce=false`) nada é bloqueado, como no resto da API. Ainda a revisar: ~11 endpoints mutantes e `GET /api/organizacoes` (lista todas).
 2. **Flyway** na `main` (ver acima) e depois `ddl-auto: validate`.
 3. **Railway: volume em `/app/uploads`** + `ASUS_UPLOADS_DIR=/app/uploads` (uploads somem a cada deploy). Passo no painel do Railway; alternativa: R2/S3.
 4. **"Passos Leves"**: duas habilidades com o mesmo nome (`PASSOS_LEVES`, ativa 10 PE de Ladrão; `PASSOS_LEVES_X`, passiva de Ladrão/Ninja). Perguntar ao Lucas se renomeia, ele ainda não respondeu.
