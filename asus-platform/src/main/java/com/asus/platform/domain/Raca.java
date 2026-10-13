@@ -34,6 +34,10 @@ public class Raca {
     @Column(columnDefinition = "TEXT")
     private String descricao;
 
+    /** Historia/aparencia completa (livro); paragrafos separados por linha em branco. */
+    @Column(columnDefinition = "TEXT")
+    private String descricaoExtensa;
+
     private int pvBase;
     private int pmBase;
     private int peBase;

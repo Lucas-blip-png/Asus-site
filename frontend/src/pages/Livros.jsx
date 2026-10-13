@@ -182,6 +182,12 @@ function RacaCard({ r }) {
       {open && (
         <div className="cris-body">
           {r.descricao && <p className="muted" style={{ margin: '2px 0 8px' }}>{r.descricao}</p>}
+          {r.descricaoExtensa && (
+            <details style={{ marginBottom: 10 }}>
+              <summary style={{ cursor: 'pointer' }}><b>Descrição completa</b></summary>
+              <p style={{ whiteSpace: 'pre-line', margin: '6px 0 0' }}>{r.descricaoExtensa}</p>
+            </details>
+          )}
           <div className="row" style={{ gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
             <span className="tag">PV base {r.pvBase}</span>
             <span className="tag">PM base {r.pmBase}</span>
