@@ -30,7 +30,8 @@ class SistemaCatalogoIntegrationTest {
         // 13 racas, com PV/PM/PE base
         mockMvc.perform(get("/api/sistemas/asus/racas"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(13));
+                .andExpect(jsonPath("$.length()").value(13))
+                .andExpect(jsonPath("$[?(@.codigo=='HUMANO')].descricaoExtensa").isNotEmpty());
 
         // 16 classes-base
         mockMvc.perform(get("/api/sistemas/asus/classes?base=true"))

@@ -92,6 +92,7 @@ public class DataSeeder implements CommandLineRunner {
             // Cada refresh isolado: uma falha (ex.: migracao de coluna) nao derruba o app.
             safeRefresh("admin", this::ensureAdmin);
             safeRefresh("bestiario", this::refreshBestiario);
+            safeRefresh("racas", this::refreshRacas);
             safeRefresh("classes", this::refreshClasses);
             safeRefresh("progressao", this::refreshProgressao);
             safeRefresh("pericias", this::refreshPericias);
@@ -1943,12 +1944,42 @@ public class DataSeeder implements CommandLineRunner {
 
     // ---------------- helpers ----------------
 
+    // Upsert por codigo (personagens referenciam racaId, entao o id nao pode mudar).
     private void raca(String codigo, String nome, int pv, int pm, int pe, String desc, String habilidadesJson) {
-        racaRepository.save(Raca.builder()
-                .gameSystemId(sid).codigo(codigo).nome(nome).descricao(desc)
-                .pvBase(pv).pmBase(pm).peBase(pe)
-                .jsonHabilidades("{\"habilidades\":" + habilidadesJson + "}")
-                .oficial(true).build());
+        Raca r = racaRepository.findByGameSystemIdAndCodigo(sid, codigo).orElseGet(Raca::new);
+        r.setGameSystemId(sid);
+        r.setCodigo(codigo);
+        r.setNome(nome);
+        r.setDescricao(desc);
+        r.setDescricaoExtensa(lore().get(codigo));
+        r.setPvBase(pv);
+        r.setPmBase(pm);
+        r.setPeBase(pe);
+        r.setJsonHabilidades("{\"habilidades\":" + habilidadesJson + "}");
+        r.setOficial(true);
+        racaRepository.save(r);
+    }
+
+    /** Texto longo das racas (seed/racas-lore.json: codigo -> paragrafos). */
+    private java.util.Map<String, String> lore() {
+        if (lore == null) {
+            try (var in = new org.springframework.core.io.ClassPathResource("seed/racas-lore.json").getInputStream()) {
+                lore = new com.fasterxml.jackson.databind.ObjectMapper().readValue(in,
+                        new com.fasterxml.jackson.core.type.TypeReference<java.util.Map<String, String>>() { });
+            } catch (java.io.IOException e) {
+                throw new java.io.UncheckedIOException(e);
+            }
+        }
+        return lore;
+    }
+    private java.util.Map<String, String> lore;
+
+    /** Reaplica as racas (PV/PM/PE, passivas, descricao) em banco ja existente, sem trocar ids. */
+    void refreshRacas() {
+        gameSystemRepository.findByCodigo(AsusV1Engine.SYSTEM_ID).ifPresent(gs -> {
+            sid = gs.getId();
+            seedRacas();
+        });
     }
 
     // Upsert por codigo: atualiza a pericia existente ou cria uma nova (permite refresh).

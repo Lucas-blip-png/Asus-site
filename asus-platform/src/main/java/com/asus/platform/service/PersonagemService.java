@@ -412,15 +412,17 @@ public class PersonagemService {
         var status = p.getStatus();
 
         // Tetos manuais (override que persiste entre recalculos); valor <= 0 limpa o override.
-        if (pvMax != null) {
+        // Reenviar o teto automatico sem mudar (ex.: editar so o PM atual na ficha) NAO vira
+        // override — senao o maximo ficava congelado e nao recalculava ao subir de nivel.
+        if (pvMax != null && !mesmoTetoAutomatico(pvMax, p.getPvMaxManual(), status.getPvMax())) {
             p.setPvMaxManual(pvMax > 0 ? pvMax : null);
             if (pvMax > 0) { status.setPvMax(pvMax); if (status.getPvAtual() > pvMax) status.setPvAtual(pvMax); }
         }
-        if (pmMax != null) {
+        if (pmMax != null && !mesmoTetoAutomatico(pmMax, p.getPmMaxManual(), status.getPmMax())) {
             p.setPmMaxManual(pmMax > 0 ? pmMax : null);
             if (pmMax > 0) { status.setPmMax(pmMax); if (status.getPmAtual() > pmMax) status.setPmAtual(pmMax); }
         }
-        if (peMax != null) {
+        if (peMax != null && !mesmoTetoAutomatico(peMax, p.getPeMaxManual(), status.getPeMax())) {
             p.setPeMaxManual(peMax > 0 ? peMax : null);
             if (peMax > 0) { status.setPeMax(peMax); if (status.getPeAtual() > peMax) status.setPeAtual(peMax); }
         }
@@ -444,6 +446,11 @@ public class PersonagemService {
         p = personagemRepository.save(p);
         realtimeNotifier.statusPersonagem(p.getId(), StatusDto.de(p.getStatus()));
         return toResponse(p);
+    }
+
+    /** Teto enviado e igual ao automatico atual, sem override previo: nada a gravar. */
+    private static boolean mesmoTetoAutomatico(int enviado, Integer manual, int atual) {
+        return enviado > 0 && manual == null && enviado == atual;
     }
 
     /** Aplica os tetos manuais (se houver) sobre o status recem-calculado e ajusta o atual ao teto. */
