@@ -717,7 +717,7 @@ public class DataSeeder implements CommandLineRunner {
                 "Ladrão", "Ao passar 1 turno analisando o terreno, o usuário recebe “Vantagens” para qualquer teste que lhe ajude a fugir de um inimigo/ameaça, além disso ignora “Terreno Difícil”.");
         hab("EVASAO_DO_PALHACO", "Evasão do Palhaço", "LADRAO", "ATIVA", 3, "PE",
                 "Ladrão / Nível 10", "O usuário brinca com seu inimigo, desviando do golpe de maneiras improváveis, dessa forma ganhando +2 a cada 5 Níveis do Personagem em testes de Esquiva / Uma vez por cena, pode esquivar de um ataque automaticamente colocando um aliado para receber o ataque em seu lugar.");
-        hab("PASSOS_LEVES_X", "Passos Leves", "LADRAO,NINJA", "PASSIVA", 0, null,
+        hab("PASSOS_LEVES_X", "Passos Leves (Passiva)", "LADRAO,NINJA", "PASSIVA", 0, null,
                 "Ladrão, Ninja", "Ao estar em estado de furtividade o usuário não sofre penalidade em seu deslocamento. (Passivo)");
         hab("MALANDRAGEM", "Malandragem", "LADRAO", "ATIVA", 3, "PE",
                 "Ladrão", "O usuário ganha +2 a cada 5 Níveis do Personagem em testes de “enganação”, além disso pode realizar uma ação simples de forma furtiva enquanto engana alguém.");
@@ -1952,6 +1952,7 @@ public class DataSeeder implements CommandLineRunner {
         r.setNome(nome);
         r.setDescricao(desc);
         r.setDescricaoExtensa(lore().get(codigo));
+        r.setExpectativaVida(EXPECTATIVA_VIDA.get(codigo));
         r.setPvBase(pv);
         r.setPmBase(pm);
         r.setPeBase(pe);
@@ -1959,6 +1960,21 @@ public class DataSeeder implements CommandLineRunner {
         r.setOficial(true);
         racaRepository.save(r);
     }
+
+    /** Longevidade de cada raca, do "Asus - Projeto de Sistema". Gigante: o livro nao informa. */
+    private static final java.util.Map<String, String> EXPECTATIVA_VIDA = java.util.Map.ofEntries(
+            java.util.Map.entry("HUMANO", "60 a 80 anos"),
+            java.util.Map.entry("DEMONIO", "Igual à dos humanos (60 a 80 anos)"),
+            java.util.Map.entry("GOBLIN", "Cerca de 50 anos"),
+            java.util.Map.entry("TIEFLING", "Semelhante à dos elfos (80 a 120 anos)"),
+            java.util.Map.entry("MEIO_FERA", "Depende do animal de origem"),
+            java.util.Map.entry("ELFO", "80 a 120 anos"),
+            java.util.Map.entry("ONI", "50 a 60 anos"),
+            java.util.Map.entry("VAMPIRO", "80 a 90 anos"),
+            java.util.Map.entry("ANAO", "80 a 110 anos"),
+            java.util.Map.entry("ORC", "Cerca de 60 anos (guerreiros) e 90 anos (xamãs)"),
+            java.util.Map.entry("DRACONATO", "70 a 100 anos"),
+            java.util.Map.entry("CELESTIAL", "Cerca de 130 anos"));
 
     /** Texto longo das racas (seed/racas-lore.json: codigo -> paragrafos). */
     private java.util.Map<String, String> lore() {

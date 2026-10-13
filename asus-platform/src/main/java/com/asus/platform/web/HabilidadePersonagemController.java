@@ -9,6 +9,7 @@ import com.asus.platform.repository.ClasseRepository;
 import com.asus.platform.repository.HabilidadePersonagemRepository;
 import com.asus.platform.repository.HabilidadeRepository;
 import com.asus.platform.repository.PersonagemRepository;
+import com.asus.platform.repository.RacaRepository;
 import com.asus.platform.security.UsuarioPrincipal;
 import com.asus.platform.service.AcessoService;
 import com.asus.platform.web.dto.HabilidadeDisponivelResponse;
@@ -34,6 +35,7 @@ import org.springframework.web.bind.annotation.*;
 public class HabilidadePersonagemController {
 
     private static final int NIVEL_TRILHA = 11;
+    private static final int NIVEL_VERSATILIDADE = 20;
     /** Codigo-dono sentinela das habilidades proprias (custom): nunca aparece em "disponiveis". */
     private static final String CODIGO_PROPRIA = "PROPRIA";
 
@@ -42,12 +44,15 @@ public class HabilidadePersonagemController {
     private final HabilidadeRepository habilidadeRepository;
     private final HabilidadePersonagemRepository escolhidasRepository;
     private final AcessoService acessoService;
+    private final RacaRepository racaRepository;
 
     public HabilidadePersonagemController(PersonagemRepository personagemRepository,
                                           ClasseRepository classeRepository,
                                           HabilidadeRepository habilidadeRepository,
                                           HabilidadePersonagemRepository escolhidasRepository,
-                                          AcessoService acessoService) {
+                                          AcessoService acessoService,
+                                          RacaRepository racaRepository) {
+        this.racaRepository = racaRepository;
         this.personagemRepository = personagemRepository;
         this.classeRepository = classeRepository;
         this.habilidadeRepository = habilidadeRepository;
@@ -67,11 +72,14 @@ public class HabilidadePersonagemController {
         // (nem GERAL) — residuo de quando o catalogo tinha classeCodigo errado. Uma
         // habilidade so entra na ficha se passar por pertenceClasse, entao qualquer uma
         // que falhe agora e um grant invalido antigo e pode sair com seguranca.
+        // Humano nivel 20+ (Versatilidade Humana) mantem 1 habilidade de fora da classe: a mais antiga.
         List<HabilidadePersonagem> intrusas = rows.stream()
                 .filter(hp -> {
                     Habilidade h = catalogo.get(hp.getHabilidadeCodigo());
                     return h != null && !pertenceClasse(h, classes);
                 })
+                .sorted(java.util.Comparator.comparing(HabilidadePersonagem::getId))
+                .skip(versatil(p) ? 1 : 0)
                 .toList();
         if (!intrusas.isEmpty()) {
             escolhidasRepository.deleteAll(intrusas);
@@ -94,9 +102,10 @@ public class HabilidadePersonagemController {
         Set<String> cods = codigosEscolhidos(id);
         // Mostra todas as habilidades da(s) classe(s) do personagem (ou GERAL), inclusive as que
         // ainda estao bloqueadas por requisito — o front exibe o motivo e nao deixa pegar ate atingir.
+        boolean abreForaDaClasse = podeEscolherForaDaClasse(p, classes);
         return habilidadeRepository.findByGameSystemId(p.getGameSystemId()).stream()
                 .filter(h -> !cods.contains(h.getCodigo()))
-                .filter(h -> pertenceClasse(h, classes))
+                .filter(h -> abreForaDaClasse || pertenceClasse(h, classes))
                 .map(h -> {
                     String motivo = motivoBloqueio(h, p);
                     return HabilidadeDisponivelResponse.de(h, motivo != null, motivo);
@@ -116,7 +125,10 @@ public class HabilidadePersonagemController {
         Habilidade h = habilidadeRepository.findByGameSystemId(p.getGameSystemId()).stream()
                 .filter(x -> x.getCodigo().equals(codigo)).findFirst()
                 .orElseThrow(() -> new NotFoundException("Habilidade '" + codigo + "' nao encontrada"));
-        if (!disponivel(h, p, classesDoPersonagem(p))) {
+        Set<String> classes = classesDoPersonagem(p);
+        boolean ok = pertenceClasse(h, classes) ? motivoBloqueio(h, p) == null
+                : podeEscolherForaDaClasse(p, classes) && motivoBloqueio(h, p) == null;
+        if (!ok) {
             throw new IllegalArgumentException("Pre-requisitos nao atendidos para " + h.getNome());
         }
         if (!escolhidasRepository.existsByPersonagemIdAndHabilidadeCodigo(id, codigo)) {
@@ -225,8 +237,20 @@ public class HabilidadePersonagemController {
 
     // ----- helpers -----
 
-    private boolean disponivel(Habilidade h, Personagem p, Set<String> classesDoPersonagem) {
-        return pertenceClasse(h, classesDoPersonagem) && motivoBloqueio(h, p) == null;
+    /** Versatilidade Humana (nivel 20): Humano pode ter 1 habilidade de classe/trilha que nao e a sua. */
+    private boolean versatil(Personagem p) {
+        return p.getNivel() >= NIVEL_VERSATILIDADE && p.getRacaId() != null
+                && racaRepository.findById(p.getRacaId()).map(r -> "HUMANO".equals(r.getCodigo())).orElse(false);
+    }
+
+    /** Versatil e ainda sem a habilidade de fora da classe. */
+    private boolean podeEscolherForaDaClasse(Personagem p, Set<String> classes) {
+        if (!versatil(p)) {
+            return false;
+        }
+        Set<String> cods = codigosEscolhidos(p.getId());
+        return habilidadeRepository.findByGameSystemId(p.getGameSystemId()).stream()
+                .noneMatch(h -> cods.contains(h.getCodigo()) && !pertenceClasse(h, classes));
     }
 
     /** A habilidade e da(s) classe/trilha do personagem, ou GERAL (vale para todas). */

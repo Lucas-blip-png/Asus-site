@@ -38,6 +38,9 @@ public class Raca {
     @Column(columnDefinition = "TEXT")
     private String descricaoExtensa;
 
+    /** Longevidade como o livro descreve (ex.: "60 a 80 anos"); null = o livro nao informa. */
+    private String expectativaVida;
+
     private int pvBase;
     private int pmBase;
     private int peBase;

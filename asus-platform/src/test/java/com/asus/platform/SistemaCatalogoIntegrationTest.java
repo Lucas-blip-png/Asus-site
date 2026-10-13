@@ -31,7 +31,8 @@ class SistemaCatalogoIntegrationTest {
         mockMvc.perform(get("/api/sistemas/asus/racas"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(13))
-                .andExpect(jsonPath("$[?(@.codigo=='HUMANO')].descricaoExtensa").isNotEmpty());
+                .andExpect(jsonPath("$[?(@.codigo=='HUMANO')].descricaoExtensa").isNotEmpty())
+                .andExpect(jsonPath("$[?(@.codigo=='ELFO')].expectativaVida").value(Matchers.contains("80 a 120 anos")));
 
         // 16 classes-base
         mockMvc.perform(get("/api/sistemas/asus/classes?base=true"))
@@ -46,7 +47,9 @@ class SistemaCatalogoIntegrationTest {
         // Habilidades e itens (catalogo representativo)
         mockMvc.perform(get("/api/sistemas/asus/habilidades"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(Matchers.greaterThanOrEqualTo(10)));
+                .andExpect(jsonPath("$.length()").value(Matchers.greaterThanOrEqualTo(10)))
+                // "Passos Leves" so existe uma vez (a passiva se chama "Passos Leves (Passiva)")
+                .andExpect(jsonPath("$[?(@.nome=='Passos Leves')].codigo").value(Matchers.hasSize(1)));
         mockMvc.perform(get("/api/sistemas/asus/itens"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(Matchers.greaterThanOrEqualTo(10)))
