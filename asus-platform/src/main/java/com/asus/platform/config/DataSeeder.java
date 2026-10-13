@@ -1401,7 +1401,7 @@ public class DataSeeder implements CommandLineRunner {
                 "[{\"nivel\":1,\"nome\":\"Linhagem\",\"efeito\":\"Sendo a raça mais numerosa, os humanos desenvolveram uma tradição de transmitir conhecimentos, objetos e bênçãos valiosas através das gerações. O personagem pode escolher 1 item ou 1 bênção para receber como herança. A escolha deve ser aprovada pelo Mestre.\"},"
                 + "{\"nivel\":20,\"nome\":\"Versatilidade Humana\",\"efeito\":\"Ao alcançar este nível, o personagem pode escolher 1 habilidade de classe ou trilha que não pertença à sua classe, desde que cumpra seus requisitos. A habilidade escolhida passa a fazer parte de seu conjunto de habilidades.\"},"
                 + "{\"nivel\":40,\"nome\":\"Almejar Maestria\",\"efeito\":\"A ambição humana permite que seus indivíduos continuem superando seus próprios limites. O personagem recebe um bônus de 50% na experiência adquirida, adicionando metade do valor recebido ao total. Além disso, pode aprimorar 1 habilidade de classe à sua escolha, desde que a alteração seja aprovada pelo Mestre.\"}]");
-        raca("DEMONIO", "Demonio", 4, 6, 3, "Humanos mutados por mana intensa.",
+        raca("DEMONIO", "Demônio", 4, 6, 3, "Humanos mutados por mana intensa.",
                 "[{\"nivel\":1,\"nome\":\"Mutação Demoníaca\",\"efeito\":\"O personagem pode escolher 1 característica fisiológica única para seu corpo, como quatro braços, pele escamada, cauda, chifres ou asas. A escolha deve ser aprovada pelo Mestre.\"},"
                 + "{\"nivel\":20,\"nome\":\"Pactos Demoníacos\",\"efeito\":\"O personagem pode estabelecer contratos mágicos com criaturas conscientes, desde que ambas concordem com seus termos. O pacto é gravado na alma de todos os envolvidos, e sua quebra resulta nas consequências determinadas pelo contrato ou pelo Mestre.\"},"
                 + "{\"nivel\":40,\"nome\":\"Pacto Restritivo\",\"efeito\":\"O personagem pode realizar contratos consigo mesmo para modificar aspectos de sua ficha, trocando um sacrifício proporcional por um benefício equivalente. Requer Ação Completa e, após realizado, o pacto é irreversível.\"}]");
@@ -1433,7 +1433,7 @@ public class DataSeeder implements CommandLineRunner {
                 "[{\"nivel\":1,\"nome\":\"Consumir Sangue\",\"efeito\":\"Originários de uma raça que, para sobreviver, precisaram recorrer ao canibalismo, praticando a auto dilaceração e o reaproveitamento de nutrientes, o que lhes permitiu sobreviver por muitos anos em um ambiente cruel. Essa habilidade é uma remanescente dessa antiga capacidade. O usuário pode beber o sangue de seres vivos para recuperar HP com base no dobro da constituição. A habilidade pode ser utilizada uma vez por criatura.\"},"
                 + "{\"nivel\":20,\"nome\":\"Afinidade Noturna\",\"efeito\":\"Suas origens vêm das profundezas escuras das cavernas onde ficaram presos. Para sobreviver às criaturas que lá habitavam, desenvolveram o dom de lutar na escuridão, aprimorando seus sentidos e aumentando suas aptidões para a sobrevivência. Ao cair da noite ou em locais sem luz solar difusa, o personagem recebe um bônus de +4 em Perícias de Força e Agilidade. Esse bônus aumenta em +4 a cada 10 níveis do personagem.\"},"
                 + "{\"nivel\":40,\"nome\":\"Nutrição pelo Sacrifício\",\"efeito\":\"A função dos mais fortes sempre foi garantir a sobrevivência dos mais fracos, assegurando a continuidade da vida de sua raça. Dessa necessidade surgiu a capacidade de nutrir suas forças por meio do hábito canibal. O usuário pode regenerar HP durante uma batalha. Para isso, deve permanecer imóvel por 1 turno, concentrando-se. Após esse turno, o usuário pode gastar limitado pela metade da constituição em PE, e a outra definição de dado será limitado pela metade da sabedoria do personagem, gastando seu PM por essa limitação, e assim gerando um dado para ganhar vida\"}]");
-        raca("ANAO", "Anao", 6, 4, 5, "Baixos, robustos e sabios artifices.",
+        raca("ANAO", "Anão", 6, 4, 5, "Baixos, robustos e sabios artifices.",
                 "[{\"nivel\":1,\"nome\":\"Conhecimento Antigo\",\"efeito\":\"Uma raça nascida em terras inóspitas, onde a sobrevivência era desafiadora. Para superar tais adversidades, desenvolveram uma capacidade única de registrar e transmitir seu aprendizado através de escritos ancestrais. Com o tempo, cada elemento descoberto foi registrado, formando um acervo de saberes de um passado perdido. O personagem pode selecionar um tema de conhecimento antigo. Tudo relacionado a esse tema, datado de antes do Período da Luz, será de seu total entendimento.\"},"
                 + "{\"nivel\":20,\"nome\":\"Resistências Subterrâneas\",\"efeito\":\"Originários de uma terra onde as planícies e locais com alta passagem de vento eram evitados, essa raça começou a cavar cavernas para garantir sua sobrevivência. Com o tempo, seus corpos se adaptaram para manter o calor interno e aumentar a eficácia no trabalho subterrâneo. O usuário ganha resistência a danos climáticos, sendo imune a climas extremos de frio e calor, além de ganhar 20 de armadura a ataques deste tipo, o personagem possui uma habilidade natural para não se perder em cavernas, sempre sabendo onde estão as passagens naturais e os caminhos internos.\"},"
                 + "{\"nivel\":40,\"nome\":\"Mestre Artífice\",\"efeito\":\"Vivendo em ambientes limitados onde todos os recursos eram preciosos, essa raça aprendeu a aproveitar ao máximo o que estava ao seu redor. Desenvolveram a habilidade de reconhecer e utilizar qualquer tipo de material de maneira eficiente, criando itens com qualidade superior. O usuário pode reconhecer materiais em sua forma mais pura ou objetos que já foram preparados, permitindo-lhe criar itens de qualidade superior. Além disso, pode incluir elementos improváveis ou teoricamente incompatíveis na criação de seus itens, combinando materiais de forma única e inovadora.\"}]");
@@ -1961,20 +1961,20 @@ public class DataSeeder implements CommandLineRunner {
         racaRepository.save(r);
     }
 
-    /** Longevidade de cada raca, do "Asus - Projeto de Sistema". Gigante: o livro nao informa. */
+    /** Longevidade media de cada raca (valores definidos pelo dono). Gigante: ainda sem valor. */
     private static final java.util.Map<String, String> EXPECTATIVA_VIDA = java.util.Map.ofEntries(
-            java.util.Map.entry("HUMANO", "60 a 80 anos"),
-            java.util.Map.entry("DEMONIO", "Igual à dos humanos (60 a 80 anos)"),
-            java.util.Map.entry("GOBLIN", "Cerca de 50 anos"),
-            java.util.Map.entry("TIEFLING", "Semelhante à dos elfos (80 a 120 anos)"),
+            java.util.Map.entry("HUMANO", "Média de 70 anos"),
+            java.util.Map.entry("DEMONIO", "Média de 70 anos"),
+            java.util.Map.entry("GOBLIN", "Média de 50 anos"),
+            java.util.Map.entry("TIEFLING", "Média de 100 anos"),
             java.util.Map.entry("MEIO_FERA", "Depende do animal de origem"),
-            java.util.Map.entry("ELFO", "80 a 120 anos"),
-            java.util.Map.entry("ONI", "50 a 60 anos"),
-            java.util.Map.entry("VAMPIRO", "80 a 90 anos"),
-            java.util.Map.entry("ANAO", "80 a 110 anos"),
-            java.util.Map.entry("ORC", "Cerca de 60 anos (guerreiros) e 90 anos (xamãs)"),
-            java.util.Map.entry("DRACONATO", "70 a 100 anos"),
-            java.util.Map.entry("CELESTIAL", "Cerca de 130 anos"));
+            java.util.Map.entry("ELFO", "Média de 100 anos"),
+            java.util.Map.entry("ONI", "Média de 60 anos"),
+            java.util.Map.entry("VAMPIRO", "Média de 90 anos"),
+            java.util.Map.entry("ANAO", "Média de 100 anos"),
+            java.util.Map.entry("ORC", "Média de 60 anos (guerreiros) e 90 anos (xamãs)"),
+            java.util.Map.entry("DRACONATO", "Média de 80 anos"),
+            java.util.Map.entry("CELESTIAL", "Média de 130 anos"));
 
     /** Texto longo das racas (seed/racas-lore.json: codigo -> paragrafos). */
     private java.util.Map<String, String> lore() {
