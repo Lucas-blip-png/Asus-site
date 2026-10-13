@@ -39,10 +39,11 @@ class SistemaCatalogoIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(16));
 
-        // 28 pericias (inclui Oficio e Sanidade)
+        // 26 pericias (PERICIAS.docx); Engenharia e Sanidade nao existem no ASUS
         mockMvc.perform(get("/api/sistemas/asus/pericias"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(28));
+                .andExpect(jsonPath("$.length()").value(26))
+                .andExpect(jsonPath("$[?(@.codigo=='SANIDADE' || @.codigo=='ENGENHARIA')]").isEmpty());
 
         // Habilidades e itens (catalogo representativo)
         mockMvc.perform(get("/api/sistemas/asus/habilidades"))

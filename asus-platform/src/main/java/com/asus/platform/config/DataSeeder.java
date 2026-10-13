@@ -1574,23 +1574,18 @@ public class DataSeeder implements CommandLineRunner {
                 + "arma, Pintores como magia e Ciganos para entretenimento. Fora do combate, é a perícia mais "
                 + "versátil para interações sociais.",
                 "Performance musical e teatral|Pintura e escultura mágica|Disfarce via atuação|Ganhar aprovação de multidões");
-        pericia("SANIDADE", "Sanidade", Atributo.SABEDORIA,
-                "Equilíbrio mental e resistência psicológica diante de horrores, traumas e manipulações. Um "
-                + "personagem com alta Sanidade mantém a lucidez mesmo diante do caos e da corrupção. Fundamental "
-                + "para evitar estados de Confusão e Insanidade.",
-                "Resistir a trauma e horror|Manter lucidez sob pressão|Resistir a manipulação mental|Recuperar-se de estados de confusão");
-        pericia("ENGENHARIA", "Engenharia", Atributo.INTELIGENCIA,
-                "Conhecimento técnico para construir, reparar e operar dispositivos mecânicos e tecnológicos. "
-                + "Inventores e Alquimistas dependem dessa perícia para criar e aprimorar seus gadgets, armadilhas "
-                + "e máquinas de guerra.",
-                "Construir dispositivos mecânicos|Desarmar mecanismos e armadilhas|Criar versões aprimoradas de dispositivos|Operar engenhocas tecnológicas");
     }
+
+    /** Perícias que não existem no ASUS (removidas do catálogo; bancos antigos ainda as têm). */
+    private static final java.util.List<String> PERICIAS_REMOVIDAS = java.util.List.of("SANIDADE", "ENGENHARIA");
 
     /** Reaplica as perícias (descrição, exemplos) em banco já existente, sem trocar ids. */
     void refreshPericias() {
         gameSystemRepository.findByCodigo(AsusV1Engine.SYSTEM_ID).ifPresent(gs -> {
             sid = gs.getId();
             seedPericias();
+            PERICIAS_REMOVIDAS.forEach(c -> periciaRepository.findByGameSystemIdAndCodigo(sid, c)
+                    .ifPresent(periciaRepository::delete));
         });
     }
 
