@@ -3,6 +3,7 @@ package com.asus.platform.web;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import com.asus.platform.domain.OrganizacaoMembro;
 import com.asus.platform.security.UsuarioPrincipal;
+import com.asus.platform.service.AcessoService;
 import com.asus.platform.service.OrganizacaoService;
 import com.asus.platform.web.dto.AdicionarMembroRequest;
 import com.asus.platform.web.dto.AtualizarOrganizacaoRequest;
@@ -21,9 +22,11 @@ import org.springframework.web.bind.annotation.*;
 public class OrganizacaoController {
 
     private final OrganizacaoService service;
+    private final AcessoService acessoService;
 
-    public OrganizacaoController(OrganizacaoService service) {
+    public OrganizacaoController(OrganizacaoService service, AcessoService acessoService) {
         this.service = service;
+        this.acessoService = acessoService;
     }
 
     @GetMapping
@@ -64,25 +67,33 @@ public class OrganizacaoController {
 
     @PutMapping("/{id}")
     public OrganizacaoResponse atualizar(@PathVariable Long id,
+                                         @AuthenticationPrincipal UsuarioPrincipal principal,
                                          @RequestBody AtualizarOrganizacaoRequest req) {
+        acessoService.exigirGestorOrganizacao(id, principal);
         return OrganizacaoResponse.de(service.atualizar(id, req.nome()));
     }
 
     @GetMapping("/{id}/membros")
-    public List<OrganizacaoMembro> membros(@PathVariable Long id) {
+    public List<OrganizacaoMembro> membros(@PathVariable Long id,
+                                           @AuthenticationPrincipal UsuarioPrincipal principal) {
+        acessoService.exigirMembroOrganizacao(id, principal);
         return service.listarMembros(id);
     }
 
     @PostMapping("/{id}/membros")
     @ResponseStatus(HttpStatus.CREATED)
     public OrganizacaoMembro adicionarMembro(@PathVariable Long id,
+                                             @AuthenticationPrincipal UsuarioPrincipal principal,
                                              @Valid @RequestBody AdicionarMembroRequest req) {
+        acessoService.exigirGestorOrganizacao(id, principal);
         return service.adicionarMembro(id, req.usuarioId(), req.papel());
     }
 
     @DeleteMapping("/{id}/membros/{usuarioId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void removerMembro(@PathVariable Long id, @PathVariable Long usuarioId) {
+    public void removerMembro(@PathVariable Long id, @PathVariable Long usuarioId,
+                              @AuthenticationPrincipal UsuarioPrincipal principal) {
+        acessoService.exigirGestorOrganizacao(id, principal);
         service.removerMembro(id, usuarioId);
     }
 }

@@ -32,7 +32,8 @@ public class ArmazenamentoLocal implements ArmazenamentoAssets {
             throws IOException {
         Path dirOrg = uploadsRoot.resolve(String.valueOf(organizacaoId));
         Files.createDirectories(dirOrg);
-        Path destino = dirOrg.resolve(UUID.randomUUID() + "_" + nomeOriginal);
+        // So o nome do arquivo: descarta qualquer diretorio/".." que venha no nome original.
+        Path destino = dirOrg.resolve(UUID.randomUUID() + "_" + Path.of(nomeOriginal).getFileName());
         Files.copy(conteudo, destino, StandardCopyOption.REPLACE_EXISTING);
         return uploadsRoot.relativize(destino).toString().replace('\\', '/');
     }
