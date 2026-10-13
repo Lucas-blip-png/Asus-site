@@ -9,7 +9,6 @@ public record CalculoDebugResponse(
         StatusDto status,
         int deslocamento,
         int cargaMaxima,
-        int limiteHabilidades,
         int limiteFeiticos,
         int limiteBencaos,
         List<PericiaCalculadaDto> pericias,

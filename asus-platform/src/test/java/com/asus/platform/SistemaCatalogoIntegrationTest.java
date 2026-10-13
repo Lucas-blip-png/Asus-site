@@ -32,7 +32,8 @@ class SistemaCatalogoIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(13))
                 .andExpect(jsonPath("$[?(@.codigo=='HUMANO')].descricaoExtensa").isNotEmpty())
-                .andExpect(jsonPath("$[?(@.codigo=='ELFO')].expectativaVida").value(Matchers.contains("Média de 100 anos")));
+                .andExpect(jsonPath("$[?(@.codigo=='ELFO')].expectativaVida").value(Matchers.contains("Média de 100 anos")))
+                .andExpect(jsonPath("$[?(@.codigo=='GIGANTE')].expectativaVida").value(Matchers.contains("Média de 110 anos")));
 
         // 16 classes-base
         mockMvc.perform(get("/api/sistemas/asus/classes?base=true"))

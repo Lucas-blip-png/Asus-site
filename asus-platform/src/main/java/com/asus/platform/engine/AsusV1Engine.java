@@ -144,12 +144,11 @@ public class AsusV1Engine implements GameSystemEngine {
 
         int deslocamento = 4 + finais.getAgilidade() / 5;
         int carga = finais.getForca() * 2;
-        int limHab = finais.getDestreza() / 2;
         int limFei = finais.getInteligencia() / 2;
         int limBen = finais.getSabedoria() / 2;
         passos.add(String.format("Deslocamento = 4 + Agi(%d)/5 = %d", finais.getAgilidade(), deslocamento));
         passos.add(String.format("Carga maxima = For(%d)x2 = %d", finais.getForca(), carga));
-        passos.add(String.format("Limites -> Habilidades %d, Feiticos %d, Bencaos %d", limHab, limFei, limBen));
+        passos.add(String.format("Limites -> Feiticos %d, Bencaos %d (nao ha limite de habilidades)", limFei, limBen));
 
         // Pericias: valor treinado e cap (2x atributo final)
         List<PericiaCalculada> pericias = new ArrayList<>();
@@ -166,7 +165,7 @@ public class AsusV1Engine implements GameSystemEngine {
         }
 
         return new ResultadoCalculo(finais, status, pericias,
-                deslocamento, carga, limHab, limFei, limBen, passos);
+                deslocamento, carga, limFei, limBen, passos);
     }
 
     private Atributo atributo(String nome) {

@@ -1956,10 +1956,11 @@ public class DataSeeder implements CommandLineRunner {
         racaRepository.save(r);
     }
 
-    /** Longevidade media de cada raca (valores definidos pelo dono). Gigante: ainda sem valor. */
+    /** Longevidade media de cada raca (valores definidos pelo dono). */
     private static final java.util.Map<String, String> EXPECTATIVA_VIDA = java.util.Map.ofEntries(
             java.util.Map.entry("HUMANO", "Média de 70 anos"),
             java.util.Map.entry("DEMONIO", "Média de 70 anos"),
+            java.util.Map.entry("GIGANTE", "Média de 110 anos"),
             java.util.Map.entry("GOBLIN", "Média de 50 anos"),
             java.util.Map.entry("TIEFLING", "Média de 100 anos"),
             java.util.Map.entry("MEIO_FERA", "Depende do animal de origem"),

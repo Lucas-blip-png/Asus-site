@@ -14,7 +14,6 @@ public record ResultadoCalculo(
         List<PericiaCalculada> pericias,
         int deslocamento,
         int cargaMaxima,
-        int limiteHabilidades,
         int limiteFeiticos,
         int limiteBencaos,
         List<String> passos

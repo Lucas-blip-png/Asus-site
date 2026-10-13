@@ -69,7 +69,7 @@ public class SistemaController {
         return List.of(
                 AtributoInfo.de(Atributo.FORCA, "Forca", "Potencia fisica, dano corpo a corpo e carga (2x)."),
                 AtributoInfo.de(Atributo.CONSTITUICAO, "Constituicao", "+2 de vida e +2 de energia por ponto."),
-                AtributoInfo.de(Atributo.DESTREZA, "Destreza", "Habilidade manual; limite de Habilidades (metade)."),
+                AtributoInfo.de(Atributo.DESTREZA, "Destreza", "Habilidade manual."),
                 AtributoInfo.de(Atributo.AGILIDADE, "Agilidade", "Reflexos e Deslocamento (4 + 1 a cada 5)."),
                 AtributoInfo.de(Atributo.INTELIGENCIA, "Inteligencia", "Feiticaria; limite de Feiticos (metade)."),
                 AtributoInfo.de(Atributo.SABEDORIA, "Sabedoria", "Instinto; limite de Bencaos (metade)."),

@@ -7,7 +7,7 @@ package com.asus.platform.domain;
  * <ul>
  *   <li>FORCA — potência física, dano corpo a corpo, capacidade de carga (2x).</li>
  *   <li>CONSTITUICAO — vida e energia (+2 de cada por ponto); energia gasta por turno.</li>
- *   <li>DESTREZA (Proficiência) — habilidade manual; limite de Habilidades (metade).</li>
+ *   <li>DESTREZA (Proficiência) — habilidade manual.</li>
  *   <li>AGILIDADE — reflexos e Deslocamento (4 + 1 a cada 5 pontos).</li>
  *   <li>INTELIGENCIA — feitiçaria; limite de Feitiços (metade).</li>
  *   <li>SABEDORIA — instinto/percepção; limite de Bênçãos (metade).</li>

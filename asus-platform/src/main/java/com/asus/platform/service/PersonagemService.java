@@ -522,7 +522,7 @@ public class PersonagemService {
                 AtributosDto.de(r.atributosFinais()),
                 StatusDto.de(r.status()),
                 r.deslocamento(), r.cargaMaxima(),
-                r.limiteHabilidades(), r.limiteFeiticos(), r.limiteBencaos(),
+                r.limiteFeiticos(), r.limiteBencaos(),
                 r.pericias().stream().map(this::toPericiaDto).toList(),
                 r.passos());
     }
@@ -837,7 +837,6 @@ public class PersonagemService {
                 rEf.deslocamento(),
                 r.cargaMaxima(),
                 cargaAtual,
-                r.limiteHabilidades(),
                 r.limiteFeiticos(),
                 r.limiteBencaos(),
                 limiteAtributo,

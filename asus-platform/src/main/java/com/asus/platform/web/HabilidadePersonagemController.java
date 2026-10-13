@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.*;
  * Habilidades escolhidas por um personagem, com pré-requisitos:
  * a habilidade precisa ser da classe/trilha do personagem (ou GERAL), o nível
  * deve alcançar o exigido (trilha só a partir do nível 11) e o atributo exigido
- * deve ser atendido. O total respeita o limite (Destreza / 2).
+ * deve ser atendido. Nao ha limite de habilidades (vem de level up e de outros meios).
  */
 @RestController
 @RequestMapping("/api/personagens/{id}/habilidades")

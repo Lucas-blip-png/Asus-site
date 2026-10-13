@@ -31,7 +31,6 @@ public record PersonagemResponse(
         int deslocamento,
         int cargaMaxima,
         double cargaAtual,
-        int limiteHabilidades,
         int limiteFeiticos,
         int limiteBencaos,
         int limiteAtributo,
