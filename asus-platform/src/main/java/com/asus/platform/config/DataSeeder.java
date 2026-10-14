@@ -1658,7 +1658,7 @@ public class DataSeeder implements CommandLineRunner {
                 "Comunhão com a Natureza. O Druida possui uma profunda ligação com a natureza e é capaz de "
                         + "sentir as mudanças no ambiente natural. Enquanto este estiver em uma floresta ou ambiente "
                         + "natural, terá +2 pontos a cada 10 Níveis do Personagem adicionado a quaisquer teste de "
-                        + "\"Furtividade, Percepção, Sobrevivência, Iniciativa, Adestrar, Virtude e Sanidade\".");
+                        + "\"Furtividade, Percepção, Sobrevivência, Iniciativa, Adestrar e Virtude\".");
         classe("ARAUTO_NATUREZA", "Arauto da Natureza", "DRUIDA",
                 bonus("{\"sabedoria\":4,\"inteligencia\":4,\"carisma\":2}", "{\"magia\":4,\"conhecimento\":3,\"adestrar\":2,\"sobrevivencia\":1}", 4),
                 "Filho da Magia Natural. O Arauto da Natureza é um verdadeiro intermediário entre o mundo "
@@ -1793,16 +1793,16 @@ public class DataSeeder implements CommandLineRunner {
                         + "desde que os ingredientes sejam Comuns ou Incomuns. Ao consumir uma poção ou elixir, sua "
                         + "duração é aumentada em 1 turno.");
         classe("QUIMICO_ARCANO", "Quimico Arcano", "ALQUIMISTA",
-                bonus("{\"inteligencia\":7,\"sabedoria\":3}", "{\"alquimia\":7,\"magia\":2,\"engenharia\":1}", 2),
+                bonus("{\"inteligencia\":7,\"sabedoria\":3}", "{\"alquimia\":7,\"magia\":2}", 2),
                 "Síntese Arcana. Enquanto estiver próximo de materiais orgânicos, o usuário pode transmutá-los "
                         + "para gerar 1d10 PM a cada 10 Níveis do Personagem ou criar poções comuns ou incomuns "
                         + "rapidamente, mesmo durante situações de pressão.");
         classe("INVENTOR", "Inventor", "ALQUIMISTA",
-                bonus("{\"inteligencia\":6,\"sabedoria\":4}", "{\"engenharia\":8,\"alquimia\":2}", 4),
-                "Engenharia Mecânica. O usuário recebe Vantagem em testes de Engenharia para desarmar ou "
+                bonus("{\"inteligencia\":6,\"sabedoria\":4}", "{\"alquimia\":2}", 4),
+                "Engenharia Mecânica. O usuário recebe Vantagem para desarmar ou "
                         + "desativar dispositivos tecnológicos. As peças obtidas desses dispositivos podem ser utilizadas "
-                        + "na criação de versões aprimoradas de seus próprios mecanismos. Em uma Oficina, recebe +10 em "
-                        + "Engenharia para criar, reparar ou aprimorar mecanismos.");
+                        + "na criação de versões aprimoradas de seus próprios mecanismos. Em uma Oficina, recebe +10 "
+                        + "para criar, reparar ou aprimorar mecanismos.");
 
         classe("LANCEIRO", "Lanceiro", null,
                 bonus("{\"forca\":3,\"destreza\":2}", "{\"combate\":4,\"atletismo\":1}", 3),
