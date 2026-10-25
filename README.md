@@ -59,7 +59,6 @@ npm install
 npm run dev
 ```
 
-Dev login: **dev@asus.local / dev12345**. To run against PostgreSQL, activate the `postgres` profile and set `DB_URL`, `DB_USER` and `DB_PASSWORD`.
 
 ## Tests
 
