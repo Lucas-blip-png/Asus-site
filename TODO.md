@@ -12,7 +12,7 @@ Lista de pendências combinadas (para retomar depois).
 - [x] ~~#4 — Healthcheck real via Actuator (`/actuator/health`).~~ Feito.
 
 ## Conteúdo do jogo
-- [ ] **Raças: expectativa de vida.** A entidade `Raca` não tem esse campo. Adicionar
+- [x] **Raças: expectativa de vida.** A entidade `Raca` não tem esse campo. Adicionar
   `expectativaVida` (entidade + helper `raca()` + `refreshRacas()` no seed) e preencher os
   valores das 13 raças (o front na aba Livro > Raças já está pronto para exibir).
   Opcional: incluir tamanho/deslocamento/idioma por raça.
